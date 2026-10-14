@@ -1,0 +1,19 @@
+# Core
+numpy
+pandas
+scikit-learn
+jupyter
+
+# Model under study
+tirex-2
+torch
+
+# Benchmarks (pick whichever the group settles on in model-selection.md)
+# gift-eval
+# fev
+
+# Visualization
+matplotlib
+seaborn
+plotly
+umap-learn
