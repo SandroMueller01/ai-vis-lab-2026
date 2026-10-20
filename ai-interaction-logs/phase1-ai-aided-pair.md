@@ -1,6 +1,6 @@
 # AI Interaction Log — Phase I, AI-aided pair
 
-Pair: Pair 1 (Hound, Max)
+Pair: Pair 1 (Hound, Maximilian Fridrich)
 Phase: I (model behavior)
 
 Keep this updated throughout Phase I, not reconstructed at the end.
