@@ -100,6 +100,14 @@ notes. The pairs swap AI4Vis roles between phases.
 | Written on-site exam | 17.12.2026 |
 | Written on-site retry exam | 18.02.2027 |
 
+## Data
+
+Hourly multivariate weather time series for Austria, with foehn labels, built
+from GeoSphere Austria open data (CC BY 4.0). See
+[`data_acquisition/README.md`](data_acquisition/README.md) for the datasets,
+the labelling method and how to rebuild them. Datasets live in `data/`, which
+is gitignored, so share them outside git.
+
 ## Setup
 
 Everyone works in the same Docker image (Python 3.12, CPU torch, TiRex-2).
@@ -134,6 +142,9 @@ prefixes and the review process.
 ```
 ai-vis-lab-2026/
 ├── model-selection.md          # model, task, dataset (due 28.10)
+├── data_acquisition/           # GeoSphere foehn dataset builders
+│   ├── tyrol_1km/
+│   └── austria_5km/
 ├── notebooks/                  # shared exploratory notebooks
 ├── phase1-model-behavior/
 │   ├── pair-1/
