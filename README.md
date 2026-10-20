@@ -105,8 +105,24 @@ notes. The pairs swap AI4Vis roles between phases.
 Hourly multivariate weather time series for Austria, with foehn labels, built
 from GeoSphere Austria open data (CC BY 4.0). See
 [`data_acquisition/README.md`](data_acquisition/README.md) for the datasets,
-the labelling method and how to rebuild them. Datasets live in `data/`, which
-is gitignored, so share them outside git.
+where they come from, the labelling method, and how to rebuild them.
+
+**Get the data:** download the ready-made datasets (~3 GB) from the release
+[`data-2025-26`](https://github.com/SandroMueller01/ai-vis-lab-2026/releases/tag/data-2025-26).
+Run this in the repo root:
+
+```bash
+gh release download data-2025-26 --dir data
+tar -xf data/tyrol_1km.tar -C data
+tar -xf data/austria_5km.tar -C data
+```
+
+You then have `data/tyrol_1km/` and `data/austria_5km/`, and you can delete the
+two `.tar` files. You need the [GitHub CLI](https://cli.github.com) (`gh`),
+logged in with `gh auth login`. Without it, download the two `.tar` files from
+the release page in the browser into `data/` and run the same two `tar`
+commands. `data/` is gitignored, so never commit datasets. Share them through
+the release instead.
 
 ## Setup
 
