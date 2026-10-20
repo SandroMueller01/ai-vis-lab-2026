@@ -42,14 +42,18 @@ and scope the group settles on. Due **28.10.2026**.
 
 ## Team
 
-| Role | Name |
-|---|---|
-| Member 1 (Pair 1) | TBD |
-| Member 2 (Pair 1) | TBD |
-| Member 3 (Pair 2) | TBD |
-| Member 4 (Pair 2) | TBD |
+**Team name: XPL41N**
 
-Team name: TBD
+> **Please correct or fill out completely:** check your own row (full name,
+> matriculation number), add your GitHub username, and enter which pair you are
+> in once we have agreed on it.
+
+| Name | Matriculation no. | GitHub | Pair |
+|---|---|---|---|
+| Sandro Müller | K52010874 | [@SandroMueller01](https://github.com/SandroMueller01) | TBD |
+| Hound | K12323568 | TBD | TBD |
+| Max | K01608851 | TBD | TBD |
+| Carlos Andres Elizondo Rojas | K52320897 | TBD | TBD |
 
 ## Assignment structure
 
