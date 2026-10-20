@@ -50,7 +50,7 @@ and scope the group settles on. Due **28.10.2026**.
 | Name | Matriculation no. | GitHub | Pair |
 |---|---|---|---|
 | Hound | K12323568 | TBD | Pair 1 |
-| Max | K01608851 | TBD | Pair 1 |
+| Maximilian Fridrich | K01608851 | [@maximilianfridrich](https://github.com/maximilianfridrich) | Pair 1 |
 | Sandro Müller | K52010874 | [@SandroMueller01](https://github.com/SandroMueller01) | Pair 2 |
 | Carlos Andres Elizondo Rojas | K52320897 | TBD | Pair 2 |
 
