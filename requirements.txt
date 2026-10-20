@@ -1,3 +1,5 @@
+# Python >= 3.11 (required by tirex-2). The Docker image uses 3.12.
+
 # Core
 numpy
 pandas
@@ -5,8 +7,8 @@ scikit-learn
 jupyter
 
 # Model under study
-tirex-2
-torch
+tirex-2==0.3.1
+torch>=2.8
 
 # Benchmarks (pick whichever the group settles on in model-selection.md)
 # gift-eval
@@ -17,3 +19,6 @@ matplotlib
 seaborn
 plotly
 umap-learn
+
+# Dev
+ruff==0.17.1

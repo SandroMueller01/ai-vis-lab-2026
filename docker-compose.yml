@@ -1,0 +1,12 @@
+# docker compose up            -> JupyterLab on http://localhost:8888
+# docker compose run --rm lab python data_acquisition/tyrol_1km/build_dataset.py
+services:
+  lab:
+    build: .
+    image: ai-vis-lab:latest
+    ports:
+      - "127.0.0.1:8888:8888"
+    volumes:
+      # Live-mount the repo, so edits on the host show up in the container.
+      # data/ is part of it, so downloaded datasets persist across rebuilds.
+      - .:/workspace

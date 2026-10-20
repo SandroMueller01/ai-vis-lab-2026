@@ -1,0 +1,40 @@
+name: PR description
+
+# Fails while the PR template's checklist has unticked boxes or the Summary is empty.
+# Re-runs whenever the description is edited, so ticking the boxes turns it green.
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  checklist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR description
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          body=$(printf '%s\n' "$BODY" | tr -d '\r')
+          section() { printf '%s\n' "$body" | awk -v h="## $1" '$0==h{f=1;next} /^## /{f=0} f'; }
+          strip_comments() { perl -0pe 's/<!--.*?-->//gs' | grep -v '^[[:space:]]*$' || true; }
+
+          fail=0
+          if [ -z "$(section Summary | strip_comments)" ]; then
+            echo "::error::'## Summary' is empty — describe what the PR does and why."
+            fail=1
+          fi
+
+          checklist=$(section Checklist)
+          if [ -z "$checklist" ]; then
+            echo "::error::No '## Checklist' section — please use the PR template."
+            fail=1
+          else
+            open=$(printf '%s\n' "$checklist" | grep -c -- '- \[ \]' || true)
+            if [ "$open" -gt 0 ]; then
+              echo "::error::$open checklist item(s) not ticked. Tick each one; if an item doesn't apply, tick it and append '(n/a: reason)'."
+              printf '%s\n' "$checklist" | grep -- '- \[ \]'
+              fail=1
+            fi
+          fi
+          [ "$fail" -eq 0 ] && echo "PR description OK."
+          exit $fail

@@ -1,0 +1,9 @@
+# Normalize line endings: LF in the repo and in the Linux container,
+# regardless of whether a teammate is on Windows, macOS, or Linux.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.pdf binary
+*.nc binary
+*.parquet binary

@@ -1,0 +1,8 @@
+.git
+data
+.venv
+venv
+**/__pycache__
+**/.ipynb_checkpoints
+*.mp4
+*.mov
