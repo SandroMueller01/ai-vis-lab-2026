@@ -15,12 +15,59 @@ Both default to the period **2025-10-01 → 2026-10-01** (one year, 8,760 hours)
 | API endpoint | `grid/historical/inca-v1-1h-1km` (NetCDF, 10-day chunks) | `timeseries/historical/inca-v1-1h-1km` (CSV, ~14 points per request) |
 | Label stations | Innsbruck Univ., Innsbruck Airport, Steinach (crest: Patscherkofel) | 16 valley stations in 4 regions (see below) |
 | Full run | a few minutes | ~255 requests, **~1–1.5 h** (API limit 240 req/h) |
-| Disk (raw + outputs) | ~1.9 GB | ~0.7 GB raw + outputs |
+| Disk | ~0.3 GB raw + ~1.6 GB outputs | ~2.6 GB raw + ~1.4 GB outputs |
+
+## Getting the data (fast)
+
+You don't need to rebuild anything. The finished outputs (without the `raw/`
+download cache) are attached to the GitHub release
+[`data-2025-26`](https://github.com/SandroMueller01/ai-vis-lab-2026/releases/tag/data-2025-26),
+one archive per dataset:
+
+```bash
+gh release download data-2025-26 --dir data
+tar -xf data/tyrol_1km.tar -C data
+tar -xf data/austria_5km.tar -C data
+```
+
+This gives you `data/tyrol_1km/` and `data/austria_5km/`, exactly as the
+builders write them. Delete the `.tar` files afterwards. `tar` comes with
+Windows 10+, macOS and Linux. Without `gh`, download the two files from the
+release page in the browser.
+
+Rebuild from the API (see [Running](#running)) only if you need a different
+period, area or label setting.
+
+## Where the data comes from
+
+| | |
+|---|---|
+| Provider | [GeoSphere Austria](https://www.geosphere.at) (formerly ZAMG), the Austrian national weather and geological service |
+| Portal | [GeoSphere Austria Data Hub](https://data.hub.geosphere.at): open data, no account or API key needed |
+| Gridded features | [INCA analysis — large domain](https://data.hub.geosphere.at/dataset/inca-v1-1h-1km) (`inca-v1-1h-1km`): hourly, 1 km, EPSG:31287, available from 2011-03-15 |
+| Station observations | [Stationsdaten v2, 10 min](https://data.hub.geosphere.at/dataset/klima-v2-10min) (`klima-v2-10min`): quality-controlled 10-min observations of the Austrian station network |
+| Access | [Dataset API v1](https://dataset.api.hub.geosphere.at/v1/docs), endpoints `grid/historical`, `timeseries/historical` and `station/historical`. Limits: 5 requests/s, 240 requests/h, max. 1M values per CSV and 10M per NetCDF request. The builders split their requests to stay under these limits |
+| Downloaded | 2026-10-20, with the scripts in this folder. Since then only output paths and code style have changed, not the download or labelling logic |
+| License | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): free to use and share, attribution required (see below) |
+
+INCA is GeoSphere's operational nowcasting analysis. It combines station
+observations, remote sensing and NWP model output into a gridded field. Our
+features are therefore model-assisted analyses, not raw measurements. The
+foehn **labels** are derived only from station observations (see below), so
+features and labels come from different sources.
+
+The labelling follows the statistical foehn diagnosis developed at the
+University of Innsbruck:
+- D. Plavcan, G. J. Mayr, A. Zeileis (2014): *Automatic and probabilistic foehn
+  diagnosis with a statistical mixture model.* J. Appl. Meteor. Climatol. 53, 652–659.
+- R. Stauffer et al.: [`foehnix`](https://github.com/retostauffer/Rfoehnix) R
+  package. Our labelling is a compact Python re-implementation of this idea, not
+  the package itself.
 
 ## Features (per cell, hourly)
 
 `T2M` 2 m temperature · `RH2M` relative humidity · `TD2M` dew point ·
-`UU`/`VV` wind components · `P0` surface pressure · `GL` global radiation ·
+`UU`/`VV` wind components · `P0` mean sea level pressure · `GL` global radiation ·
 `RR` precipitation · derived `wind_speed`, `wind_dir`.
 
 ## Labels — how "foehn" is defined
