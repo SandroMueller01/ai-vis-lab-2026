@@ -102,11 +102,32 @@ notes. The pairs swap AI4Vis roles between phases.
 
 ## Setup
 
+Everyone works in the same Docker image (Python 3.12, CPU torch, TiRex-2).
+Install [Docker Desktop](https://www.docker.com/products/docker-desktop/), then
+use one of these:
+
+**VS Code (recommended):** install the *Dev Containers* extension, open the
+repo, then run *Dev Containers: Reopen in Container*.
+
+**Terminal:**
+
 ```bash
-python -m venv .venv
-source .venv/bin/activate  # or .venv\Scripts\activate on Windows
-pip install -r requirements.txt
+docker compose up                       # JupyterLab on http://localhost:8888
+docker compose run --rm lab python data_acquisition/tyrol_1km/build_dataset.py
 ```
+
+The repo is live-mounted at `/workspace`, so edits on your machine show up in
+the container right away. Rebuild (`docker compose build`) only after changing
+`requirements.txt` or the `Dockerfile`.
+
+Without Docker: use Python ≥ 3.11 (needed by `tirex-2`), then
+`pip install -r requirements.txt`.
+
+## Contributing
+
+Branch → pull request → one review → merge. See
+[`WAYS_OF_DEV_WORKING.md`](WAYS_OF_DEV_WORKING.md) for branch names, commit
+prefixes and the review process.
 
 ## Repository layout
 
@@ -126,5 +147,9 @@ ai-vis-lab-2026/
 ├── submissions/
 │   ├── midpoint/
 │   └── final/
-└── data/                       # gitignored; raw/intermediate datasets
+├── data/                       # gitignored; raw/intermediate datasets
+├── .github/                    # PR template, CI workflows
+├── .devcontainer/              # VS Code dev container
+├── Dockerfile
+└── docker-compose.yml
 ```
