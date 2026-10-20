@@ -45,15 +45,17 @@ and scope the group settles on. Due **28.10.2026**.
 **Team name: XPL41N**
 
 > **Please correct or fill out completely:** check your own row (full name,
-> matriculation number), add your GitHub username, and enter which pair you are
-> in once we have agreed on it.
+> matriculation number, pair) and add your GitHub username.
 
 | Name | Matriculation no. | GitHub | Pair |
 |---|---|---|---|
-| Sandro Müller | K52010874 | [@SandroMueller01](https://github.com/SandroMueller01) | TBD |
-| Hound | K12323568 | TBD | TBD |
-| Max | K01608851 | TBD | TBD |
-| Carlos Andres Elizondo Rojas | K52320897 | TBD | TBD |
+| Hound | K12323568 | TBD | Pair 1 |
+| Max | K01608851 | TBD | Pair 1 |
+| Sandro Müller | K52010874 | [@SandroMueller01](https://github.com/SandroMueller01) | Pair 2 |
+| Carlos Andres Elizondo Rojas | K52320897 | TBD | Pair 2 |
+
+Pair 1 is **AI-aided in Phase I** and human-only in Phase II. Pair 2 is the
+reverse (see [Assignment structure](#assignment-structure)).
 
 ## Assignment structure
 
