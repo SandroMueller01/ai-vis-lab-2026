@@ -42,14 +42,20 @@ and scope the group settles on. Due **28.10.2026**.
 
 ## Team
 
-| Role | Name |
-|---|---|
-| Member 1 (Pair 1) | TBD |
-| Member 2 (Pair 1) | TBD |
-| Member 3 (Pair 2) | TBD |
-| Member 4 (Pair 2) | TBD |
+**Team name: XPL41N**
 
-Team name: TBD
+> **Please correct or fill out completely:** check your own row (full name,
+> matriculation number, pair) and add your GitHub username.
+
+| Name | Matriculation no. | GitHub | Pair |
+|---|---|---|---|
+| Hound | K12323568 | TBD | Pair 1 |
+| Maximilian Fridrich | K01608851 | [@maximilianfridrich](https://github.com/maximilianfridrich) | Pair 1 |
+| Sandro Müller | K52010874 | [@SandroMueller01](https://github.com/SandroMueller01) | Pair 2 |
+| Carlos Andres Elizondo Rojas | K52320897 | TBD | Pair 2 |
+
+Pair 1 is **AI-aided in Phase I** and human-only in Phase II. Pair 2 is the
+reverse (see [Assignment structure](#assignment-structure)).
 
 ## Assignment structure
 
