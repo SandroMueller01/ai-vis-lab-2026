@@ -28,14 +28,17 @@ from __future__ import annotations
 
 import argparse
 import io
-import time
+import sys
 from itertools import pairwise
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import requests
 import xarray as xr
+
+# Also support running this file directly from any working directory.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from geosphere_http import GeoSphereClient
 
 HERE = Path(__file__).resolve().parent
 REPO_DATA = HERE.parents[1] / "data"
@@ -86,34 +89,7 @@ REGIONS = [
      "valley": {55: (280, 80), 69: (280, 80), 137: (280, 80), 150: (270, 60)}},
 ]
 
-session = requests.Session()
-session.headers["User-Agent"] = "foehn-dataset-builder (research)"
-
-
-# --------------------------------------------------------------------------- HTTP
-def get(url: str, params: dict, *, retries: int = 10) -> requests.Response:
-    """GET with handling for the API limits (5 req/s, 240 req/h -> HTTP 429)."""
-    for attempt in range(retries):
-        try:
-            r = session.get(url, params=params, timeout=300)
-        except requests.RequestException as exc:
-            wait = 10 * (attempt + 1)
-            print(f"    network error ({exc.__class__.__name__}), retry in {wait}s")
-            time.sleep(wait)
-            continue
-        if r.status_code == 429:
-            wait = int(float(r.headers.get("ratelimit-reset", 60))) + 2
-            print(f"    hourly API limit reached, waiting {wait}s ...")
-            time.sleep(wait)
-            continue
-        if r.status_code >= 500:
-            time.sleep(10 * (attempt + 1))
-            continue
-        if r.status_code != 200:
-            raise RuntimeError(f"HTTP {r.status_code} for {r.url[:300]}\n{r.text[:500]}")
-        time.sleep(0.3)
-        return r
-    raise RuntimeError(f"giving up on {url}")
+get = GeoSphereClient(retries=10).get
 
 
 def iso(t: pd.Timestamp) -> str:
@@ -247,11 +223,16 @@ def download_points(points: pd.DataFrame, start, end, raw: Path) -> list:
     hours = int((end - start) / pd.Timedelta("1h"))
     per_req = max(1, CSV_LIMIT // (len(GRID_PARAMS) * hours))
     batches = [points.iloc[i : i + per_req] for i in range(0, len(points), per_req)]
+    done = [(raw / f"inca_pts_{b.point_id.iloc[0]:04d}_{b.point_id.iloc[-1]:04d}.csv", b) for b in batches]
+    pending = sum(not f.exists() for f, _ in done)
     print(f"  {len(points)} points, {per_req} per request -> {len(batches)} requests "
-          f"(API allows 240/hour, so this takes about {len(batches) / 240 * 60:.0f}+ min)")
-    done = []
-    for bi, b in enumerate(batches):
-        f = raw / f"inca_pts_{b.point_id.iloc[0]:04d}_{b.point_id.iloc[-1]:04d}.csv"
+          f"({pending} uncached)")
+    if pending:
+        print(f"  rough download estimate: ~{max(1, pending / 240 * 60):.0f}+ min at 240 requests/hour "
+              "(remaining quota, reset timing and transfer speed affect actual time)")
+    else:
+        print("  all INCA batches cached; no downloads needed")
+    for bi, (f, b) in enumerate(done):
         if not f.exists():
             print(f"  INCA batch {bi + 1}/{len(batches)}")
             r = get(f"{API}/timeseries/historical/{INCA}", {
@@ -262,7 +243,6 @@ def download_points(points: pd.DataFrame, start, end, raw: Path) -> list:
             if d.groupby(["lat", "lon"]).ngroups != len(b):
                 raise RuntimeError(f"asked for {len(b)} points but got {d.groupby(['lat', 'lon']).ngroups}")
             f.write_text(r.text, encoding="utf-8")
-        done.append((f, b))
     return done
 
 

@@ -14,8 +14,8 @@ Both default to the period **2025-10-01 → 2026-10-01** (one year, 8,760 hours)
 | Spatial sampling | Full INCA 1 km grid (≈3,600 cells), optional `--coarsen N` | 3,363 points on a 5 km lattice (`austria_points_5km.csv`, EPSG:31287), nearest INCA 1 km cell each |
 | API endpoint | `grid/historical/inca-v1-1h-1km` (NetCDF, 10-day chunks) | `timeseries/historical/inca-v1-1h-1km` (CSV, ~14 points per request) |
 | Label stations | Innsbruck Univ., Innsbruck Airport, Steinach (crest: Patscherkofel) | 16 valley stations in 4 regions (see below) |
-| Full run | a few minutes | ~255 requests, **~1–1.5 h** (API limit 240 req/h) |
-| Disk | ~0.3 GB raw + ~1.6 GB outputs | ~2.6 GB raw + ~1.4 GB outputs |
+| Full run (measured 2026-10-24) | **3 min 19 s** | **49 min 45 s** (249 requests) |
+| Disk (raw + outputs) | ~1.9 GB | ~0.7 GB raw + outputs |
 
 ## Getting the data (fast)
 
@@ -37,6 +37,21 @@ release page in the browser.
 
 Rebuild from the API (see [Running](#running)) only if you need a different
 period, area or label setting.
+
+### Measured default builds (2026-10-24)
+
+One full run of each builder with an empty local download cache, using the default
+2025-10-01 to 2026-10-01 period, variables, spatial sampling and label settings.
+
+| Stage | Tyrol 1 km | Austria 5 km |
+|---|---|---|
+| Station acquisition | 13.0 s | 53.0 s |
+| Grid acquisition | 2 min 30 s | 47 min 12 s |
+| Both acquisition stages | 2 min 43 s | 48 min 5 s |
+| Station foehn labelling | 0.07 s | 0.32 s |
+| Attach labels and write outputs | 35 s | 1 min 39 s |
+| Complete build, including startup | 3 min 19 s | 49 min 45 s |
+| Successful HTTP requests | 41 | 249 |
 
 ## Where the data comes from
 
