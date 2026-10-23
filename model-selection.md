@@ -22,84 +22,110 @@ stream at constant per-patch cost.
 
 ## Task (proposal)
 
-**Zero-shot forecasting of hourly alpine weather, and how TiRex-2 behaves when
-the weather regime switches to foehn.**
+**Forecasting temperature change with TiRex-2, and whether input from
+multiple stations makes it better at it. The end goal is to detect
+thunderstorms and cold waves moving across Austria early.**
 
-Foehn is a warm, dry downslope wind in Alpine valleys. When it sets in,
-temperature, humidity and wind change abruptly within a few hours. That makes
-it a **real, labelled regime shift**. Every hour in our data has a
-foehn / no-foehn label that comes from station observations and is independent
-of the model input. So instead of injecting synthetic change points, we can ask
-how a forecasting foundation model handles real ones.
+Step by step:
 
-Concretely, for each location and forecast origin:
-- **Target:** one hourly variable, e.g. 2 m temperature `T2M` or wind speed.
-  Pick one, maybe two.
-- **Covariates:** the other INCA fields (humidity, dew point, wind
-  components, pressure, radiation, precipitation).
-- **Setup:** context of a few weeks of hourly history, horizon of e.g. 24 h,
-  rolling origins over the year.
+1. **Temperature forecast at a location.** TiRex-2 forecasts the hourly 2 m
+   temperature `T2M` zero-shot, for e.g. the next 6–24 h. What matters is the
+   **change** (ΔT), not the absolute level.
+2. **Add more input, step by step**, and measure what each step adds:
+   - (a) only the location's own temperature history (univariate)
+   - (b) plus the location's other variables (humidity, wind, pressure,
+     precipitation, radiation)
+   - (c) plus the **temperature series of other locations**, especially those
+     **upstream**, i.e. west or northwest, where fronts usually come from
+3. **From forecast to event.** We check whether the forecast ΔT is good enough
+   to flag a **cold wave** or **thunderstorm** in time, scored as an event
+   forecast: hit rate, false alarms, lead time.
 
-This framing covers what the two phases need:
+We have no official event labels, so we define the events from the data
+itself, as rules to tune together:
+
+| Event | Proxy definition (draft) | Frequency in our year |
+|---|---|---|
+| **Thunderstorm** | ≥ 3 K drop within 1 h **and** ≥ 2 mm rain in that hour | ≈ 10 events per location per year, almost all **May–August** |
+| **Cold wave / cold front** | ≥ 8 K colder than the same hour the day before | **29 days** on which ≥ 25 % of Austria is affected |
+
+A first check shows that the strongest cold wave (2026-03-26, 99 % of
+Austria) moves clearly **from west to east**: the time of the temperature drop
+correlates with longitude at r = 0.82, ≈ 87 km/h. For the other large events
+this simple measurement shows no clear direction. Fronts don't always come
+from the west, and the daily temperature cycle interferes with the
+measurement. **Whether, and how much, upstream stations really help is
+therefore an open question,** which makes it a good one for Phase I.
+
+How it maps to the phases:
 
 | Phase | Questions it enables |
 |---|---|
-| **I: behavior** | Is forecast error higher during foehn than outside it, and in particular right at **onset** and **offset**? Are the quantiles calibrated during foehn, or overconfident? Do **covariates** help most exactly in foehn hours? How does it differ **across regions** and with **context length**? |
-| **II: internals** | Do hidden states and gate activations **separate foehn from non-foehn** hours? The labels give a ready-made colouring for UMAP / k-NN in representation space. How does the recurrent state evolve patch by patch **around an onset**? Which input patches matter (saliency) when the model gets an onset right vs. wrong? |
+| **I: behavior** | How well does TiRex-2 forecast ΔT, especially **right before and during** an event? How much do steps (b) and (c) add, and does it depend on **wind direction**, i.e. are the extra stations actually upstream? Are the quantiles calibrated at events, or overconfident? How far ahead are events detectable? How does it differ by region, season, and context length? |
+| **II: internals** | Does the model's internal state change **before** the temperature drop, i.e. does it "see" the front coming? Do hidden states and gate activations separate event from normal hours (UMAP / k-NN coloured by event)? Which input patches and which **stations** matter for a correct event forecast (saliency over time and over inputs)? |
 
-It also combines three of the original candidate framings: covariates
-(multivariate vs. univariate), regime shift, and context length / streaming.
+**Note on TiRex-2:** the model takes multivariate input with past covariates,
+so step (c) is a supported use of the model. How many extra series fit into
+one forecast in practice (memory, speed) is something to check early.
 
 ## Dataset
 
 Our own dataset, built from **GeoSphere Austria open data** (CC BY 4.0). It
 covers **one year of hourly data, 2025-10-01 → 2026-10-01 (8,760 hours)**.
 Everything about it is documented in
-[`data_acquisition/README.md`](data_acquisition/README.md): source, API, label
+[`data_acquisition/README.md`](data_acquisition/README.md): source, API,
 method, caveats, and how to download or rebuild it.
 
-| | Tyrol 1 km | Austria 5 km |
+| | **Austria 5 km** (main) | Tyrol 1 km |
 |---|---|---|
-| Area | Innsbruck – Wipp valley – Brenner | All of Austria |
-| Locations | 3,306 grid cells, **2,018 labelled** | 3,363 lattice points, **463 labelled** (Tyrol 122, Carinthia/East Tyrol 136, Salzburg 131, Vorarlberg 74) |
-| Rows (location × hour) | 29.0 M | 29.5 M |
-| Features | 8 INCA fields + derived wind speed/direction | same |
-| Labels from | 3 valley stations, crest Patscherkofel | 16 valley stations in 4 regions |
-| Foehn share | 9.2 % of station-hours (Innsbruck 6–7 %, Steinach 14 %) | 10.7 % (6–30 % per station) |
+| Area | All of Austria (~570 km west–east) | Innsbruck – Wipp valley – Brenner |
+| Locations | 3,363 lattice points | 3,306 grid cells |
+| Rows (location × hour) | 29.5 M | 29.0 M |
+| Variables | `T2M`, humidity, dew point, wind (u/v), sea-level pressure, radiation, precipitation | same |
+| Role | Cold waves and thunderstorms moving **across the country**; choose upstream/downstream locations | Small-scale, dense detail (e.g. valley vs. mountain) |
 
 Why this data rather than a standard benchmark (GIFT-Eval / fev-bench):
-- **Ground-truth regimes.** The labels let us split every result by
-  "foehn / no foehn / onset", which a generic benchmark can't.
-- **Large enough to be systematic.** Thousands of series and several hundred
-  foehn hours per station over the year (≈540 in Innsbruck up to ≈2,650 in
-  Bludenz), so patterns aren't cherry-picked.
-- **Multivariate by nature,** so the covariate question is meaningful.
-- **Local and checkable.** We know the region, and the label method is
-  established foehn research from Innsbruck.
+- **Space and time together.** A standard benchmark has independent series.
+  Ours are neighbouring locations, so we can test whether upstream information
+  helps.
+- **Real events.** Thunderstorms and cold waves are real, abrupt changes in
+  the series, not synthetic change points.
+- **Large enough to be systematic:** thousands of series, about 10
+  thunderstorm events per location, and 29 country-wide cold-wave days.
+- **Local and checkable.** We know the region and can check events against
+  weather reports.
 
 GIFT-Eval's weather subset remains an option as a **sanity reference**, to
 check that TiRex-2 behaves as published on standard data before we interpret
 anything on ours.
 
-**Known limitations** (details in `data_acquisition/README.md`):
-- The features are INCA analyses, which are model-assisted, not raw measurements.
-- Grid labels are copied from the nearest valley station.
-- Wind sectors are not tuned per station.
-- Bludenz (30 %) and Salzburg Airport (16 %) have suspiciously high foehn
-  shares. Check these before using them.
+**Known limitations:**
+- The variables are INCA analyses, which are model-assisted, not raw
+  measurements. Very local thunderstorms may be smoothed out.
+- **No lightning data.** "Thunderstorm" means a temperature drop plus heavy
+  rain. Lightning data would be better but isn't in the open dataset.
+- The event thresholds are a first draft. Several of the large cold-wave days
+  fall in summer, so some may be thunderstorm outflows rather than classic
+  cold fronts. We should tune the definitions together.
+- One year means each season occurs only once.
+- The foehn labels from the first data version stay in the data. They're no
+  longer the focus, but useful as extra context: foehn often ends with a cold
+  front.
 
 ## Decision
 
 Fill in once all four agree. The proposals are pre-filled.
 
-- **Final task framing:** *proposal:* zero-shot forecasting of hourly alpine
-  weather with covariates, analysed by foehn regime (especially onset/offset).
+- **Final task framing:** *proposal:* forecast temperature change (ΔT) with
+  TiRex-2 zero-shot, measure the gain from (b) local covariates and (c) other
+  / upstream stations, evaluate on thunderstorm and cold-wave events.
   → ☐ agreed
-- **Target variable(s) and horizon:** *proposal:* `T2M` (+ maybe wind speed),
-  24 h horizon. → ☐ agreed
-- **Final dataset(s):** *proposal:* **Tyrol 1 km** as the main dataset (dense,
-  best-validated labels), **Austria 5 km** for the cross-region comparison.
+- **Target and horizon:** *proposal:* `T2M`, analysed as ΔT; horizon 6–24 h.
   → ☐ agreed
+- **Event definitions:** *proposal:* the two proxies above as a starting
+  point, finalised in the first week of Phase I. → ☐ agreed
+- **Final dataset(s):** *proposal:* **Austria 5 km** as the main dataset,
+  Tyrol 1 km for detail. → ☐ agreed
 - **Scope:** *proposal:* single-model deep dive on TiRex-2, with GIFT-Eval
   weather as a sanity check only. → ☐ agreed
 - **Registered on the course form:** ☐ (who, date)
