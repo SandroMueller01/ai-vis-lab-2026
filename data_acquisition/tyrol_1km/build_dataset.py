@@ -26,14 +26,17 @@ Data: GeoSphere Austria, https://data.hub.geosphere.at (CC BY 4.0).
 from __future__ import annotations
 
 import argparse
-import time
+import sys
 from itertools import pairwise
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import requests
 import xarray as xr
+
+# Also support running this file directly from any working directory.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from geosphere_http import GeoSphereClient
 
 REPO_DATA = Path(__file__).resolve().parents[2] / "data"
 API = "https://dataset.api.hub.geosphere.at/v1"
@@ -63,34 +66,7 @@ STATION_META = {  # id: (lat, lon, altitude m) from the klima-v2 station list
     196: (47.20889, 11.46222, 2251.0),
 }
 
-session = requests.Session()
-session.headers["User-Agent"] = "foehn-dataset-builder (research)"
-
-
-# --------------------------------------------------------------------------- HTTP
-def get(url: str, params: dict, *, retries: int = 8) -> requests.Response:
-    """GET with handling for the API limits (5 req/s, 240 req/h -> HTTP 429)."""
-    for attempt in range(retries):
-        try:
-            r = session.get(url, params=params, timeout=300)
-        except requests.RequestException as exc:
-            wait = 10 * (attempt + 1)
-            print(f"    network error ({exc.__class__.__name__}), retry in {wait}s")
-            time.sleep(wait)
-            continue
-        if r.status_code == 429:
-            wait = int(r.headers.get("ratelimit-reset", 60)) + 2
-            print(f"    rate limited, waiting {wait}s")
-            time.sleep(wait)
-            continue
-        if r.status_code >= 500:
-            time.sleep(10 * (attempt + 1))
-            continue
-        if r.status_code != 200:
-            raise RuntimeError(f"HTTP {r.status_code} for {r.url}\n{r.text[:500]}")
-        time.sleep(0.3)  # stay well below 5 req/s
-        return r
-    raise RuntimeError(f"giving up on {url} {params}")
+get = GeoSphereClient(retries=8).get
 
 
 def iso(t: pd.Timestamp) -> str:
