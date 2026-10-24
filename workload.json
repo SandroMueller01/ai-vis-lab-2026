@@ -1,0 +1,25 @@
+{
+    "team_name": "XPL41N",
+    "students": [
+        {
+            "first_name": "TODO",
+            "last_name": "Hound",
+            "workload": 0.25
+        },
+        {
+            "first_name": "Maximilian",
+            "last_name": "Fridrich",
+            "workload": 0.25
+        },
+        {
+            "first_name": "Sandro",
+            "last_name": "Müller",
+            "workload": 0.25
+        },
+        {
+            "first_name": "Carlos Andres",
+            "last_name": "Elizondo Rojas",
+            "workload": 0.25
+        }
+    ]
+}
