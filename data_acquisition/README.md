@@ -1,10 +1,20 @@
-# Data acquisition — Austrian foehn datasets
+# Data acquisition — Austrian hourly weather datasets
 
 Two builders that download hourly weather fields from the
-[GeoSphere Austria Data Hub](https://data.hub.geosphere.at) (CC BY 4.0) and
-attach a **foehn / no-foehn label** to every grid cell and hour. The outputs are
-multivariate hourly time series, one per location, which is the input shape for
-TiRex-2.
+[GeoSphere Austria Data Hub](https://data.hub.geosphere.at) (CC BY 4.0). The
+outputs are multivariate hourly time series, one per location, which is the
+input shape for TiRex-2.
+
+What we use them for (see [`model-selection.md`](../model-selection.md)):
+forecasting the temperature change with TiRex-2, and checking how well it
+handles **cold drops, cold waves and thunderstorms** moving across Austria.
+These events are labelled by a separate step, [`events/`](events/README.md),
+so that both pairs use the same definitions.
+
+The builders also attach a **foehn / no-foehn label** to every location and
+hour. That was the focus of the first data version. It's no longer the main
+question, but it stays in the data as extra context: foehn often ends with a
+cold front.
 
 Both default to the period **2025-10-01 → 2026-10-01** (one year, 8,760 hours).
 
@@ -135,6 +145,17 @@ the files outside git.
 | `grid.nc` | `(time, y, x)` cube: all features + `foehn_prob`, `foehn`, `label_station`, `label_dist_km` |
 | `grid_long.parquet` | long format, one row per (cell/point, hour). **This is the TiRex-2 input** |
 | `points_with_labels.csv` | *(Austria only)* each point's assigned station, region and distance |
+| `events.parquet`, `cold_wave_days.csv` | event labels, written by [`events/build_events.py`](events/README.md) (not by the builders) |
+
+**Time stamps** are UTC everywhere and mark the end of the hour (INCA analysis
+time). The parquet files store them time zone-aware (`datetime64[us, UTC]`), so
+filter with UTC timestamps, e.g. `pd.Timestamp("2026-03-26", tz="UTC")`.
+`grid.nc` stores naive timestamps that are also UTC.
+
+**Gaps:** every location has all 8,760 hours, but a few values are NaN
+(Austria 5 km: 0.01 % of `T2M`, almost all in one hour, 2025-10-10 09 UTC). The
+event labels fill `T2M` gaps of up to 3 h and leave longer gaps empty. Do the
+same in an analysis, so results stay comparable.
 
 ## Running
 

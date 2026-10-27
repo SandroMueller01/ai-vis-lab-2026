@@ -102,10 +102,11 @@ notes. The pairs swap AI4Vis roles between phases.
 
 ## Data
 
-Hourly multivariate weather time series for Austria, with foehn labels, built
-from GeoSphere Austria open data (CC BY 4.0). See
+Hourly multivariate weather time series for Austria, built from GeoSphere
+Austria open data (CC BY 4.0), with shared labels for cold drops, cold waves
+and thunderstorms (and foehn as extra context). See
 [`data_acquisition/README.md`](data_acquisition/README.md) for the datasets,
-where they come from, the labelling method, and how to rebuild them.
+where they come from, how the labels are defined, and how to rebuild them.
 
 **Get the data:** download the ready-made datasets (~3 GB) from the release
 [`data-2025-26`](https://github.com/SandroMueller01/ai-vis-lab-2026/releases/tag/data-2025-26).
@@ -158,9 +159,10 @@ prefixes and the review process.
 ```
 ai-vis-lab-2026/
 ├── model-selection.md          # model, task, dataset (due 28.10)
-├── data_acquisition/           # GeoSphere foehn dataset builders
+├── data_acquisition/           # GeoSphere weather dataset builders
 │   ├── tyrol_1km/
-│   └── austria_5km/
+│   ├── austria_5km/
+│   └── events/                 # shared event labels (cold drops, thunderstorms)
 ├── notebooks/                  # shared exploratory notebooks
 ├── phase1-model-behavior/
 │   ├── pair-1/
