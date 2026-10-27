@@ -29,6 +29,7 @@ jobs:
           cache-to: type=gha,mode=max
       - name: Smoke test
         run: |
+          docker run --rm ai-vis-lab:ci python -m unittest discover -s data_acquisition/test -v
           docker run --rm ai-vis-lab:ci python -c "import tirex2, torch; print('imports ok')"
           # Every CLI script must at least start (catches missing deps and syntax errors).
           docker run --rm ai-vis-lab:ci sh -c 'for f in $(find . -path "./data" -prune -o -name "build_*.py" -print); do echo "$f --help"; python "$f" --help > /dev/null || exit 1; done'
