@@ -37,8 +37,16 @@ foundation model from a JKU-adjacent lab, with a real architectural story
 (recurrent gating, not attention) that gives Phase II something genuinely
 different to visualize than yet another transformer's attention maps.
 
-See [`model-selection.md`](model-selection.md) for the specific task, dataset,
-and scope the group settles on. Due **28.10.2026**.
+## Task
+
+Forecast hourly temperature at points sampled from a 5 km grid covering all of
+Austria. Starting with each location's own temperature history, then adding
+its local weather variables, and then the temperatures of neighbouring points,
+especially upstream (west) ones. We test whether this extra information
+improves the forecasts and helps detect thunderstorms and cold fronts earlier.
+
+Details, reasoning and the dataset are in
+[`model-selection.md`](model-selection.md) and [Data](#data).
 
 ## Team
 
@@ -62,21 +70,19 @@ notes. The pairs swap AI4Vis roles between phases.
 | **Phase II** — What did the model learn? | Human-only | AI-aided |
 
 - **Phase I (black-box behavior)**: `phase1-model-behavior/pair-1/`,
-  `phase1-model-behavior/pair-2/` — analysis of TiRex-2's forecasts given only
-  inputs/outputs: error patterns across domains, frequencies, or horizons;
-  quantile-calibration and confidence-interval behavior; how forecast quality
-  shifts with context length or with/without covariates; multivariate vs.
-  univariate behavior gaps; streaming robustness over long contexts. Dataset:
-  GIFT-Eval or fev-bench series (established benchmarks for this task), or a
-  synthetic set targeting specific hypotheses (e.g. regime shifts, missing
-  covariates, adversarial context perturbations) — large enough that any
-  reported pattern is systematic, not a handful of cherry-picked series.
+  `phase1-model-behavior/pair-2/` — how TiRex-2's temperature forecasts behave,
+  seen only from inputs and outputs: where and when they fail, how they react
+  to cold drops and thunderstorms, whether the forecast bands are calibrated,
+  and whether local variables and upstream points change the forecast at all.
+  Both pairs use the Austria 5 km data and the shared
+  [event labels](data_acquisition/events/README.md), on enough locations and
+  events that any pattern is systematic, not cherry-picked. Synthetic inputs
+  (e.g. an inserted temperature drop) are used to test specific hypotheses.
 - **Phase II (opening the black box)**: `phase2-model-internals/pair-1/`,
-  `phase2-model-internals/pair-2/` — xLSTM internals: hidden-state/gate
-  activations across the recurrent blocks, how the representation evolves
-  patch-by-patch under streaming, how multivariate covariates get encoded
-  relative to the univariate-only pathway, and how representations differ
-  between series where Phase I found good vs. poor forecasts. At least two
+  `phase2-model-internals/pair-2/` — xLSTM internals, following up on the
+  Phase I findings: e.g. whether the hidden state changes before a cold drop,
+  how covariates are encoded compared with the target, and how
+  representations differ between good and poor forecasts. At least two
   techniques per pair (e.g. hidden-state projections/UMAP, gate-activation
   heatmaps, gradient-based saliency over input patches, k-NN in
   representation space), compared or combined rather than shown in isolation.
@@ -94,7 +100,7 @@ notes. The pairs swap AI4Vis roles between phases.
 | Deadline | Date |
 |---|---|
 | Group formation | 21.10.2026, 23:59 |
-| Model selection | 28.10.2026, 23:59 |
+| Task selection | 28.10.2026, 23:59 |
 | Midpoint submission (end of Phase I) | 11.11.2026, 23:59 |
 | Final submission (end of Phase II) | 09.12.2026, 23:59 |
 | Written on-site exam | 17.12.2026 |
@@ -158,7 +164,7 @@ prefixes and the review process.
 
 ```
 ai-vis-lab-2026/
-├── model-selection.md          # model, task, dataset (due 28.10)
+├── model-selection.md          # model, task, dataset
 ├── data_acquisition/           # GeoSphere weather dataset builders
 │   ├── tyrol_1km/
 │   ├── austria_5km/
