@@ -1,5 +1,5 @@
 """
-Build a 1-year gridded foehn dataset for the Wipp/Inn valley (Tyrol) from
+Build a 1-year gridded hourly weather dataset (with foehn labels) for the Wipp/Inn valley (Tyrol) from
 GeoSphere Austria open data (CC BY 4.0).
 
   Grid features : INCA analysis, 1 km, hourly        (inca-v1-1h-1km)

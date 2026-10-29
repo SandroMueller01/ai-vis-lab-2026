@@ -1,5 +1,5 @@
 """
-Build a 1-year foehn dataset for ALL OF AUSTRIA on a 5 km grid from GeoSphere Austria
+Build a 1-year hourly weather dataset for ALL OF AUSTRIA on a 5 km grid from GeoSphere Austria
 open data (CC BY 4.0). Same method as the Tyrol 1 km dataset, scaled to the country.
 
   Grid features : INCA analysis (inca-v1-1h-1km), sampled at 3,363 points on a 5 km

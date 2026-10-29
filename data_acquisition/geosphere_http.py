@@ -46,7 +46,7 @@ class GeoSphereClient:
     def __init__(self, *, retries: int = 10):
         self.retries = retries
         self.session = requests.Session()
-        self.session.headers["User-Agent"] = "foehn-dataset-builder (research)"
+        self.session.headers["User-Agent"] = "geosphere-dataset-builder (research)"
         self.rate_limiter = RateLimiter()
 
     def get(self, url: str, params: dict, *, retries: int | None = None) -> requests.Response:
