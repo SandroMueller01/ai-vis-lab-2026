@@ -163,6 +163,7 @@ ai-vis-lab-2026/
 │   ├── tyrol_1km/
 │   ├── austria_5km/
 │   └── events/                 # shared event labels (cold drops, thunderstorms)
+├── scripts/                    # shared helpers, e.g. tirex_smoke_test.py
 ├── notebooks/                  # shared exploratory notebooks
 ├── phase1-model-behavior/
 │   ├── pair-1/
