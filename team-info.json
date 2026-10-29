@@ -1,0 +1,33 @@
+{
+    "team_name": "XPL41N",
+    "students": [
+        {
+            "student_id": "k12323568",
+            "first_name": "TODO",
+            "last_name": "Hound",
+            "email": "k12323568@students.jku.at",
+            "github_user": "TODO"
+        },
+        {
+            "student_id": "k01608851",
+            "first_name": "Maximilian",
+            "last_name": "Fridrich",
+            "email": "k01608851@students.jku.at",
+            "github_user": "maximilianfridrich"
+        },
+        {
+            "student_id": "k52010874",
+            "first_name": "Sandro",
+            "last_name": "Müller",
+            "email": "k52010874@students.jku.at",
+            "github_user": "SandroMueller01"
+        },
+        {
+            "student_id": "k52320897",
+            "first_name": "Carlos Andres",
+            "last_name": "Elizondo Rojas",
+            "email": "k52320897@students.jku.at",
+            "github_user": "TODO"
+        }
+    ]
+}
