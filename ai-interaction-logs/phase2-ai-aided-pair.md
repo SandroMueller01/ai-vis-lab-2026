@@ -1,6 +1,6 @@
 # AI Interaction Log — Phase II, AI-aided pair
 
-Pair: Pair 2 (Sandro Müller, Carlos Andres Elizondo Rojas), human-only in Phase I
+Pair: Pair 1 (Hound, Maximilian Fridrich), human-only in Phase I
 Phase: II (model internals)
 
 Keep this updated throughout Phase II, not reconstructed at the end.
