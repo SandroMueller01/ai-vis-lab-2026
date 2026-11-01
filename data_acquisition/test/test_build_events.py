@@ -9,7 +9,7 @@ import pandas as pd
 
 # Support discovery and direct execution from any working directory.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "events"))
-from build_events import cold_wave_days, deltas, episodes, flags
+from build_events import anomaly, cold_wave_days, deltas, episodes, flags, fronts, passages, plane_fit
 
 
 def frame(values):
@@ -83,6 +83,54 @@ class EventTests(unittest.TestCase):
         days = cold_wave_days(cold, frame(np.ones((48, 4), dtype=bool)), share=0.5)
         self.assertEqual(days.cold_wave.sum(), 0)
         self.assertAlmostEqual(days.share.max(), 0.25)
+
+
+class FrontTests(unittest.TestCase):
+    def setUp(self):
+        # 4 x 3 locations 50 km apart; a front moves east at 10 m/s (36 km/h) on day 5
+        self.xy = pd.DataFrame({"x": np.tile([0, 50, 100, 150], 3), "y": np.repeat([0, 50, 100], 4)}, dtype=float)
+        hours = 240
+        daily = 10 + 5 * np.sin(np.arange(hours) / 24 * 2 * np.pi)
+        t2m, p0 = np.tile(daily[:, None], (1, 12)), np.full((hours, 12), 100000.0)
+        self.onset = 120 + np.round(self.xy.x.to_numpy() / 36).astype(int)
+        for loc, h in enumerate(self.onset):
+            t2m[h:, loc] -= 6  # 6 K colder ...
+            p0[h:, loc] += 400  # ... and 4 hPa higher from the passage on
+        self.t2m, self.p0 = frame(t2m), frame(p0)
+
+    def test_anomaly_removes_daily_cycle(self):
+        daily = self.t2m.iloc[:, :1].copy()
+        daily.iloc[:, 0] = 10 + 5 * np.sin(np.arange(len(daily)) / 24 * 2 * np.pi)
+        change = daily - daily.shift(3)
+        self.assertGreater(change.abs().max().max(), 3)  # the daily cycle alone changes T by > 3 K in 3 h
+        self.assertLess(anomaly(change).abs().max().max(), 1e-9)
+
+    def test_passages_find_the_onset_at_every_location(self):
+        mask = passages(self.t2m, self.p0)
+        for loc, h in enumerate(self.onset):
+            self.assertEqual(mask.index[mask[loc]][0], self.t2m.index[h])
+            self.assertFalse(mask[loc].iloc[: h - 3].any())
+
+    def test_plane_fit_recovers_speed_and_direction(self):
+        x, y = self.xy.x.to_numpy(), self.xy.y.to_numpy()
+        r2, speed, deg = plane_fit(x / 36, x, y)
+        self.assertAlmostEqual(r2, 1)
+        self.assertAlmostEqual(speed, 10)
+        self.assertAlmostEqual(deg, 90)
+        self.assertEqual(round(plane_fit(-y / 36, x, y)[2]), 180)  # southwards
+
+    def test_moving_line_is_a_front_simultaneous_jump_is_not(self):
+        found, keep = fronts(passages(self.t2m, self.p0), self.xy)
+        self.assertEqual(found.cold_front.tolist(), [True])
+        self.assertAlmostEqual(found.share.iloc[0], 1)
+        self.assertTrue(keep.any().all())
+
+        same_time = self.t2m.copy(), self.p0.copy()
+        for f, step in zip(same_time, (-6, 400)):
+            f.iloc[:, :] = np.where(np.arange(len(f))[:, None] >= 120, f + step, f)
+        found, keep = fronts(passages(*same_time), self.xy)
+        self.assertEqual(found.cold_front.tolist(), [False])  # everywhere at once: no moving line
+        self.assertFalse(keep.any().any())
 
 
 if __name__ == "__main__":

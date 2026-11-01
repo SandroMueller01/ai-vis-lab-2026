@@ -1,24 +1,34 @@
 """
-Shared event labels for the analysis: cold drops, thunderstorms and cold-wave days, derived
-from the hourly INCA temperature (T2M) and precipitation (RR) of an existing dataset build.
-Both pairs use these files, so every analysis works with the same events.
+Shared event labels for the analysis: cold drops, thunderstorms, cold fronts and cold-wave
+days, derived from the hourly INCA temperature (T2M), pressure (P0) and precipitation (RR) of
+an existing dataset build. Both pairs use these files, so every analysis works with the same
+events. The reasoning behind the cold-front definition is in events/README.md.
 
-Definitions (thresholds are options; defaults from model-selection.md):
+Definitions (thresholds are options; defaults from model-selection.md and events/README.md):
   dT24          T2M minus T2M at the same hour the day before (removes the daily cycle)
   dT1           T2M minus T2M one hour before
   cold_drop     dT24 <= -8 K
   thunderstorm  dT1 <= -3 K and RR >= 2 mm in the same hour (proxy, no lightning data)
   cold-wave day UTC day with an hour in which >= 25 % of all locations are in a cold_drop
+  passage       surface signature of a cold-front passage at one location: the 3 h T2M change
+                <= -3 K and the 6 h P0 change around it >= +2 hPa, both as anomalies from the
+                mean change of that location, month and hour of day
+  front         >= 50 % of all locations have a passage within 24 h, and the passage times
+                fit a front moving across the area (plane fit R^2 >= 0.3, 1-30 m/s, moving
+                towards 60-240 deg, i.e. coming from the west or north)
+  cold_front    a passage that belongs to a front
 
-T2M gaps of up to 3 h are filled linearly per location before differencing; longer gaps
-stay NaN and never produce an event. Flagged hours of the same kind and location that are
-at most --episode-gap hours apart form one episode.
+T2M and P0 gaps of up to 3 h are filled linearly per location before differencing; longer
+gaps stay NaN and never produce an event. Flagged hours of the same kind and location that
+are at most --episode-gap hours apart form one episode.
 
 Outputs, written next to the input (data/<dataset>/):
   events.parquet       one row per flagged location-hour:
                        <id>, time, kind, dT24, dT1, RR, episode
   cold_wave_days.csv   one row per UTC day: peak share of locations in a cold drop at the same
                        hour, that hour (peak_time), cold_wave flag
+  fronts.csv           one row per candidate front: peak time, share of locations, plane fit
+                       (r2, speed_ms, moves_to_deg), cold_front flag
 
 Usage:
   python data_acquisition/events/build_events.py                       # Austria 5 km
@@ -37,17 +47,19 @@ REPO_DATA = Path(__file__).resolve().parents[2] / "data"
 ID_COLUMNS = ["point_id", "cell_id"]  # Austria 5 km, Tyrol 1 km
 
 
-def load(path: Path) -> tuple[str, pd.DataFrame, pd.DataFrame]:
-    """grid_long.parquet -> (id column, T2M, RR) as wide (time x location) frames."""
+def load(path: Path) -> tuple[str, dict[str, pd.DataFrame], pd.DataFrame]:
+    """grid_long.parquet -> (id column, {T2M, RR, P0} as wide (time x location) frames,
+    location coordinates in km on a local flat grid)."""
     import pyarrow.parquet as pq
 
     names = pq.read_schema(path).names
     id_col = next(c for c in ID_COLUMNS if c in names)
-    df = pq.read_table(path, columns=[id_col, "time", "T2M", "RR"]).to_pandas()
+    df = pq.read_table(path, columns=[id_col, "time", "lat", "lon", "T2M", "RR", "P0"]).to_pandas()
     full = pd.date_range(df.time.min(), df.time.max(), freq="1h")
-    t2m = df.pivot(index="time", columns=id_col, values="T2M").reindex(full)
-    rr = df.pivot(index="time", columns=id_col, values="RR").reindex(full)
-    return id_col, t2m, rr
+    wide = {v: df.pivot(index="time", columns=id_col, values=v).reindex(full) for v in ["T2M", "RR", "P0"]}
+    ll = df.groupby(id_col)[["lat", "lon"]].first().reindex(wide["T2M"].columns)
+    xy = pd.DataFrame({"x": ll.lon * 111.32 * np.cos(np.radians(ll.lat.mean())), "y": ll.lat * 110.57})
+    return id_col, wide, xy
 
 
 def fill_short_gaps(t2m: pd.DataFrame, max_gap: int) -> pd.DataFrame:
@@ -74,6 +86,61 @@ def flags(dt24, dt1, rr, cold_k=8.0, storm_k=3.0, storm_rr=2.0) -> dict[str, pd.
     return {"cold_drop": dt24 <= -cold_k, "thunderstorm": (dt1 <= -storm_k) & (rr >= storm_rr)}
 
 
+def anomaly(d: pd.DataFrame) -> pd.DataFrame:
+    """Change minus its mean for the same location, month and hour of day (removes the
+    daily cycle of temperature and the daily pressure tide)."""
+    return d - d.groupby([d.index.month, d.index.hour]).transform("mean")
+
+
+def passages(t2m, p0, max_gap=3, temp_k=3.0, pres_hpa=2.0) -> pd.DataFrame:
+    """Hours with the surface signature of a cold-front passage: cooling over the last 3 h
+    and a pressure rise over the 6 h around it, both stronger than usual for that hour."""
+    t, p = fill_short_gaps(t2m, max_gap), fill_short_gaps(p0, max_gap) / 100  # Pa -> hPa
+    dt3 = anomaly(t - t.shift(3))
+    dp6 = anomaly(p.shift(-3) - p.shift(3))
+    return (dt3 <= -temp_k) & (dp6 >= pres_hpa)
+
+
+def plane_fit(hours: np.ndarray, x: np.ndarray, y: np.ndarray) -> tuple[float, float, float]:
+    """Fit passage time = a + b x + c y. Returns R^2, the speed of the moving line (m/s) and
+    the direction it moves to (degrees, 0 = north, 90 = east)."""
+    A = np.column_stack([np.ones_like(x), x, y])
+    coef = np.linalg.lstsq(A, hours, rcond=None)[0]
+    ss = ((hours - hours.mean()) ** 2).sum()
+    r2 = 1 - ((hours - A @ coef) ** 2).sum() / ss if ss else 0.0
+    slope = np.hypot(coef[1], coef[2])  # h per km
+    speed = 1 / slope / 3.6 if slope else np.inf
+    return r2, speed, (np.degrees(np.arctan2(coef[1], coef[2])) + 360) % 360
+
+
+def fronts(passage, xy, share=0.5, window=24, min_r2=0.3, speed=(1.0, 30.0), toward=(60.0, 240.0)):
+    """Candidate fronts: hours where >= `share` of the locations have a passage onset within
+    `window` hours, at least `window` hours apart. A candidate is a cold front if the onset
+    times fit a line moving across the area. Returns the candidates and the passage mask
+    reduced to the accepted fronts."""
+    onset = passage & ~passage.shift(1, fill_value=False)
+    hit = onset.astype("int8").rolling(window, center=True, min_periods=1).max()
+    shares = hit.mean(axis=1)
+    peaks = []
+    for t in shares[shares >= share].sort_values(ascending=False, kind="stable").index:
+        if all(abs(t - p) >= pd.Timedelta(hours=window) for p in peaks):
+            peaks.append(t)
+    half = pd.Timedelta(hours=window // 2)
+    rows, keep = [], pd.DataFrame(False, index=passage.index, columns=passage.columns)
+    for peak in sorted(peaks):
+        win = onset.loc[peak - half : peak + half - pd.Timedelta("1h")]
+        on = win.any().to_numpy()
+        hours = ((win.idxmax()[on] - peak) / pd.Timedelta("1h")).to_numpy(float)
+        r2, v, deg = plane_fit(hours, xy.x.to_numpy()[on], xy.y.to_numpy()[on])
+        ok = r2 >= min_r2 and speed[0] <= v <= speed[1] and toward[0] <= deg <= toward[1]
+        rows.append({"peak_time": peak, "share": shares[peak], "r2": r2, "speed_ms": v,
+                     "moves_to_deg": deg, "cold_front": ok})
+        if ok:
+            keep.loc[win.index] = keep.loc[win.index] | passage.loc[win.index]
+    cols = ["peak_time", "share", "r2", "speed_ms", "moves_to_deg", "cold_front"]
+    return pd.DataFrame(rows, columns=cols), keep
+
+
 def episodes(mask: pd.DataFrame, gap: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Flagged cells as (time index, location index, episode id). Hours of one location
     that are at most `gap` hours apart share an episode id (ids are unique overall)."""
@@ -94,9 +161,12 @@ def cold_wave_days(cold: pd.DataFrame, valid: pd.DataFrame, share: float = 0.25)
     return out
 
 
-def build(id_col, t2m, rr, args) -> tuple[pd.DataFrame, pd.DataFrame]:
+def build(id_col, wide, xy, args) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    t2m, rr = wide["T2M"], wide["RR"]
     dt24, dt1 = deltas(t2m, args.max_gap)
     masks = flags(dt24, dt1, rr, args.cold_k, args.storm_k, args.storm_rr)
+    passage = passages(t2m, wide["P0"], args.max_gap, args.front_k, args.front_hpa)
+    front_list, masks["cold_front"] = fronts(passage, xy, args.front_share, min_r2=args.front_r2)
     frames, offset = [], 0
     for kind, mask in masks.items():
         ti, loc, ep = episodes(mask, args.episode_gap)
@@ -108,10 +178,10 @@ def build(id_col, t2m, rr, args) -> tuple[pd.DataFrame, pd.DataFrame]:
     events = pd.concat(frames, ignore_index=True)
     events["kind"] = events.kind.astype("category")
     days = cold_wave_days(masks["cold_drop"], dt24.notna(), args.cold_share)
-    return events, days
+    return events, days, front_list
 
 
-def summary(events: pd.DataFrame, days: pd.DataFrame, id_col: str, n_loc: int, n_hours: int):
+def summary(events, days, front_list, id_col: str, n_loc: int, n_hours: int):
     years = n_hours / 8760
     for kind, g in events.groupby("kind", observed=True):
         per_loc = g.groupby(id_col).episode.nunique()
@@ -122,6 +192,9 @@ def summary(events: pd.DataFrame, days: pd.DataFrame, id_col: str, n_loc: int, n
     cw = days[days.cold_wave]
     print(f"  cold-wave days: {len(cw)} (largest: "
           + ", ".join(f"{d} {s * 100:.0f} %" for d, s in cw.share.nlargest(3).items()) + ")")
+    cf = front_list[front_list.cold_front]
+    print(f"  cold fronts: {len(cf)} of {len(front_list)} candidates ("
+          + ", ".join(f"{t:%Y-%m-%d %H} UTC" for t in cf.nlargest(3, "share").peak_time) + ")")
 
 
 def main():
@@ -131,23 +204,29 @@ def main():
     ap.add_argument("--storm-k", type=float, default=3.0, help="thunderstorm: K drop within 1 h")
     ap.add_argument("--storm-rr", type=float, default=2.0, help="thunderstorm: mm rain in that hour")
     ap.add_argument("--cold-share", type=float, default=0.25, help="cold-wave day: share of locations")
-    ap.add_argument("--max-gap", type=int, default=3, help="fill T2M gaps up to this many hours")
+    ap.add_argument("--front-k", type=float, default=3.0, help="passage: K cooling in 3 h (anomaly)")
+    ap.add_argument("--front-hpa", type=float, default=2.0, help="passage: hPa pressure rise in 6 h (anomaly)")
+    ap.add_argument("--front-share", type=float, default=0.5, help="front: share of locations with a passage")
+    ap.add_argument("--front-r2", type=float, default=0.3, help="front: minimum R^2 of the moving-line fit")
+    ap.add_argument("--max-gap", type=int, default=3, help="fill T2M and P0 gaps up to this many hours")
     ap.add_argument("--episode-gap", type=int, default=6, help="merge flagged hours up to this far apart")
     args = ap.parse_args()
 
     data = Path(args.data)
     print(f"1/3 load {data / 'grid_long.parquet'}")
-    id_col, t2m, rr = load(data / "grid_long.parquet")
-    print(f"  {t2m.shape[1]} locations x {len(t2m)} hours")
+    id_col, wide, xy = load(data / "grid_long.parquet")
+    n_hours, n_loc = wide["T2M"].shape
+    print(f"  {n_loc} locations x {n_hours} hours")
 
     print("2/3 label events")
-    events, days = build(id_col, t2m, rr, args)
+    events, days, front_list = build(id_col, wide, xy, args)
 
     print("3/3 write")
     events.to_parquet(data / "events.parquet", index=False, compression="zstd")
     days.to_csv(data / "cold_wave_days.csv")
-    summary(events, days, id_col, t2m.shape[1], len(t2m))
-    print(f"files: {data / 'events.parquet'}, {data / 'cold_wave_days.csv'}")
+    front_list.round({"share": 3, "r2": 3, "speed_ms": 1, "moves_to_deg": 0}).to_csv(data / "fronts.csv", index=False)
+    summary(events, days, front_list, id_col, n_loc, n_hours)
+    print(f"files: {data / 'events.parquet'}, {data / 'cold_wave_days.csv'}, {data / 'fronts.csv'}")
 
 
 if __name__ == "__main__":
