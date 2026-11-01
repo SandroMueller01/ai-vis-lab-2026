@@ -52,7 +52,7 @@ and scope the group settles on. Due **28.10.2026**.
 | Hound | K12323568 | TBD | Pair 1 |
 | Maximilian Fridrich | K01608851 | [@maximilianfridrich](https://github.com/maximilianfridrich) | Pair 1 |
 | Sandro Müller | K52010874 | [@SandroMueller01](https://github.com/SandroMueller01) | Pair 2 |
-| Carlos Andres Elizondo Rojas | K52320897 | TBD | Pair 2 |
+| Carlos Elizondo | K52320897 | @erca-2064 | Pair 2 |
 
 Pair 1 is **AI-aided in Phase I** and human-only in Phase II. Pair 2 is the
 reverse (see [Assignment structure](#assignment-structure)).
