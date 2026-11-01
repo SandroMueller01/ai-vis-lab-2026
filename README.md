@@ -54,7 +54,7 @@ and scope the group settles on. Due **28.10.2026**.
 | Sandro Müller | K52010874 | [@SandroMueller01](https://github.com/SandroMueller01) | Pair 2 |
 | Carlos Elizondo | K52320897 | @erca-2064 | Pair 2 |
 
-Pair 1 is **AI-aided in Phase I** and human-only in Phase II. Pair 2 is the
+Pair 1 is human-only in Phase I and **AI-aided in Phase II**. Pair 2 is the
 reverse (see [Assignment structure](#assignment-structure)).
 
 ## Assignment structure
