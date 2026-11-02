@@ -80,10 +80,12 @@ notes. The pairs swap AI4Vis roles between phases.
   techniques per pair (e.g. hidden-state projections/UMAP, gate-activation
   heatmaps, gradient-based saliency over input patches, k-NN in
   representation space), compared or combined rather than shown in isolation.
-- **AI interaction logs**: `ai-interaction-logs/` — one log per
+- **AI interactions**: `ai-interactions/` — one log per
   (phase, AI-aided pair), documenting key prompts, which suggestions were
   accepted/modified/rejected and why, observed failure patterns, and emerging
   best practices. Required only from whichever pair is AI-aided in that phase.
+- **AI reflection**: `ai_reflection_midpoint.md` — the AI-aided pair's
+  reflection on Phase I with GenAI, starting with their names and student IDs.
 - **Submissions**: `submissions/midpoint/` (end of Phase I: code from both
   pairs + AI log + up to 5-minute progress video) and `submissions/final/`
   (end of Phase II: code from both pairs + AI logs from both phases +
@@ -169,9 +171,10 @@ ai-vis-lab-2026/
 ├── phase2-model-internals/
 │   ├── pair-1/
 │   └── pair-2/
-├── ai-interaction-logs/
+├── ai-interactions/             # GenAI interaction logs (AI-aided pair)
 │   ├── phase1-ai-aided-pair.md
 │   └── phase2-ai-aided-pair.md
+├── ai_reflection_midpoint.md   # Phase I reflection on GenAI (AI-aided pair)
 ├── submissions/
 │   ├── midpoint/
 │   └── final/
