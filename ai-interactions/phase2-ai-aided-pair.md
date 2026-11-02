@@ -1,6 +1,6 @@
 # AI Interaction Log — Phase II, AI-aided pair
 
-Pair: Pair 2 (Sandro Müller, Carlos Elizondo)
+Pair: TBD (the pair that was human-only in Phase I)
 Phase: II (model internals)
 
 Keep this updated throughout Phase II, not reconstructed at the end.

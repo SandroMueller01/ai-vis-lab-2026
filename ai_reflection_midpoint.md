@@ -4,8 +4,8 @@
 
 | First name | Last name | Student ID |
 |---|---|---|
-| TODO | Hound | k12323568 |
-| Maximilian | Fridrich | k01608851 |
+| Sandro | Müller | k52010874 |
+| Carlos | Elizondo | k52320897 |
 
 Team XPL41N · Model: TiRex-2 · Task: hourly temperature forecasts for Austria
 (see [`README.md`](README.md)). The detailed log is in
@@ -38,4 +38,4 @@ Team XPL41N · Model: TiRex-2 · Task: hourly temperature forecasts for Austria
 
 ## What we would do differently in Phase II
 
-<!-- Practices to keep, practices to avoid, advice for Pair 2 who is AI-aided in Phase II. -->
+<!-- Practices to keep, practices to avoid, advice for Pair 2, who is AI-aided in Phase II. -->
