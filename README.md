@@ -49,12 +49,12 @@ and scope the group settles on. Due **28.10.2026**.
 
 | Name | Matriculation no. | GitHub | Pair |
 |---|---|---|---|
-| Hound | K12323568 | TBD | Pair 1 |
-| Maximilian Fridrich | K01608851 | [@maximilianfridrich](https://github.com/maximilianfridrich) | Pair 1 |
-| Sandro Müller | K52010874 | [@SandroMueller01](https://github.com/SandroMueller01) | Pair 2 |
-| Carlos Elizondo | K52320897 | @erca-2064 | Pair 2 |
+| Sandro Müller | K52010874 | [@SandroMueller01](https://github.com/SandroMueller01) | Pair 1 |
+| Carlos Elizondo | K52320897 | [@erca-2064](https://github.com/erca-2064) | Pair 1 |
+| Hound | K12323568 | TBD | Pair 2 |
+| Maximilian Fridrich | K01608851 | [@maximilianfridrich](https://github.com/maximilianfridrich) | Pair 2 |
 
-Pair 1 is human-only in Phase I and **AI-aided in Phase II**. Pair 2 is the
+Pair 1 is **AI-aided in Phase I** and human-only in Phase II. Pair 2 is the
 reverse (see [Assignment structure](#assignment-structure)).
 
 ## Assignment structure

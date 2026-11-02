@@ -1,6 +1,6 @@
 # AI Interaction Log — Phase I, AI-aided pair
 
-Pair: Pair 2 (Sandro Müller, Carlos Elizondo)
+Pair: Pair 1 (Sandro Müller, Carlos Elizondo)
 Phase: I (model behavior)
 
 Keep this updated throughout Phase I, not reconstructed at the end.
