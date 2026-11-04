@@ -50,14 +50,17 @@ Details, reasoning and the dataset are in
 
 ## Team
 
-| Role | Name |
-|---|---|
-| Member 1 (Pair 1) | TBD |
-| Member 2 (Pair 1) | TBD |
-| Member 3 (Pair 2) | TBD |
-| Member 4 (Pair 2) | TBD |
+**Team name: XPL41N**
 
-Team name: TBD
+| Name | Matriculation no. | GitHub | Pair |
+|---|---|---|---|
+| Sandro Müller | K52010874 | [@SandroMueller01](https://github.com/SandroMueller01) | Pair 1 |
+| Carlos Elizondo | K52320897 | [@erca-2064](https://github.com/erca-2064) | Pair 1 |
+| Nikolas Basios | K12323568 | [@nklsb](https://github.com/nklsb) | Pair 2 |
+| Maximilian Fridrich | K01608851 | [@maximilianfridrich](https://github.com/maximilianfridrich) | Pair 2 |
+
+Pair 1 is **AI-aided in Phase I** and human-only in Phase II. Pair 2 is the
+reverse (see [Assignment structure](#assignment-structure)).
 
 ## Assignment structure
 

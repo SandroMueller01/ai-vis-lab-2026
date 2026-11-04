@@ -1,6 +1,6 @@
 # AI Interaction Log — Phase II, AI-aided pair
 
-Pair: TBD (the pair that was human-only in Phase I)
+Pair: Pair 2 (Nikolas Basios, Maximilian Fridrich), human-only in Phase I
 Phase: II (model internals)
 
 Keep this updated throughout Phase II, not reconstructed at the end.
