@@ -8,13 +8,15 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-page="explore">
 <div id="map"></div>
 <div id="tip" hidden></div>
 
 <aside class="card" id="panel">
   <h1>Austria weather explorer</h1>
   <p class="sub">Hourly INCA analysis on a <span id="spacing">15</span> km grid, Oct 2025 – Sep 2026</p>
+
+  <div id="qchips"></div>
 
   <h2>Show</h2>
   <div id="vars" role="radiogroup" aria-label="Variable"></div>
@@ -76,6 +78,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="common.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
