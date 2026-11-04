@@ -3,9 +3,10 @@
 Due: **28.10.2026, 23:59**. Register the final choice via the course's
 model-selection form once the group has agreed.
 
-> **Status: proposal.** Everything under *Task*, *Dataset* and *Decision* is a
-> draft for the team to discuss. Comment on the PR, change what you disagree
-> with, and we fill in the final decision once all four of us agree.
+> **Status (4 November 2026):** the task is registered and Phase I is running
+> (see the *Task* section of the [README](README.md)). This document keeps the
+> original proposal. What has changed since is marked **Update**. The *Decision*
+> boxes are still for the team to tick.
 
 ## Model
 
@@ -47,7 +48,12 @@ itself, as rules to tune together:
 | Event | Proxy definition (draft) | Frequency in our year |
 |---|---|---|
 | **Thunderstorm** | ≥ 3 K drop within 1 h **and** ≥ 2 mm rain in that hour | ≈ 10 events per location per year, almost all **May–August** |
-| **Cold wave / cold front** | ≥ 8 K colder than the same hour the day before | **29 days** on which ≥ 25 % of Austria is affected |
+| **Cold drop / cold wave** | ≥ 8 K colder than the same hour the day before | **29 days** on which ≥ 25 % of Austria is affected |
+| **Cold front** (**Update**) | A passage (≥ 3 K cooling in 3 h and ≥ 2 hPa pressure rise, compared with normal) at ≥ 50 % of the points within 24 h, moving across Austria as a line from the west or north | 17 fronts on the 5 km grid, 16 on the 15 km grid |
+
+**Update:** a cold drop is not a cold front. The cold-front label is built from
+the literature on objective front detection. Its reasoning, thresholds, checks
+and limits are in [`data_acquisition/events/README.md`](data_acquisition/events/README.md).
 
 A first check shows that the strongest cold wave (2026-03-26, 99 % of
 Austria) moves clearly **from west to east**: the time of the temperature drop
@@ -64,9 +70,13 @@ How it maps to the phases:
 | **I: behavior** | How well does TiRex-2 forecast ΔT, especially **right before and during** an event? How much do steps (b) and (c) add, and does it depend on **wind direction**, i.e. are the extra stations actually upstream? Are the quantiles calibrated at events, or overconfident? How far ahead are events detectable? How does it differ by region, season, and context length? |
 | **II: internals** | Does the model's internal state change **before** the temperature drop, i.e. does it "see" the front coming? Do hidden states and gate activations separate event from normal hours (UMAP / k-NN coloured by event)? Which input patches and which **stations** matter for a correct event forecast (saliency over time and over inputs)? |
 
-**Note on TiRex-2:** the model takes multivariate input with past covariates,
-so step (c) is a supported use of the model. How many extra series fit into
-one forecast in practice (memory, speed) is something to check early.
+**Note on TiRex-2:** the model accepts past and future covariates. **Update:**
+our smoke test (`scripts/tirex_smoke_test.py`) showed that the forecast did
+not change when we gave it *past* covariates (other variables or other
+locations), and only changed with *future* covariates. Future values of
+other stations are not known at forecast time, so they can only show an upper
+bound. Step (c) therefore needs a careful design, for example forecasting
+several locations together.
 
 ## Dataset
 
@@ -106,7 +116,9 @@ anything on ours.
   rain. Lightning data would be better but isn't in the open dataset.
 - The event thresholds are a first draft. Several of the large cold-wave days
   fall in summer, so some may be thunderstorm outflows rather than classic
-  cold fronts. We should tune the definitions together.
+  cold fronts. **Update:** the separate cold-front label (a moving line of
+  passages) addresses this; it finds almost no fronts in winter. The
+  thresholds are options of the event script, so the team can tune them in one place.
 - One year means each season occurs only once.
 - The foehn labels from the first data version stay in the data. They're no
   longer the focus, but useful as extra context: foehn often ends with a cold
@@ -123,9 +135,13 @@ Fill in once all four agree. The proposals are pre-filled.
 - **Target and horizon:** *proposal:* `T2M`, analysed as ΔT; horizon 6–24 h.
   → ☐ agreed
 - **Event definitions:** *proposal:* the two proxies above as a starting
-  point, finalised in the first week of Phase I. → ☐ agreed
+  point, finalised in the first week of Phase I. **Update:** implemented in
+  `data_acquisition/events/` (cold drop, thunderstorm, cold front, cold-wave
+  day). → ☐ agreed
 - **Final dataset(s):** *proposal:* **Austria 5 km** as the main dataset,
-  Tyrol 1 km for detail. → ☐ agreed
+  Tyrol 1 km for detail. **Update:** Phase I works with the **Austria 15 km**
+  dataset (378 points, every third point of the 5 km dataset; release
+  `data-austria-15km`). → ☐ agreed
 - **Scope:** *proposal:* single-model deep dive on TiRex-2, with GIFT-Eval
   weather as a sanity check only. → ☐ agreed
 - **Registered on the course form:** ☐ (who, date)

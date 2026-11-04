@@ -18,6 +18,11 @@ cold front.
 
 Both default to the period **2025-10-01 → 2026-10-01** (one year, 8,760 hours).
 
+**Phase I uses a thinned-out copy of the Austria 5 km dataset:** the
+[15 km dataset](austria_15km/README.md) with 378 points (every third point in x
+and y), made by `austria_15km/build_subset.py` without a new download. Its event
+labels are calculated for exactly these points.
+
 | | `tyrol_1km/` | `austria_5km/` |
 |---|---|---|
 | Area | Innsbruck – Wipp valley – Brenner (bbox 46.95–47.45 N, 11.00–11.75 E) | All of Austria |

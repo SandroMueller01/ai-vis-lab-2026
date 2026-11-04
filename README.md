@@ -77,7 +77,7 @@ notes. The pairs swap AI4Vis roles between phases.
   seen only from inputs and outputs: where and when they fail, how they react
   to cold drops and thunderstorms, whether the forecast bands are calibrated,
   and whether local variables and upstream points change the forecast at all.
-  Both pairs use the Austria 5 km data and the shared
+  Both pairs use the Austria 15 km dataset (378 points) and the shared
   [event labels](data_acquisition/events/README.md), on enough locations and
   events that any pattern is systematic, not cherry-picked. Synthetic inputs
   (e.g. an inserted temperature drop) are used to test specific hypotheses.
@@ -136,6 +136,30 @@ the release page in the browser into `data/` and run the same two `tar`
 commands. `data/` is gitignored, so never commit datasets. Share them through
 the release instead.
 
+**Phase I dataset (15 km):** both pairs work with the same 378 points, a
+thinned-out version of the 5 km dataset with the event labels already
+calculated (about 70 MB), from the release
+[`data-austria-15km`](https://github.com/SandroMueller01/ai-vis-lab-2026/releases/tag/data-austria-15km):
+
+```bash
+gh release download data-austria-15km --dir data
+tar -xf data/austria_15km.tar -C data
+```
+
+How it is made and what is in it:
+[`data_acquisition/austria_15km/README.md`](data_acquisition/austria_15km/README.md).
+
+## Dashboard
+
+An interactive dashboard for the Phase I analysis: a map of the data with a
+time slider, and page by page our answers to the five Phase I questions. Every
+chart names the questions it answers.
+
+- Live: <https://sandromueller01.github.io/ai-vis-lab-2026/>
+- Run it locally: `python -m http.server -d phase1-model-behavior/pair-1/dashboard/site`, then open <http://localhost:8000>
+- How it works and how to rebuild the data:
+  [`phase1-model-behavior/pair-1/dashboard/README.md`](phase1-model-behavior/pair-1/dashboard/README.md)
+
 ## Setup
 
 Everyone works in the same Docker image (Python 3.12, CPU torch, TiRex-2).
@@ -173,11 +197,12 @@ ai-vis-lab-2026/
 ├── data_acquisition/           # GeoSphere weather dataset builders
 │   ├── tyrol_1km/
 │   ├── austria_5km/
-│   └── events/                 # shared event labels (cold drops, thunderstorms)
+│   ├── austria_15km/           # Phase I dataset: every 3rd point of the 5 km one
+│   └── events/                 # shared event labels (cold drops, cold fronts, thunderstorms)
 ├── scripts/                    # shared helpers, e.g. tirex_smoke_test.py
 ├── notebooks/                  # shared exploratory notebooks
 ├── phase1-model-behavior/
-│   ├── pair-1/
+│   ├── pair-1/                 # incl. dashboard/ (published on GitHub Pages)
 │   └── pair-2/
 ├── phase2-model-internals/
 │   ├── pair-1/
@@ -186,11 +211,12 @@ ai-vis-lab-2026/
 │   ├── phase1-ai-aided-pair.md
 │   └── phase2-ai-aided-pair.md
 ├── ai_reflection_midpoint.md   # Phase I reflection on GenAI (AI-aided pair)
+├── team-info.json, workload.json   # course-required team files
 ├── submissions/
 │   ├── midpoint/
 │   └── final/
 ├── data/                       # gitignored; raw/intermediate datasets
-├── .github/                    # PR template, CI workflows
+├── .github/                    # PR template, CI and Pages workflows
 ├── .devcontainer/              # VS Code dev container
 ├── Dockerfile
 └── docker-compose.yml
