@@ -3,16 +3,19 @@
 An interactive map of the hourly weather over Austria, for exploring the data we use for TiRex-2 and the
 events we label in it. It runs in the browser from static files, so it can be hosted on GitHub Pages.
 
-**What it shows now (milestone 1):** the INCA analysis on the 15 km grid for one year, as a map with a time slider.
+**What it shows now (milestone 1):** the INCA analysis on the 15 km grid for one year, as a map you can step through hour by hour.
 
 - Variables: temperature, dew point, humidity, sea-level pressure, wind speed, global radiation, rain.
 - Event rings: cold front passages, thunderstorms and cold drops (definitions in
   [`data_acquisition/events/README.md`](../../../data_acquisition/events/README.md)).
-- A year overview above the slider (cold fronts on top, thunderstorms below). Click or drag to jump.
+- Time: pick a day (date field or the arrows), then slide through its 24 hours (UTC). The arrows next to the slider
+  step one hour and continue over midnight. The play button runs through the hours (1, 3 or 6 h per step).
+- A year overview above the day controls (cold fronts on top, thunderstorms below). The selected day is
+  highlighted; click or drag to pick another day.
 - Click a point for a chart of the selected variable, three days before and after, with the event hours marked.
 - "Jump to": the three largest cold fronts, the widest thunderstorm day and a calm day.
-- Zoom and pan, light and dark map, play button, and a link that remembers the view
-  (`#v=T2M&t=4233&ev=cold_front&sel=300`).
+- Zoom and pan (dark map), and a link that remembers the view (`#v=T2M&t=4233&ev=cold_front&sel=300`, where `t`
+  is the number of hours since 2025-10-01 00 UTC).
 
 ## Run it locally
 

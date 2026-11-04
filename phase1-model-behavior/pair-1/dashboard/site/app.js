@@ -1,10 +1,7 @@
 "use strict";
 
 // ---------------------------------------------------------------- configuration
-const STYLES = {
-  light: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
-  dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
-};
+const STYLE = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 
 const PALETTES = {
   temp: ["#313695", "#4575b4", "#74add1", "#abd9e9", "#e0f3f8", "#ffffbf", "#fee090", "#fdae61", "#f46d43", "#d73027", "#a50026"],
@@ -27,9 +24,9 @@ const LAYERS = {
 };
 
 const EVENT_KINDS = {
-  cold_front: { label: "Cold front passage", color: "#5e2ca5" },
-  thunderstorm: { label: "Thunderstorm", color: "#e91e8c" },
-  cold_drop: { label: "Cold drop", color: "#00838f" },
+  cold_front: { label: "Cold front passage", color: "#b388ff" },
+  thunderstorm: { label: "Thunderstorm", color: "#ff4fa3" },
+  cold_drop: { label: "Cold drop", color: "#26c6da" },
 };
 
 const PRESET_LABEL = { cold_front: "Cold front", thunderstorm: "Thunderstorms", calm: "Calm day" };
@@ -41,12 +38,12 @@ const PRESET_SETUP = {
 
 // ---------------------------------------------------------------- state
 const $ = (id) => document.getElementById(id);
-let meta, flags = {}, share = {};
+let meta, flags = {}, share = {}, DAYS;
 let map, geo, T0;
 const cache = {}; // stored variable -> Uint8Array (time x point)
 const luts = {};
 const S = {
-  t: 0, layer: "T2M", events: new Set(["cold_front"]), sel: null, playing: false, theme: "light", busy: false,
+  t: 0, layer: "T2M", events: new Set(["cold_front"]), sel: null, playing: false,
 };
 
 // ---------------------------------------------------------------- data
@@ -107,6 +104,8 @@ const fmtVienna = new Intl.DateTimeFormat("en-GB", {
 const fmtDay = new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", day: "numeric", month: "short" });
 const dateOf = (t) => new Date(T0 + t * 3600e3);
 const indexOf = (iso) => Math.round((Date.parse(iso) - T0) / 3600e3);
+const dayOf = (t) => Math.floor(t / 24); // the data starts at 00 UTC, so a day is 24 consecutive hours
+const isoDay = (t) => dateOf(dayOf(t) * 24).toISOString().slice(0, 10);
 
 // ---------------------------------------------------------------- colours
 function makeLut(pal) {
@@ -142,7 +141,7 @@ function setupLayers() {
   map.addSource("rings", { type: "geojson", data: empty });
   map.addLayer({
     id: "rings-halo", type: "circle", source: "rings",
-    paint: { "circle-color": "rgba(0,0,0,0)", "circle-radius": radius(0.72), "circle-stroke-color": "#ffffff", "circle-stroke-width": 4.5, "circle-stroke-opacity": 0.9 },
+    paint: { "circle-color": "rgba(0,0,0,0)", "circle-radius": radius(0.72), "circle-stroke-color": "#0b0f14", "circle-stroke-width": 4.5, "circle-stroke-opacity": 0.85 },
   });
   map.addLayer({
     id: "rings", type: "circle", source: "rings",
@@ -151,14 +150,14 @@ function setupLayers() {
   map.addSource("sel", { type: "geojson", data: empty });
   map.addLayer({
     id: "sel", type: "circle", source: "sel",
-    paint: { "circle-color": "rgba(0,0,0,0)", "circle-radius": radius(1.15), "circle-stroke-color": S.theme === "dark" ? "#ffffff" : "#000000", "circle-stroke-width": 2.5 },
+    paint: { "circle-color": "rgba(0,0,0,0)", "circle-radius": radius(1.15), "circle-stroke-color": "#ffffff", "circle-stroke-width": 2.5 },
   });
   render();
 }
 
 function initMap() {
   map = new maplibregl.Map({
-    container: "map", style: STYLES[S.theme], center: [13.35, 47.6], zoom: 6.2, minZoom: 4, maxZoom: 13,
+    container: "map", style: STYLE, center: [13.35, 47.6], zoom: 6.2, minZoom: 4, maxZoom: 13,
     attributionControl: { compact: true },
   });
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
@@ -213,7 +212,7 @@ function draw() {
       if (f[t * n + i]) rings.push({ type: "Feature", geometry: feats[i].geometry, properties: { col } });
     }
   }
-  if (map.getSource("pts")) {
+  if (map.getSource("pts") && map.getSource("rings") && map.getSource("sel")) {
     map.getSource("pts").setData(geo);
     map.getSource("rings").setData({ type: "FeatureCollection", features: rings });
     map.getSource("sel").setData({
@@ -222,7 +221,9 @@ function draw() {
   }
   const d = dateOf(t);
   $("when").innerHTML = `${fmtUtc.format(d)} UTC <span>· ${fmtVienna.format(d)}</span>`;
-  $("slider").value = t;
+  $("slider").value = t % 24;
+  $("day").value = isoDay(t);
+  $("hourlbl").textContent = `${String(t % 24).padStart(2, "0")} UTC`;
   drawTimeline();
   drawChart();
   writeHash();
@@ -272,13 +273,17 @@ function drawTimeline() {
     g.fillRect(x, 0, 1, h);
     g.fillText(d.toLocaleString("en-GB", { month: "short", timeZone: "UTC" }), x + 3, 36 - 0);
   }
+  // the selected day as a band, the selected hour as a line
+  g.fillStyle = "rgba(255, 255, 255, .16)";
+  g.fillRect((dayOf(S.t) / DAYS) * w, 0, Math.max(3, w / DAYS), h);
   g.fillStyle = css.getPropertyValue("--fg");
-  g.fillRect(Math.round((S.t / meta.nt) * w) - 1, 0, 2, h);
+  g.fillRect(Math.round((S.t / meta.nt) * w), 0, 1, h);
 }
 
+// click or drag on the year overview selects a day, the hour of the day stays
 function scrub(e) {
   const r = $("tl").getBoundingClientRect();
-  setT(Math.max(0, Math.min(meta.nt - 1, Math.round(((e.clientX - r.left) / r.width) * (meta.nt - 1)))));
+  setDay(Math.floor(((e.clientX - r.left) / r.width) * DAYS));
 }
 
 // ---------------------------------------------------------------- chart of the selected point
@@ -324,7 +329,10 @@ function select(i) {
 }
 
 // ---------------------------------------------------------------- controls
-function setT(t) { S.t = t; render(); }
+function setT(t) { S.t = Math.max(0, Math.min(meta.nt - 1, t)); render(); }
+
+// jump to another day, the hour of the day stays
+function setDay(d) { setT(Math.max(0, Math.min(DAYS - 1, d)) * 24 + (S.t % 24)); }
 
 async function setLayer(key) {
   S.layer = key;
@@ -395,29 +403,31 @@ function buildUi() {
     };
     $("jumps").append(b);
   }
-  const slider = $("slider");
-  slider.max = meta.nt - 1;
-  slider.oninput = () => setT(Number(slider.value));
-  $("prev").onclick = () => setT(Math.max(0, S.t - 1));
-  $("next").onclick = () => setT(Math.min(meta.nt - 1, S.t + 1));
+  // pick a day, then slide through its 24 hours
+  const day = $("day");
+  day.min = isoDay(0);
+  day.max = isoDay(meta.nt - 1);
+  day.onchange = () => {
+    const ms = Date.parse(`${day.value}T00:00:00Z`);
+    if (Number.isNaN(ms)) render(); else setDay(Math.round((ms - T0) / 86400e3));
+  };
+  $("dprev").onclick = () => setDay(dayOf(S.t) - 1);
+  $("dnext").onclick = () => setDay(dayOf(S.t) + 1);
+  $("slider").oninput = () => setT(dayOf(S.t) * 24 + Number($("slider").value));
+  $("prev").onclick = () => setT(S.t - 1);
+  $("next").onclick = () => setT(S.t + 1);
   $("play").onclick = togglePlay;
   $("cclose").onclick = () => select(null);
   let drag = false;
   $("tl").addEventListener("pointerdown", (e) => { drag = true; $("tl").setPointerCapture(e.pointerId); scrub(e); });
   $("tl").addEventListener("pointermove", (e) => { if (drag) scrub(e); });
   $("tl").addEventListener("pointerup", () => { drag = false; });
-  $("theme").onclick = () => {
-    S.theme = S.theme === "light" ? "dark" : "light";
-    document.documentElement.dataset.theme = S.theme;
-    TL.cols = null;
-    map.setStyle(STYLES[S.theme]);
-  };
   window.addEventListener("resize", () => { TL.cols = null; render(); });
 }
 
 // ---------------------------------------------------------------- shareable link: #v=T2M&t=4000&ev=cold_front&sel=12
 function writeHash() {
-  const h = `v=${S.layer}&t=${S.t}&ev=${[...S.events].join(",")}${S.sel == null ? "" : `&sel=${S.sel}`}&theme=${S.theme}`;
+  const h = `v=${S.layer}&t=${S.t}&ev=${[...S.events].join(",")}${S.sel == null ? "" : `&sel=${S.sel}`}`;
   history.replaceState(null, "", `#${h}`);
 }
 
@@ -427,19 +437,17 @@ function readHash() {
   if (q.has("t")) S.t = Math.max(0, Math.min(meta.nt - 1, Number(q.get("t")) || 0));
   if (q.has("ev")) S.events = new Set(q.get("ev").split(",").filter((k) => EVENT_KINDS[k]));
   if (q.has("sel") && Number(q.get("sel")) < meta.n) S.sel = Number(q.get("sel"));
-  if (STYLES[q.get("theme")]) S.theme = q.get("theme");
 }
 
 // ---------------------------------------------------------------- start
 async function main() {
   const [m, ev] = await Promise.all([fetchJson("data/meta.json"), fetchJson("data/events.json")]);
-  meta = m; T0 = Date.parse(meta.t0);
+  meta = m; T0 = Date.parse(meta.t0); DAYS = meta.nt / 24;
   buildEvents(ev);
   geo = {
     type: "FeatureCollection",
     features: meta.lon.map((lon, i) => ({ type: "Feature", geometry: { type: "Point", coordinates: [lon, meta.lat[i]] }, properties: { i, c: "#999", o: 0.9 } })),
   };
-  S.theme = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   const hasHash = location.hash.length > 1;
   if (!hasHash) {
     // open on the cold front that reaches the largest share of Austria
@@ -447,7 +455,6 @@ async function main() {
     if (f) S.t = indexOf(f.time);
   }
   readHash();
-  document.documentElement.dataset.theme = S.theme;
   buildUi();
   syncEvents();
   initMap();
