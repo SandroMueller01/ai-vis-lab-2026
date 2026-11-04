@@ -9,6 +9,22 @@ const QUESTIONS = {
   5: { short: "What kind of mistakes?", long: "What kind of mistakes does it make? Regions, neighbours and start times", page: "q5.html" },
 };
 
+// the questions Carlos works on (his findings are on carlos.html)
+const CARLOS = {
+  1: "Does a longer history help (1–10 weeks)?",
+  2: "Does a time input help (hour of day, time of year)?",
+  3: "Does the model copy a repeated weekly pattern (fixed Sundays)?",
+  4: "Can it forecast a cold front 6 h ahead?",
+  5: "Do extra inputs help it see fronts (flags, pressure/humidity/wind as levels or changes, upstream points, neighbours)?",
+  6: "Once the drop starts, does it catch up?",
+  7: "When does the front forecast become good?",
+  8: "After a front, is it less sure or does it expect lasting cold?",
+  9: "Is the 10–90 % band honest?",
+  10: "How weird must the history be for the band to reach a front?",
+  11: "Which part of the history does it use?",
+  12: "Is it unusually warm before fronts?",
+};
+
 const COL = { blue: "#3987e5", orange: "#d95926", aqua: "#199e70", violet: "#9085e9", red: "#e66767", text: "#e7ebf0", sec: "#9aa6b3", muted: "#6f7c89", line: "#2e3842" };
 const SVGNS = "http://www.w3.org/2000/svg";
 
@@ -22,7 +38,7 @@ function h(tag, props = {}, ...kids) {
     else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
     else e.setAttribute(k, v === true ? "" : v);
   }
-  for (const kid of kids.flat()) if (kid != null && kid !== false) e.append(kid.nodeType ? kid : document.createTextNode(kid));
+  for (const kid of kids.flat(Infinity)) if (kid != null && kid !== false) e.append(kid.nodeType ? kid : document.createTextNode(kid));
   return e;
 }
 
@@ -34,7 +50,7 @@ function s(tag, props = {}, ...kids) {
     else if (k === "text") e.textContent = v;
     else e.setAttribute(k, v);
   }
-  for (const kid of kids.flat()) if (kid != null) e.append(kid);
+  for (const kid of kids.flat(Infinity)) if (kid != null) e.append(kid);
   return e;
 }
 
@@ -76,7 +92,7 @@ const tip = {
 };
 
 function renderNav(current) {
-  const links = [["explore", "index.html", "Explore the data"], ...Object.entries(QUESTIONS).map(([n, q]) => [`q${n}`, q.page, `Q${n} · ${q.short}`])];
+  const links = [["explore", "index.html", "Explore the data"], ...Object.entries(QUESTIONS).map(([n, q]) => [`q${n}`, q.page, `Q${n} · ${q.short}`]), ["carlos", "carlos.html", "Carlos's findings"]];
   const nav = h("nav", { id: "nav", "aria-label": "Pages" },
     h("a", { class: "brand", href: "index.html" }, "Austria weather explorer"),
     links.map(([key, href, label]) => h("a", { class: "link", href, "aria-current": key === current ? "page" : null }, label)));
@@ -90,8 +106,14 @@ function chips(nums, verb = "Answers") {
 }
 
 // a visualisation card; every one names the questions it answers
-function card({ id, title, questions, desc, controls, body, note }) {
-  return h("section", { class: "viz", id }, h("h2", {}, title), chips(questions), desc ? h("p", { class: "desc" }, desc) : null,
+// owner: who the chart belongs to; related: questions of Carlos's list that it overlaps with (links to his findings)
+function ownerLine(owner, related) {
+  return h("p", { class: "owner" }, `Owner: ${owner}`,
+    related && related.length ? [" · Overlaps with Carlos's question ", related.map((c, i) => [i ? ", " : "", h("a", { href: `carlos.html#c${c}` }, `C${c} · ${CARLOS[c]}`)])] : null);
+}
+
+function card({ id, title, questions, desc, controls, body, note, owner = "Sandro", related }) {
+  return h("section", { class: "viz", id }, h("h2", {}, title), questions && questions.length ? chips(questions) : null, ownerLine(owner, related), desc ? h("p", { class: "desc" }, desc) : null,
     controls ? h("div", { class: "controls" }, controls) : null, body, note ? h("p", { class: "note" }, note) : null);
 }
 

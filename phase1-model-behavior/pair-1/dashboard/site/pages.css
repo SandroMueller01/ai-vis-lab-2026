@@ -71,3 +71,7 @@ table.pick tbody tr[aria-selected="true"] { background: rgba(106, 166, 255, .16)
 }
 #tt b { color: var(--fg); }
 #tt i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+
+.viz p.owner { color: var(--muted); font-size: 12px; margin: 0 0 10px; }
+.viz p.owner a { color: var(--accent); }
+.finding { font-size: 15px; line-height: 1.6; margin: 4px 0 8px; }

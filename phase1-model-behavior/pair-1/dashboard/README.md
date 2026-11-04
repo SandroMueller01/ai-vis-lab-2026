@@ -36,6 +36,14 @@ question). The five questions are the Phase I questions of the team:
 | | Do points with more neighbours get better forecasts? | Q5 |
 | | Does the start time matter? (start hour against hours ahead) | Q5 |
 
+| **Carlos's findings** `carlos.html` | Carlos's 12 questions (C1 to C12) with his findings, as he reported them. Not computed by the dashboard | bears on Q1, Q2, Q4, Q5 |
+
+**Who owns what.** Carlos works on his own list of questions (C1 to C12, for example "Can it forecast a cold front 6 h
+ahead?" and "Is the 10–90 % band honest?"). The charts on the Q pages are Sandro's. Every chart shows an **Owner** line. Where a
+chart overlaps with one of Carlos's questions it says so and links to his finding, and his card links back to the chart,
+so that no question is answered twice in two places. The overlaps are: C4, C6, C8 and C9 with the front and band charts,
+C5 with the limits, C7 with the events chart.
+
 Each page starts with a short answer written from the data (the numbers are computed, not typed), and ends with its
 sources. Every chart shows values on hover and has a table view (*Show as table*).
 

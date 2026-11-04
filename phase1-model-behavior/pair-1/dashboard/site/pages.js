@@ -97,7 +97,7 @@ function pageQ1(main) {
   };
   draw1("mae");
   main.append(card({
-    id: "by-lead", title: "Error by hours ahead", questions: [1, 4],
+    id: "by-lead", title: "Error by hours ahead", questions: [1, 4], related: [9],
     desc: "How far the forecast is from the measured value, compared with two simple forecasts. Lower is better. A forecast counts as a mistake when it is more than 2 °C off.",
     controls: [segmented([["mae", "Average error"], ["wrong", "Share wrong by more than 2 °C"], ["cover", "Inside the 10–90 % band"]], "mae", draw1)],
     body: host1, note: `${S.n_spread} start times spread over the year, ${S.n_points} points, forecasts 1 to 24 hours ahead. Hover the chart for the values.`,
@@ -110,7 +110,7 @@ function pageQ1(main) {
   const redraw = () => { drawFan(fanHost, st.run, st.pt, 330, 660); map.select(st.pt); name.textContent = `Shown: ${pointLabel(st.pt)}. Click a dot on the map to choose another point.`; };
   const body = h("div", { class: "cols wide-left" }, h("div", {}, fanHost), h("div", {}, mapHost, name));
   main.append(card({
-    id: "detail", title: "One forecast in detail", questions: [1, 2],
+    id: "detail", title: "One forecast in detail", questions: [1, 2], related: [4],
     desc: "The measured temperature, the TiRex-2 forecast and its 10–90 % band for one place and one start time. Pick a cold front to see what happens when the weather changes suddenly.",
     controls: [h("label", {}, "Forecast ", runSelect(st.run, (v) => { st.run = v; redraw(); })), h("label", {}, "Place ", placeSelect(st.pt, (v) => { st.pt = v; redraw(); }))],
     body, note: "Grey: the 36 hours before the start (the model sees these). White: what was measured. Blue: the forecast and its band.",
@@ -146,7 +146,7 @@ function pageQ2(main) {
   const draw = (metric) => situationBars(host, metric);
   draw("wrong");
   main.append(card({
-    id: "situations", title: "Right and wrong by weather situation", questions: [2, 4],
+    id: "situations", title: "Right and wrong by weather situation", questions: [2, 4], related: [9],
     desc: "The same forecasts, split by the weather at the time. Left view: how often a forecast is wrong by more than 2 °C. Right view: whether the uncertainty band is honest (it should hold the true value 80 % of the time).",
     controls: [segmented([["wrong", "Wrong by more than 2 °C"], ["cover", "Inside the 10–90 % band"]], "wrong", draw)], body: host,
     note: `Forecasts 1 to 12 hours ahead. The event rows use all forecasts, including the ${R.summary.n_front_runs} extra runs started 6 and 12 hours before each front. A case is one start time and one point.`,
@@ -157,7 +157,7 @@ function pageQ2(main) {
   const redraw = () => { drawFan(hostA, st.a, st.pt, 300, 500); drawFan(hostB, st.b, st.pt, 300, 500); };
   redraw();
   main.append(card({
-    id: "compare", title: "A calm day against a front day", questions: [2, 1],
+    id: "compare", title: "A calm day against a front day", questions: [2, 1], related: [4],
     desc: "The same place on two different days. On a calm day the forecast follows the measurement. When a front arrives, the measured temperature falls but the forecast does not, and the band does not warn about it.",
     controls: [h("label", {}, "Place ", placeSelect(st.pt, (v) => { st.pt = v; redraw(); })),
       h("label", {}, "Left ", runSelect(st.a, (v) => { st.a = v; redraw(); })), h("label", {}, "Right ", runSelect(st.b, (v) => { st.b = v; redraw(); }))],
@@ -269,7 +269,7 @@ function pageQ4(main) {
     `During a cold front the error 6 hours ahead is ${f1(at6("cold_front"))} °C instead of ${f1(E.all[5])} °C, and the uncertainty band holds the true value only ${f0(bandFront)} % of the time instead of 80 %.`));
 
   main.append(card({
-    id: "limits", title: "What the model does not see, and what we cannot check", questions: [4],
+    id: "limits", title: "What the model does not see, and what we cannot check", questions: [4], related: [5],
     body: h("ul", {},
       h("li", { html: "<b>One point, one variable.</b> The model got only the past temperature of one point (28 days). Wind, pressure, humidity and neighbouring points were not given." }),
       h("li", { html: "<b>Extra past information was ignored.</b> In our first test with extra past inputs (PR #8, smoke test) the forecast did not change, so TiRex-2 cannot &quot;see&quot; a front coming from the west. Only future values of an input changed the forecast." }),
@@ -297,7 +297,7 @@ function pageQ4(main) {
     ], xlim: [1, 24], xticks: [1, 6, 12, 18, 24], ylim: [0, 7], xlabel: "hours ahead", ylabel: "average error (°C)", yfmt: (v) => `${fmt(v, 2)} °C`, xfmt: (x) => `${x} h ahead`, height: 320,
   });
   main.append(card({
-    id: "events-by-lead", title: "Error in normal weather and at weather events", questions: [4, 2],
+    id: "events-by-lead", title: "Error in normal weather and at weather events", questions: [4, 2], related: [7],
     desc: "Average error by hours ahead. In the hours of a cold front, cold drop or thunderstorm the error is much larger, even for the first hours.",
     body: evHost, note: `Event hours in all forecasts (cold front ${E.n.cold_front.toLocaleString("en-GB")}, cold drop ${E.n.cold_drop.toLocaleString("en-GB")}, thunderstorm ${E.n.thunderstorm.toLocaleString("en-GB")} point-hours).`,
   }));
@@ -305,7 +305,7 @@ function pageQ4(main) {
   const bandHost = h("div");
   situationBars(bandHost, "cover");
   main.append(card({
-    id: "band", title: "Is the uncertainty band honest?", questions: [4, 2],
+    id: "band", title: "Is the uncertainty band honest?", questions: [4, 2], related: [9],
     desc: "Share of true values inside the 10–90 % band. A well calibrated forecast is at 80 %. In normal weather the band is honest, but at weather events it is far too narrow: the model is too sure of itself when it matters.",
     body: bandHost, note: "Forecasts 1 to 12 hours ahead.",
   }));
@@ -344,7 +344,7 @@ function pageQ5(main) {
     xlim: [-12, 12], xticks: [-12, -6, 0, 6, 12], ylim: [0, 100], xlabel: "hours since the front reached the point", ylabel: "inside the band (%)", yfmt: (v) => `${f0(v)} %`, xfmt: t, height: 220,
   });
   main.append(card({
-    id: "around-front", title: "Error around the front arrival", questions: [5, 4],
+    id: "around-front", title: "Error around the front arrival", questions: [5, 4], related: [4, 6, 8, 9],
     desc: "Forecast minus measured temperature, by hours since the front reached each point. Positive means the forecast is too warm. The model is too cold before the front, jumps to too warm at the arrival and stays too warm for hours. Below: the true value is inside the band far too rarely.",
     body: h("div", {}, fe1, h("div", { style: "height:10px" }), fe2),
     note: `${FE.runs} forecasts started 6 or 12 hours before ${FE.fronts} fronts (the first front of the year is too early for the 28-day history), forecasts 1 to 24 hours ahead. The lead time grows along the axis, so part of the rise in error comes from longer forecasts.`,
@@ -409,6 +409,36 @@ function pageQ5(main) {
   ]));
 }
 
+// ------------------------------------------------------------------------------------------------ Carlos's findings
+// his questions and findings, as he reported them; where they overlap with our charts the cards link to them
+const CARLOS_FINDINGS = {
+  1: ["No, 2–10 weeks give the same error.", [4], []],
+  2: ["No.", [4], []],
+  3: ["Yes, the more it stands out the more, and a Sunday flag helps. A single fixed Sunday is ignored. A rerun on 40 dates is in progress.", [4], []],
+  4: ["No, about 21 % of the drop, for every front.", [4, 5], [["q5.html#around-front", "Error around the front arrival"], ["q1.html#detail", "One forecast in detail"]]],
+  5: ["No, none of them.", [4], [["q4.html#limits", "What the model does not see"]]],
+  6: ["It adopts the new cold level, but never extends a fall that's still going on.", [5], [["q5.html#around-front", "Error around the front arrival"]]],
+  7: ["Only about 3 h before.", [4], [["q4.html#events-by-lead", "Error in normal weather and at weather events"]]],
+  8: ["Barely less sure, and normal again after about a day.", [5], [["q5.html#around-front", "Error around the front arrival (band coverage)"]]],
+  9: ["On normal days yes. With a front coming, no: half the hours are colder than the whole band.", [1, 2, 4], [["q1.html#by-lead", "Error by hours ahead (band coverage)"], ["q2.html#situations", "Right and wrong by weather situation"], ["q4.html#band", "Is the uncertainty band honest?"], ["q5.html#around-front", "Error around the front arrival"]]],
+  10: ["It can't get there realistically. Inserted drops widen the band only up to a point, and it narrows again for big or many drops.", [4], []],
+  11: ["All 4 weeks: about 35 % of the effect comes from the last week, with a mild focus on the same hour of day.", [4], []],
+  12: ["In about half of them, but it's not a usable warning sign: after a warm-up, a front follows only 5.5 % of the time.", [4], []],
+};
+
+function pageCarlos(main) {
+  main.append(h("div", { class: "qnum" }, "Findings by Carlos"), h("h1", { class: "q" }, "Carlos's questions and findings"),
+    h("p", { class: "answer", html: "These are the questions Carlos works on, with his findings as he reported them. They are <b>not computed by this dashboard</b>. Where one of our charts overlaps with a question, the chart says so and links here, and the card below links back to the chart, so no question is answered twice. The weekly-pattern result (C3) is provisional: a rerun on 40 dates is in progress." }));
+  for (const [n, [finding, ours, charts]] of Object.entries(CARLOS_FINDINGS)) {
+    main.append(h("section", { class: "viz", id: `c${n}` }, h("h2", {}, CARLOS[n]),
+      h("div", { class: "answers" }, h("span", { class: "lbl" }, "Carlos's question"), h("span", { class: "qchip", style: "cursor:default" }, `C${n}`),
+        h("span", { class: "lbl", style: "margin-left:10px" }, "Also bears on"), ours.map((q) => h("a", { class: "qchip", href: QUESTIONS[q].page, title: QUESTIONS[q].long }, `Q${q} · ${QUESTIONS[q].short}`))),
+      h("p", { class: "owner" }, "Owner: Carlos"), h("p", { class: "finding" }, finding),
+      charts.length ? h("p", { class: "note" }, "Our charts on the same topic: ", charts.map(([href, label], i) => [i ? " · " : "", h("a", { href }, label)])) : null));
+  }
+  main.append(sources(["Carlos Elizondo, own experiments with TiRex-2 for Phase I. The details and the code are in his part of the repository [check: add the path or the PR here]."]));
+}
+
 // ------------------------------------------------------------------------------------------------ start
 async function startPage() {
   const main = h("main", { id: "main" });
@@ -416,7 +446,7 @@ async function startPage() {
   try {
     [R] = await Promise.all([getJson("data/results.json")]);
     if (["q1", "q2"].includes(PAGE)) await loadRuns();
-    ({ q1: pageQ1, q2: pageQ2, q3: pageQ3, q4: pageQ4, q5: pageQ5 })[PAGE](main);
+    ({ q1: pageQ1, q2: pageQ2, q3: pageQ3, q4: pageQ4, q5: pageQ5, carlos: pageCarlos })[PAGE](main);
   } catch (err) {
     main.append(h("p", { class: "answer" }, `Could not load the data: ${err.message}`));
     console.error(err);
