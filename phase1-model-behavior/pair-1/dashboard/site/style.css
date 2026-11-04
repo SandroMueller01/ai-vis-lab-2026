@@ -1,0 +1,79 @@
+:root {
+  color-scheme: dark; /* dark scrollbars, date picker and drop-down lists */
+  --bg: #12161b; --card: rgba(24, 29, 35, .95); --field: #1d242c; --fg: #e7ebf0; --muted: #9aa6b3; --line: #2e3842;
+  --accent: #6aa6ff; --accent-fg: #0b1522; --bar-h: 150px;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--fg); }
+a { color: var(--accent); }
+button, select, input { font: inherit; color: inherit; }
+
+#map { position: fixed; left: 0; right: 0; top: 0; bottom: var(--bar-h); }
+.card {
+  position: fixed; z-index: 2; background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+  padding: 12px 14px; backdrop-filter: blur(6px); box-shadow: 0 2px 10px rgba(0, 0, 0, .35);
+}
+#panel { left: 12px; top: 12px; width: 280px; max-height: calc(100% - var(--bar-h) - 24px); overflow: auto; }
+#chart { right: 12px; top: 12px; width: 372px; }
+h1 { font-size: 16px; margin: 0 0 2px; }
+h2 { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; }
+.sub, #csub { color: var(--muted); font-size: 12px; margin: 0; }
+details { margin-top: 14px; font-size: 12px; color: var(--muted); }
+summary { cursor: pointer; color: var(--fg); }
+details p { margin: 6px 0; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip, .jump {
+  border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 3px 10px; cursor: pointer;
+}
+.chip[aria-checked="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.jump { display: block; width: 100%; text-align: left; border-radius: 6px; margin-bottom: 4px; }
+.jump:hover, .chip:hover { border-color: var(--accent); }
+.ev { display: flex; align-items: center; gap: 8px; margin: 3px 0; cursor: pointer; }
+.swatch { width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid; background: transparent; flex: none; }
+
+#legbar { height: 10px; border-radius: 3px; margin-top: 12px; }
+.legtxt { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+#bar {
+  position: fixed; left: 0; right: 0; bottom: 0; height: var(--bar-h); z-index: 2; background: var(--card);
+  border-top: 1px solid var(--line); padding: 8px 14px 8px; display: flex; flex-direction: column; gap: 6px;
+}
+.row, .dayrow { display: flex; align-items: center; gap: 8px; }
+.row { justify-content: space-between; flex-wrap: wrap; }
+#when { font-weight: 600; font-variant-numeric: tabular-nums; }
+#when span { color: var(--muted); font-weight: 400; }
+.ctrl, .daypick { display: flex; gap: 6px; align-items: center; }
+button, select, input[type="date"] {
+  border: 1px solid var(--line); background: var(--field); color: var(--fg); border-radius: 6px; padding: 3px 10px; cursor: pointer;
+}
+option { background: var(--field); color: var(--fg); }
+button:hover, select:hover, input[type="date"]:hover { border-color: var(--accent); }
+.chip, .jump { background: transparent; }
+.chip[aria-checked="true"] { background: var(--accent); }
+.daypick button { padding: 3px 8px; }
+#slider { flex: 1; min-width: 80px; margin: 0; accent-color: var(--accent); }
+#hourlbl { width: 58px; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+#tl { width: 100%; height: 46px; display: block; cursor: pointer; touch-action: none; }
+
+.chead { display: flex; justify-content: space-between; align-items: center; }
+#cclose { border: 0; background: transparent; font-size: 20px; line-height: 1; cursor: pointer; color: var(--muted); padding: 0 4px; }
+#csvg { width: 100%; height: auto; margin-top: 6px; }
+#csvg text { fill: var(--muted); font-size: 9px; }
+#csvg .grid { stroke: var(--line); stroke-width: 1; }
+#csvg .line { fill: none; stroke: var(--accent); stroke-width: 1.8; stroke-linejoin: round; }
+#csvg .now { stroke: var(--fg); stroke-width: 1; stroke-dasharray: 3 3; }
+
+#tip {
+  position: fixed; z-index: 3; pointer-events: none; background: var(--card); border: 1px solid var(--line);
+  border-radius: 6px; padding: 4px 8px; font-size: 12px; white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  :root { --bar-h: 188px; }
+  #panel { right: 12px; width: auto; max-height: 34%; }
+  #chart { left: 12px; right: 12px; top: auto; bottom: calc(var(--bar-h) + 12px); width: auto; }
+  .dayrow { flex-wrap: wrap; }
+  #slider { order: 5; flex-basis: 100%; }
+}

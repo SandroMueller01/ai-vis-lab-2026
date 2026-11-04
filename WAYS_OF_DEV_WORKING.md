@@ -12,7 +12,7 @@ git switch -c <prefix>/<short-name>
 
 | Branch prefix | For | Example |
 |---|---|---|
-| `data/` | data acquisition, preprocessing | `data/geosphere-foehn-builders` |
+| `data/` | data acquisition, preprocessing | `data/event-labels` |
 | `p1/` | Phase I analysis (model behaviour) | `p1/pair2-calibration-plots` |
 | `p2/` | Phase II analysis (model internals) | `p2/pair1-gate-heatmaps` |
 | `infra/` | Docker, CI, repo setup | `infra/docker-devcontainer` |
@@ -36,7 +36,7 @@ imperative ("add", not "added"):
 
 | Commit prefix | Use for | Example |
 |---|---|---|
-| `data:` | acquisition / preprocessing code, dataset docs | `data: add Austria 5 km foehn builder` |
+| `data:` | acquisition / preprocessing code, dataset docs | `data: add shared event labels for cold drops` |
 | `feat:` | new analysis code, plots, notebooks | `feat: add quantile calibration plot per region` |
 | `fix:` | bug fixes | `fix: align station hours to INCA analysis time` |
 | `refactor:` | restructuring without changing results | `refactor: move plotting helpers into utils` |
@@ -59,7 +59,7 @@ written and every checklist box is ticked. If an item doesn't apply, tick it
 and add `(n/a: reason)`.
 
 The **PR title** follows the same prefix scheme as commits, e.g.
-`data: add GeoSphere foehn dataset builders`. With squash-merge it becomes the
+`data: add shared event labels for cold drops and thunderstorms`. With squash-merge it becomes the
 commit on `main`.
 
 Open the PR as a **draft** early if you want feedback before it's done.

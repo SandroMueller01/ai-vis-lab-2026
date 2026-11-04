@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Austria weather explorer</title>
+<meta name="description" content="Hourly weather over Austria (INCA analysis, 15 km grid) with cold fronts, thunderstorms and cold drops marked.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="map"></div>
+<div id="tip" hidden></div>
+
+<aside class="card" id="panel">
+  <h1>Austria weather explorer</h1>
+  <p class="sub">Hourly INCA analysis on a <span id="spacing">15</span> km grid, Oct 2025 – Sep 2026</p>
+
+  <h2>Show</h2>
+  <div id="vars" role="radiogroup" aria-label="Variable"></div>
+  <div id="legend">
+    <div id="legbar"></div>
+    <div class="legtxt"><span id="lmin"></span><span id="lunit"></span><span id="lmax"></span></div>
+  </div>
+
+  <h2>Highlight</h2>
+  <div id="evs"></div>
+
+  <h2>Jump to</h2>
+  <div id="jumps"></div>
+
+  <details>
+    <summary>About this view</summary>
+    <p>Values are the INCA analysis of GeoSphere Austria (stations, radar and weather model combined), not raw
+    measurements. Times are UTC; Vienna time is shown next to them.</p>
+    <p><b>Cold front passage:</b> at a point, cooling of at least 3 K in 3 h with a pressure rise of at least 2 hPa, as part
+    of a line that crosses Austria from the west or north.
+    <b>Thunderstorm:</b> at least 3 K cooling in one hour with at least 2 mm of rain.
+    <b>Cold drop:</b> at least 8 K colder than 24 h before.
+    <a href="https://github.com/SandroMueller01/ai-vis-lab-2026/blob/main/data_acquisition/events/README.md" target="_blank" rel="noopener">Definitions and references</a></p>
+    <p>Data: GeoSphere Austria, <a href="https://data.hub.geosphere.at" target="_blank" rel="noopener">data.hub.geosphere.at</a>,
+    CC BY 4.0. Map: CARTO, OpenStreetMap contributors.</p>
+  </details>
+</aside>
+
+<section class="card" id="chart" hidden>
+  <div class="chead"><b id="ctitle"></b><button id="cclose" aria-label="Close chart">×</button></div>
+  <div id="csub"></div>
+  <svg id="csvg" viewBox="0 0 340 150" role="img" aria-label="Time series of the selected point"></svg>
+</section>
+
+<footer id="bar">
+  <div class="row">
+    <div id="when"></div>
+    <div class="ctrl">
+      <button id="play">▶ Play</button>
+      <select id="speed" aria-label="Playback speed">
+        <option value="1" selected>1 h per step</option>
+        <option value="3">3 h per step</option>
+        <option value="6">6 h per step</option>
+      </select>
+    </div>
+  </div>
+  <canvas id="tl" aria-label="Year overview: share of points with a cold front passage (top) and thunderstorm (bottom). Click a day to select it."></canvas>
+  <div class="dayrow">
+    <div class="daypick">
+      <button id="dprev" aria-label="Previous day">◀</button>
+      <input type="date" id="day" aria-label="Day">
+      <button id="dnext" aria-label="Next day">▶</button>
+    </div>
+    <button id="prev" aria-label="One hour back">◀</button>
+    <input type="range" id="slider" min="0" max="23" value="0" step="1" aria-label="Hour of the day (UTC)">
+    <button id="next" aria-label="One hour forward">▶</button>
+    <span id="hourlbl"></span>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

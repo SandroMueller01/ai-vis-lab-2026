@@ -28,7 +28,7 @@
 ## AI usage (AI4Vis)
 
 <!-- Required by the assignment. Was generative AI used for this PR? Which suggestions were accepted / modified / rejected?
-     If this is the AI-aided pair's work, link the matching entry in ai-interaction-logs/. -->
+     If this is the AI-aided pair's work, link the matching entry in ai-interactions/. -->
 
 ## Reviewer focus
 
