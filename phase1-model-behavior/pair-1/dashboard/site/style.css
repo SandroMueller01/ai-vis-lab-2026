@@ -1,7 +1,7 @@
 :root {
   color-scheme: dark; /* dark scrollbars, date picker and drop-down lists */
   --bg: #12161b; --card: rgba(24, 29, 35, .95); --field: #1d242c; --fg: #e7ebf0; --muted: #9aa6b3; --line: #2e3842;
-  --accent: #6aa6ff; --accent-fg: #0b1522; --bar-h: 150px;
+  --accent: #6aa6ff; --accent-fg: #0b1522; --bar-h: 150px; --nav-h: 46px;
 }
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
@@ -9,13 +9,13 @@ body { font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 a { color: var(--accent); }
 button, select, input { font: inherit; color: inherit; }
 
-#map { position: fixed; left: 0; right: 0; top: 0; bottom: var(--bar-h); }
+#map { position: fixed; left: 0; right: 0; top: var(--nav-h); bottom: var(--bar-h); }
 .card {
   position: fixed; z-index: 2; background: var(--card); border: 1px solid var(--line); border-radius: 10px;
   padding: 12px 14px; backdrop-filter: blur(6px); box-shadow: 0 2px 10px rgba(0, 0, 0, .35);
 }
-#panel { left: 12px; top: 12px; width: 280px; max-height: calc(100% - var(--bar-h) - 24px); overflow: auto; }
-#chart { right: 12px; top: 12px; width: 372px; }
+#panel { left: 12px; top: calc(var(--nav-h) + 12px); width: 280px; max-height: calc(100% - var(--bar-h) - var(--nav-h) - 24px); overflow: auto; }
+#chart { right: 12px; top: calc(var(--nav-h) + 12px); width: 372px; }
 h1 { font-size: 16px; margin: 0 0 2px; }
 h2 { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; }
 .sub, #csub { color: var(--muted); font-size: 12px; margin: 0; }
@@ -72,8 +72,27 @@ button:hover, select:hover, input[type="date"]:hover { border-color: var(--accen
 
 @media (max-width: 760px) {
   :root { --bar-h: 188px; }
-  #panel { right: 12px; width: auto; max-height: 34%; }
+  #panel { right: 12px; width: auto; max-height: 30%; }
   #chart { left: 12px; right: 12px; top: auto; bottom: calc(var(--bar-h) + 12px); width: auto; }
   .dayrow { flex-wrap: wrap; }
   #slider { order: 5; flex-basis: 100%; }
 }
+
+/* top navigation, shared by all pages */
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; height: var(--nav-h); z-index: 5; display: flex; align-items: center; gap: 4px;
+  padding: 0 12px; background: var(--card); border-bottom: 1px solid var(--line); overflow-x: auto; white-space: nowrap;
+}
+#nav { scrollbar-width: none; }
+#nav::-webkit-scrollbar { display: none; }
+#nav .brand { font-weight: 700; color: var(--fg); text-decoration: none; margin-right: 12px; }
+#nav a.link { color: var(--muted); text-decoration: none; padding: 5px 10px; border-radius: 6px; font-size: 13px; }
+#nav a.link:hover { color: var(--fg); background: var(--field); }
+#nav a.link[aria-current="page"] { background: var(--accent); color: var(--accent-fg); }
+.qchip {
+  display: inline-block; font-size: 12px; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--accent);
+  color: var(--accent); text-decoration: none; margin: 0 6px 6px 0;
+}
+.answers { margin: 10px 0 4px; }
+.answers .lbl { color: var(--muted); font-size: 12px; margin-right: 8px; }
+.qchip:hover { background: var(--accent); color: var(--accent-fg); }
