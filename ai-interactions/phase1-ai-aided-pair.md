@@ -404,6 +404,24 @@ assistant answered, what you did with it. If you did not use an AI assistant for
 |---|---|---|---|
 | | | | |
 
+## Key prompts, what we found, and what each finding led to
+
+The 91 prompts in the table above, boiled down to the ones that changed the work. The numbers in brackets are the prompt numbers.
+
+| What we asked (distilled) | What we found | What it led to |
+|---|---|---|
+| Set up the repo properly: branches, PR template, review, Docker (2) | CI failed on one lint rule and on unticked checklist boxes; Docker needed WSL | Required checks (`lint`, `docker`, `checklist`), squash merges, one review per PR |
+| Leave no trace of the tool in the repo; document how we work (3) | Commits and pushes are made by us | `WAYS_OF_DEV_WORKING.md` with branch and commit prefixes |
+| Change the goal to temperature change at several stations, thunderstorms and cold waves; test how TiRex-2 behaves (27, 28) | TiRex-2 ignores *past* covariates; only *future* ones change the forecast | "Neighbours as inputs" can only give an upper bound; the work turned from "predict with many inputs" to **how the model behaves** (hypotheses B1 to B4, 36) |
+| Show how the cold spreads over Austria, real data against forecast; which horizon is good? (38, 39) | The forecast follows the front late; 12 h is the best compromise | **12 h as the main horizon**, and the time-slider idea for the dashboard (40) |
+| Phase I plan from the meeting: a coarser grid, a few moments, main questions (56) | Three grid options with run times | **15 km, 378 points** and a shared release for the whole team (61) |
+| Is there research on how a cold front is defined? Make a scientific decision on the label (62, 63) | Our `cold_drop` (8 K colder than yesterday) is not a front. Literature: a cooling, a pressure rise and a line that moves | A separate **`cold_front` label** (3 K in 3 h, 2 hPa, at least 50 % of points within 24 h, a moving line): 16 fronts on 15 km. Every Q3 chart rests on it |
+| Answer the five questions with data and science (65, 70, 72) | After the run of 336 forecasts: 22 % wrong (more than 2 K) up to 12 h and 41 % at 13 to 24 h; 25 % better than "same as yesterday" at 12 h but only 5 % at 24 h; band holds 81 % (target 80 %); errors lowest in the Alps; large mistakes in normal weather are mostly too cold | The first text with placeholders was replaced by numbers from the run; three statements changed. These are the contents of the pages Q1 to Q5 |
+| Fix the pair roles everywhere (68) | The repo and the assistant still followed the 20 Oct plan (AI-aided in Phase II) | README, both log headers and PR texts corrected: Pair 1 is AI-aided in Phase I |
+| No password, GitHub Pages, 3D last (74); resolve Carlos's review comments (76) | The data is open (CC BY 4.0) and the repo public. Carlos: the light/dark switch broke the map, the year-long slider is too coarse, the drop-down is unreadable | Public page without password; **dark only**, day picker plus 24 h slider |
+| Several pages, and name the question each chart answers (79) | Without it, a chart did not say what it was for | Six pages, blue question chips and an owner line on every chart |
+| Do not answer Carlos's questions twice (83) | Cross-check of his "21 % of the drop": about 0 % when the front is 4 or more hours away, 19 to 40 % at 1 to 3 hours. Four of his questions overlap with our charts | We keep our charts and mark the owner; overlapping charts link to his finding and back |
+
 ## How AI suggestions affected analytical decisions
 
 - **Cold fronts.** Our `cold_drop` label (8 °C colder than yesterday) is not a front. The literature search (prompt 62) led to a separate `cold_front` label (63).
