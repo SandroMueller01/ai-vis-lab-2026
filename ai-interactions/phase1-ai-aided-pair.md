@@ -181,6 +181,202 @@ Student ID K52010874 · GitHub SandroMueller01
 | 90 | 10:33 | Okay the things which are not populated are those things I have to do or carlos? # | Split the open items between Sandro and Carlos. |
 | 91 | 10:34 | Okay then please help me to do the things I have to get done, thank you... | Wrote the docs PR (#15: README, model-selection, typo) and prepared this log. |
 
+### The same work seen per pull request (reconstructed)
+
+The table above lists the real prompts. This section describes the same work per pull request. It was put together
+afterwards from the PR descriptions (each has an *AI usage* section), the commit history and the files in the repo.
+The prompts in it are short paraphrases of what was asked, not quotes, and are marked *(reconstructed)*; the exact
+prompts are in the table above. The lines "What Sandro did" are Sandro's to confirm or correct. Dates follow the
+merge dates of the pull requests.
+
+Part A is the shared setup before Phase I. It shaped the dataset and questions both pairs use. Part B is the
+Phase I analysis of Pair 1.
+
+##### Part A — Shared setup (Phase 0)
+
+###### A1 · 14.10. · Project structure and model choice (`0883730`)
+
+- **Goal:** pick a model and set up the repo skeleton.
+- **Prompt (reconstructed):** "Suggest a recent, locally relevant model for the
+  JKU AI and Visualization lab and set up a repo with folders for both phases,
+  both pairs, AI logs and submissions."
+- **AI output:** TiRex-2 (NX-AI, xLSTM) as the model, with the argument that its
+  recurrent gating gives Phase II something other than attention maps to
+  visualise; folder layout; templates for the AI logs and the comparison files;
+  Python `.gitignore`.
+- **What Sandro did:** accepted the model as a *proposal* and left the task and
+  dataset for the team to decide.
+- **Verdict:** accepted (structure), modified (model choice became a team
+  proposal, not a decision).
+
+###### A2 · 20.10. · Docker, dev container, CI and PR workflow (PR #2) and dataset builders (PR #3)
+
+- **Goal:** one environment for all four of us, a branch → PR → review process,
+  and a reproducible GeoSphere dataset.
+- **Prompt (reconstructed):** "Set up a Docker image with CPU torch and TiRex-2,
+  a VS Code dev container, CI, a PR template with an AI usage section, and write
+  dataset builders for hourly GeoSphere INCA data for Tyrol (1 km) and Austria
+  (5 km) with foehn labels."
+- **AI output:** `Dockerfile`, `docker-compose.yml`, `.devcontainer/`, CI and
+  PR-description workflows, PR template, `WAYS_OF_DEV_WORKING.md`, the two
+  `build_dataset*.py` builders.
+- **What Sandro did:** ran the builds in the container. The datasets were later
+  shared as release `data-2025-26` (~3 GB, added with PR #5).
+- **Verdict:** accepted. The PR template's *AI usage* section came from this
+  session and is now the main source for this log.
+
+###### A3 · 23.10. · Model-selection draft (PR #5)
+
+- **Goal:** draft `model-selection.md` for the 28.10. deadline.
+- **Prompt (reconstructed):** "Draft the model selection: TiRex-2 zero-shot on our
+  foehn dataset, analysed by weather regime, plus where the data comes from."
+- **AI output:** the draft, foehn shares per dataset, data source description.
+- **What Sandro did:** checked the numbers in the container. Found that Bludenz
+  (30 %) and Salzburg Airport (16 %) foehn shares look too high and left them as an
+  open point. Corrected `P0`: it is mean sea level pressure, not surface pressure.
+- **Verdict:** modified. **Failure:** a plausible but wrong variable description
+  (`P0`) that only a check against the data source caught.
+
+###### A4 · 29.10. · TiRex-2 smoke test with covariate check (PR #8)
+
+- **Goal:** check that TiRex-2 runs on our data and whether extra input helps.
+- **Prompt (reconstructed):** "Write a smoke test that forecasts T2M 24 h ahead at
+  random points with four input setups (own history, + local variables, + 4 west
+  stations, + 4 east stations), compare with persistence and same-hour-yesterday,
+  and also at cold-wave origins."
+- **AI output:** `scripts/tirex_smoke_test.py`; after the first results showed no
+  effect of any covariate, a **synthetic covariate check** (random walks with a
+  past covariate that leads the target by 12 h, noise, and the target as future
+  covariate).
+- **Result:** TiRex-2 barely uses *past* covariates (≤ 0.03 K change) but uses
+  *future* covariates strongly (MAE 1.46 → 0.24). The 10–90 % band covers only
+  58 % at cold waves.
+- **What Sandro did:** reviewed the results, asked the team whether a past-covariate
+  setting was missing, and kept the shifted-upstream-as-future-covariate idea as
+  an open team decision.
+- **Verdict:** accepted. **Effect on decisions:** this changed the project. The
+  original "neighbours help" hypothesis became a question to test, and
+  `model-selection.md` later got the correction that past covariates did not
+  change the forecast.
+
+###### A5 · 29.10. · Shared event labels (PR #9)
+
+- **Goal:** one definition of cold drops, thunderstorms and cold-wave days for both
+  pairs.
+- **Prompt (reconstructed):** "Write `build_events.py` with the thresholds from
+  `model-selection.md`, with tests."
+- **AI output:** builder, tests, README.
+- **What Sandro did:** compared the counts with the earlier numbers. The AI's
+  cold-wave definition ("≥ 25 % of Austria in a cold drop at *any* hour of the
+  day") gave 42 days; only "at the *same* hour" reproduces the agreed 29 days.
+  Also noticed that `pandas.interpolate(limit=3)` fills the first 3 h of long gaps
+  and asked for a run-length based fill.
+- **Verdict:** modified. **Failure:** a definition that looked reasonable but did
+  not match the agreed numbers.
+
+###### A6 · 02.11. · 15 km dataset and cold-front label (PR #11)
+
+- **Goal:** a smaller shared Phase I dataset and a real cold-front label (a cold
+  drop says it is colder, not that a front arrived).
+- **Prompt (reconstructed):** "Thin the 5 km grid to 15 km without downloading
+  again. Then define a cold front from the literature: surface signature at each
+  point and a line moving across Austria."
+- **AI output:** `build_subset.py` (keep points on a 15 km lattice in EPSG:31287),
+  the `cold_front` label (cooling + pressure rise as anomalies, ≥ 50 % of points,
+  plane fit with R² ≥ 0.3), sensitivity table, references, `fronts.csv` with the
+  reason for each verdict.
+- **What Sandro did:** ran builds and tests, checked thresholds on calm days and
+  on the large events, checked the references, and ran an independent check with
+  variables not in the definition (wind turns north in 38 % vs 17 %, rain in 77 %
+  vs 14 %). Accepted the limitation that winter fronts are mostly missed.
+- **Verdict:** accepted after verification. Carlos found in review that a docstring
+  said 374 instead of 378 points (fixed in #15). **Failure:** a stale number in a
+  docstring.
+
+###### A7 · 04.11. · Docs, team files, submission structure (PRs #4, #7, #10, #12)
+
+- **Goal:** README task text, data docs (time stamps, gaps), team name and
+  members, `team-info.json`, `workload.json`, folder name `ai-interactions/` and
+  the midpoint reflection template.
+- **Prompt (reconstructed):** "Update the docs to the registered task, document
+  time zones and gaps, and bring the repo in line with the Moodle submission
+  requirements."
+- **What Sandro did:** checked the texts against the data, `model-selection.md`
+  and Moodle; verified gap and time-stamp facts in the container. Names, numbers
+  and GitHub users came from the team, not from the AI.
+- **Verdict:** accepted (wording), team data supplied by humans.
+
+##### Part B — Phase I analysis (Pair 1, AI-aided)
+
+###### B1 · 04.11. · Explore dashboard (PR #13)
+
+- **Goal:** an interactive map of the 15 km dataset that runs from static files
+  on GitHub Pages.
+- **Prompt (reconstructed):** "Build a browser dashboard: map of the 378 points,
+  time slider over the year, seven variables, rings for cold fronts,
+  thunderstorms and cold drops, a chart for a clicked point, and jump-to buttons
+  for the big events."
+- **AI output:** `build_dashboard_data.py` (one byte per value, delta coding),
+  the site, tests, Pages workflow.
+- **What Sandro did:** ran build, tests and browser checks; compared decoded
+  values with the source (−5.56 vs −5.54 °C, inside the 0.27 K step).
+- **Corrections after looking at the output:**
+  - The "Jump to" times used the peak of the front detection, where almost no
+    point was marked, because a front needs ~12 h to cross Austria. Changed to the
+    hour in which most points are in the passage.
+  - Carlos's review: the light/dark switch broke the map (removed, dark only); the
+    year-long slider was too coarse (now day picker + 24 h slider); the speed
+    drop-down was unreadable in dark mode.
+- **Verdict:** modified. **Failure:** a technically correct choice (peak of the
+  detection score) that is wrong for the user; and UI defaults that only a human
+  reviewer noticed.
+
+###### B2 · 04.11. · Question pages Q1–Q5 and Carlos's findings (PR #14)
+
+- **Goal:** answer the five Phase I questions with TiRex-2 forecasts.
+- **Prompt (reconstructed):** "Run TiRex-2 at start times spread over the year and
+  before cold fronts on all 378 points, then add one page per question. Every
+  chart names the questions it answers and its owner. Where a chart overlaps one of
+  Carlos's questions, link to his finding."
+- **AI output:** `run_forecasts.py` (336 start times: 306 spread, 30 before fronts;
+  28 days of history, 24 h ahead), `build_results_data.py`, five question pages,
+  Carlos's page, tests, 54 scripted browser checks.
+- **Results:** wrong by > 2 °C in 22 % of forecasts up to 12 h, 41 % at 13–24 h;
+  the 10–90 % band holds 81 % in normal weather but 34 % during cold fronts; about
+  1 °C too cold before a front and 5.3 °C too warm 3 h after it.
+- **Corrections after looking at the output:** number of spread start times first
+  wrong (304 instead of 306); overlapping axis labels; tiny text on half-width
+  charts; the links to Carlos's questions were lost by a bug in the element
+  builder.
+- **Human decisions:** the questions, the split of ownership with Carlos and which
+  charts overlap with his questions. Carlos's findings are shown as he reported
+  them, not computed.
+- **Verdict:** modified. **Failure:** off-by-a-few counts and layout bugs that tests
+  did not catch but looking at the page did.
+
+###### B3 · 05.11. · Docs update (PR #15)
+
+- **Goal:** README and `model-selection.md` up to date for 15 km and the dashboard.
+- **What Sandro did:** checked every statement against the repo, the releases and
+  the smoke test. The *Decision* boxes were left unticked on purpose: that is for
+  the team, not for the AI.
+- **Verdict:** accepted.
+
+###### B4 · 05.11. · This log
+
+- **Prompt:** "Check out this repo and create a collaborative AI log of how this
+  repo was created, in the role of sandro.mueller."
+- **AI output:** this file, reconstructed from PR descriptions and commits.
+- **What Sandro did:** *(to fill in: what was checked and changed.)*
+- **Follow-up prompt:** "Create a few notebooks which showcase this collaborative
+  approach and how we ended up with our results."
+- **AI output:** `notebooks/00`–`03`, which replay sessions A4, A5/A6 and B1/B2
+  with code. While re-computing, the AI found that on the 15 km grid the cold-wave
+  rule gives 27 days with the final definition (29 on 5 km) and 42 with the first
+  draft. A simplified wind/rain check gave different numbers than PR #11 (rain
+  95 % vs 29 %, northerly wind 54 % vs 43 %), because the definition is simpler.
+  This is noted in notebook 02.
+
 ## Carlos Elizondo
 
 Student ID K52320897 · GitHub erca-2064 (account created 15 October 2026)
