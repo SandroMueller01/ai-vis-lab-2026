@@ -452,5 +452,17 @@ async function startPage() {
     console.error(err);
   }
 }
+// one-page dashboard (story.html): all five question pages, one section each, under the story
+async function renderQuestions(host) {
+  [R] = await Promise.all([getJson("data/results.json")]);
+  await loadRuns();
+  const pages = { 1: pageQ1, 2: pageQ2, 3: pageQ3, 4: pageQ4, 5: pageQ5 };
+  for (const [n, fn] of Object.entries(pages)) {
+    const sec = h("section", { class: "qsec part", id: `q${n}` });
+    host.append(sec);
+    fn(sec);
+  }
+}
+
 const PAGE = document.body.dataset.page;
-startPage();
+if (PAGE !== "story") startPage();

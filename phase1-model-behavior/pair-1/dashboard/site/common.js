@@ -91,7 +91,26 @@ const tip = {
   hide() { if (this.el) this.el.hidden = true; },
 };
 
+function renderOnePageNav() {
+  const links = [["explore", "Explore the data"], ["story", "The story"], ...Object.entries(QUESTIONS).map(([n, q]) => [`q${n}`, `Q${n} · ${q.short}`])];
+  const go = (id) => (ev) => { ev.preventDefault(); byId(id)?.scrollIntoView({ behavior: "smooth", block: "start" }); };
+  const nav = h("nav", { id: "nav", "aria-label": "Sections" },
+    h("a", { class: "brand", href: "#explore", onclick: go("explore") }, "Austria weather explorer"),
+    links.map(([id, label]) => h("a", { class: "link", href: `#${id}`, "data-sec": id, onclick: go(id) }, label)));
+  document.body.prepend(nav);
+  // highlight the section in the middle of the screen
+  const mark = () => {
+    const y = window.innerHeight * 0.35;
+    let cur = "explore";
+    for (const [id] of links) { const el = byId(id); if (el && el.getBoundingClientRect().top <= y) cur = id; }
+    nav.querySelectorAll("a.link").forEach((a) => a.setAttribute("aria-current", a.dataset.sec === cur ? "page" : "false"));
+  };
+  window.addEventListener("scroll", mark, { passive: true });
+  setTimeout(mark, 300);
+}
+
 function renderNav(current) {
+  if (current === "story") return renderOnePageNav();
   const links = [["explore", "index.html", "Explore the data"], ...Object.entries(QUESTIONS).map(([n, q]) => [`q${n}`, q.page, `Q${n} · ${q.short}`]), ["carlos", "carlos.html", "Carlos's findings"]];
   const nav = h("nav", { id: "nav", "aria-label": "Pages" },
     h("a", { class: "brand", href: "index.html" }, "Austria weather explorer"),
