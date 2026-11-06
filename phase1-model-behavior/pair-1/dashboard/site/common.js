@@ -2,12 +2,21 @@
 // Shared helpers of all pages: the five questions, colours, small DOM builders, navigation, tooltip and cards.
 
 const QUESTIONS = {
-  1: { short: "How often is it wrong?", long: "How often does the system make mistakes?", page: "q1.html" },
-  2: { short: "When is it right or wrong?", long: "In what situations is the system likely to be correct or incorrect?", page: "q2.html" },
-  3: { short: "What is a cold front?", long: "How do we define a cold front?", page: "q3.html" },
-  4: { short: "What are the limits?", long: "What are the limitations of the system?", page: "q4.html" },
-  5: { short: "What kind of mistakes?", long: "What kind of mistakes does it make? Regions, neighbours and start times", page: "q5.html" },
+  1: { short: "How often is it wrong?", long: "How often does the system make mistakes?", page: "q1.html",
+    kicker: "How often it is wrong", title: "How often the forecast misses, and by how much" },
+  2: { short: "When is it right or wrong?", long: "In what situations is the system likely to be correct or incorrect?", page: "q2.html",
+    kicker: "When it is right or wrong", title: "Which weather makes the forecast right or wrong" },
+  3: { short: "What is a cold front?", long: "How do we define a cold front?", page: "q3.html",
+    kicker: "Finding cold fronts", title: "How we find a cold front in the data" },
+  4: { short: "What are the limits?", long: "What are the limitations of the system?", page: "q4.html",
+    kicker: "Limits", title: "What the model does not see, and what we cannot check" },
+  5: { short: "What kind of mistakes?", long: "What kind of mistakes does it make? Regions, neighbours and start times", page: "q5.html",
+    kicker: "Errors", title: "Where and when the forecast goes wrong: regions, neighbours and start times" },
 };
+
+// menu of the one-page dashboard (story.html, also-tested.html): [section id, tab label]
+const STORY_TABS = [["overview", "Overview"], ["ch-looks", "Which hours it uses"], ["ch-sundays", "Copy or ignore a pattern"],
+  ["ch-weird", "Stranger history, wider band"], ["q4", "Limits"], ["q5", "Errors"]];
 
 // the questions Carlos works on (his findings are on carlos.html)
 const CARLOS = {
@@ -92,7 +101,7 @@ const tip = {
 };
 
 function renderOnePageNav() {
-  const links = [["explore", "Explore the data"], ["story", "The story"], ...Object.entries(QUESTIONS).map(([n, q]) => [`q${n}`, `Q${n} · ${q.short}`])];
+  const links = STORY_TABS;
   const go = (id) => (ev) => { ev.preventDefault(); byId(id)?.scrollIntoView({ behavior: "smooth", block: "start" }); };
   const nav = h("nav", { id: "nav", "aria-label": "Sections" },
     h("a", { class: "brand", href: "#explore", onclick: go("explore") }, "Austria weather explorer"),
@@ -101,7 +110,7 @@ function renderOnePageNav() {
   // highlight the section in the middle of the screen
   const mark = () => {
     const y = window.innerHeight * 0.35;
-    let cur = "explore";
+    let cur = null;
     for (const [id] of links) { const el = byId(id); if (el && el.getBoundingClientRect().top <= y) cur = id; }
     nav.querySelectorAll("a.link").forEach((a) => a.setAttribute("aria-current", a.dataset.sec === cur ? "page" : "false"));
   };
@@ -109,8 +118,16 @@ function renderOnePageNav() {
   setTimeout(mark, 300);
 }
 
+function renderMoreNav() {
+  const nav = h("nav", { id: "nav", "aria-label": "Sections" },
+    h("a", { class: "brand", href: "story.html#explore" }, "Austria weather explorer"),
+    STORY_TABS.map(([id, label]) => h("a", { class: "link", href: `story.html#${id}` }, label)));
+  document.body.prepend(nav);
+}
+
 function renderNav(current) {
   if (current === "story") return renderOnePageNav();
+  if (current === "more") return renderMoreNav();  // also-tested.html: links go back to the story page
   const links = [["explore", "index.html", "Explore the data"], ...Object.entries(QUESTIONS).map(([n, q]) => [`q${n}`, q.page, `Q${n} · ${q.short}`]), ["carlos", "carlos.html", "Carlos's findings"]];
   const nav = h("nav", { id: "nav", "aria-label": "Pages" },
     h("a", { class: "brand", href: "index.html" }, "Austria weather explorer"),
@@ -128,7 +145,7 @@ function chips(nums, verb = "Answers") {
 // owner: who the chart belongs to; related: questions of Carlos's list that it overlaps with (links to his findings)
 function ownerLine(owner, related) {
   return h("p", { class: "owner" }, `Owner: ${owner}`,
-    related && related.length ? [" · Overlaps with Carlos's question ", related.map((c, i) => [i ? ", " : "", h("a", { href: `carlos.html#c${c}` }, `C${c} · ${CARLOS[c]}`)])] : null);
+    related && related.length && !document.body.classList.contains("onepage") ? [" · Overlaps with Carlos's question ", related.map((c, i) => [i ? ", " : "", h("a", { href: `carlos.html#c${c}` }, `C${c} · ${CARLOS[c]}`)])] : null);
 }
 
 function card({ id, title, questions, desc, controls, body, note, owner = "Sandro", related }) {

@@ -128,3 +128,20 @@ h2.frame-q { text-transform: none; letter-spacing: 0; font-size: 20px; color: va
 .sticky .viz { padding: 16px 20px 12px; }
 .sticky svg.chart { max-height: calc(100vh - var(--nav-h) - 280px); }
 .explorer svg.chart { max-height: calc(100vh - var(--nav-h) - 220px); }
+svg.chart .axt { font-size: 14px; fill: var(--fg); }
+/* all story figures as wide as the history heatmap chapter (2026-11-06) */
+.chapter, #ch-nothelp, .explorer { max-width: 1900px; }
+.exseason { margin: 0 0 2px; text-align: center; font-size: 15px; font-weight: 700; color: var(--fg); }
+/* links between the story and the "Also tested" page */
+.pagelink-row { max-width: 1040px; margin: 60px auto 100px; padding: 0 28px; }
+.pagelink { display: inline-flex; flex-direction: column; gap: 4px; padding: 14px 20px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--card); color: var(--fg); text-decoration: none; }
+.pagelink:hover { border-color: var(--accent); }
+.pagelink .pl-label { font-size: 18px; font-weight: 700; color: var(--accent); }
+.pagelink .pl-sub { font-size: 13px; color: var(--muted); }
+.part-head .pagelink { padding: 6px 12px; margin-bottom: 20px; }
+.part-head .pagelink .pl-label { font-size: 13px; }
+/* overview: placeholder text and the setup sketch */
+.overview .ovdata { max-width: 900px; color: var(--muted); font-size: 16px; line-height: 1.6; }
+/* no question numbers on the one-page dashboard */
+.onepage .answers { display: none; }

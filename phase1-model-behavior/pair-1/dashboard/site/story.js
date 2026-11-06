@@ -11,7 +11,7 @@ const PLASMA = ramp(["#2a0f6e", "#6a00a8", "#b12a90", "#e16462", "#fca636", "#f0
 const C = { fc: "#6da7ec", band: "#3987e5", front: "#ff6b6b", grey: "#8b96a3", flag: "#ffa45c" };
 
 async function loadJson(name) {
-  const r = await fetch(`data/carlos/${name}.json?v=7`);
+  const r = await fetch(`data/carlos/${name}.json?v=8`);
   if (!r.ok) throw new Error(`${name}.json: ${r.status}`);
   return r.json();
 }
@@ -31,8 +31,8 @@ function axes(svg, box, { x0, x1, y0, y1, xticks, yticks, xfmt = String, yfmt = 
     if (grid) svg.append(s("line", { class: "gl", x1: X(v), x2: X(v), y1: box.t, y2: box.t + box.h }));
     svg.append(s("text", { x: X(v), y: box.t + box.h + 15, "text-anchor": "middle", text: xfmt(v) }));
   }
-  if (xlabel) svg.append(s("text", { x: box.l + box.w / 2, y: box.t + box.h + 32, "text-anchor": "middle", text: xlabel }));
-  if (ylabel) svg.append(s("text", { x: box.l - 40, y: box.t + box.h / 2, "text-anchor": "middle", transform: `rotate(-90 ${box.l - 40} ${box.t + box.h / 2})`, text: ylabel }));
+  if (xlabel) svg.append(s("text", { x: box.l + box.w / 2, y: box.t + box.h + 32, "text-anchor": "middle", class: "axt", text: xlabel }));
+  if (ylabel) svg.append(s("text", { x: box.l - 40, y: box.t + box.h / 2, "text-anchor": "middle", transform: `rotate(-90 ${box.l - 40} ${box.t + box.h / 2})`, class: "axt", text: ylabel }));
   return { X, Y };
 }
 
@@ -90,7 +90,7 @@ function drawer(title, body) {
   const d = h("aside", { class: "drawer", role: "dialog", "aria-label": title },
     h("div", { class: "dhead" }, h("b", {}, title), h("button", { type: "button", class: "dclose", "aria-label": "Close", onclick: () => d.classList.remove("open") }, "×")), body);
   document.body.append(d);
-  return () => d.classList.add("open");
+  return () => d.classList.toggle("open");  // the same button opens and closes it
 }
 
 // ------------------------------------------------------------------------------------------- scrollytelling frame
@@ -145,9 +145,9 @@ function scrolly({ id, kicker, question, sub, info, steps, draw, tall = false })
 
 // =========================================================================================== 1. the weather (Exp 7)
 function chapterWeather(d) {
-  const W = 1000, H = 560, n = d.x.length;
+  const W = 1250, H = 560, n = d.x.length;
   const svg = frame(W, H, "Time curve of Austria's temperature map around the 25-26 March cold front");
-  const box = { l: 30, t: 30, w: 600, h: 500 };
+  const box = { l: 30, t: 30, w: 850, h: 500 };
   const xr = [Math.min(...d.x), Math.max(...d.x)], yr = [Math.min(...d.y), Math.max(...d.y)];
   const sc = Math.min(box.w / (xr[1] - xr[0]), box.h / (yr[1] - yr[0]));
   const ox = box.l + (box.w - (xr[1] - xr[0]) * sc) / 2, oy = box.t + (box.h - (yr[1] - yr[0]) * sc) / 2;
@@ -180,7 +180,7 @@ function chapterWeather(d) {
   });
   // three snapshot maps
   const maps = Object.entries(d.keys).map(([k, v], r) => {
-    const b = { l: 668, t: 30 + r * 166, w: 300, h: 128 };
+    const b = { l: 918, t: 30 + r * 166, w: 300, h: 128 };
     const geo = geoBox(d.points.lon, d.points.lat, b);
     const g = s("g", { class: "snap" });
     g.append(s("text", { x: b.l, y: b.t - 8, class: "title", text: `${k} · ${v.name} (${d.label[v.i]})` }));
@@ -188,7 +188,7 @@ function chapterWeather(d) {
     svg.append(g);
     return g;
   });
-  colorBar(svg, 700, 534, 240, RDBU, [[0, `−${d.clim}`], [0.5, "0"], [1, `+${d.clim}`]], "°C vs the usual temperature");
+  colorBar(svg, 950, 534, 240, RDBU, [[0, `−${d.clim}`], [0.5, "0"], [1, `+${d.clim}`]], "°C vs the usual temperature");
   const iA = d.keys.A.i, iB = d.keys.B.i;
   const update = ({ upto, map }) => {
     const last = upto === "all" ? n - 1 : d.keys[upto].i;
@@ -222,7 +222,7 @@ function chapterWeather(d) {
 // full = true: the comparison with cold-front cases and the totals per day ("Also tested" section)
 function chapterLooksFull(d) { return chapterLooks(d, true); }
 function chapterLooks(d, full = false) {
-  const W = 1000, H = 440;
+  const W = 1250, H = 440;
   const svg = frame(W, H, "Occlusion: which hours of the history change the forecast");
   const [gn, gf] = d.groups;
   const all = [...gn.grid.flat(), ...gf.grid.flat()].sort((a, b) => a - b);
@@ -230,7 +230,7 @@ function chapterLooks(d, full = false) {
   const heat = (g, left, w = 300) => {
     const b = { l: left, t: 40, w, h: 336 }, cw = b.w / 24, ch = b.h / 28;
     const grp = s("g");
-    grp.append(s("text", { x: b.l + b.w / 2, y: 26, "text-anchor": "middle", class: "title", text: `${g.group === "normal day" ? "Normal days" : "Before a cold front"} (${g.n} cases)` }));
+    if (full) grp.append(s("text", { x: b.l + b.w / 2, y: 26, "text-anchor": "middle", class: "title", text: g.group === "normal day" ? `${g.n} random forecasts` : `Before a cold front (${g.n} cases)` }));
     g.grid.forEach((row, r) => row.forEach((v, c) => {
       const rect = s("rect", { x: b.l + c * cw, y: b.t + r * ch, width: cw + 0.3, height: ch + 0.3, fill: INFERNO(Math.min(v / zmax, 1)) });
       rect.addEventListener("pointermove", (ev) => tip.show(`<b>${r + 1} day${r ? "s" : ""} back, hour ${c + 1}</b><br>forecast changes by ${v.toFixed(3)} °C when this hour is hidden`, ev));
@@ -241,35 +241,57 @@ function chapterLooks(d, full = false) {
     d.pattern_32h.cells.forEach(([r, c]) => pat.append(s("rect", { x: b.l + c * cw + 0.5, y: b.t + r * ch + 0.5, width: cw - 1, height: ch - 1, fill: "none", stroke: "#4ee1ff", "stroke-width": 1.3 })));
     for (const r of [0, 6, 13, 20, 27]) grp.append(s("text", { x: b.l - 6, y: b.t + (r + 0.75) * ch, "text-anchor": "end", text: r + 1 }));
     for (const c of [0, 5, 11, 17, 23]) grp.append(s("text", { x: b.l + (c + 0.5) * cw, y: b.t + b.h + 14, "text-anchor": "middle", text: c + 1 }));
-    grp.append(s("text", { x: b.l + b.w / 2, y: b.t + b.h + 30, "text-anchor": "middle", text: "hour of that day (1 = closest to the forecast)" }));
+    grp.append(s("text", { x: b.l + b.w / 2, y: b.t + b.h + 32, "text-anchor": "middle", class: "axt", text: "hour of that day (1 = closest to the forecast)" }));
     svg.append(grp, pat);
     return { grp, pat };
   };
-  svg.append(s("text", { x: 22, y: 208, "text-anchor": "middle", transform: "rotate(-90 22 208)", text: "days before the forecast" }));
-  const N = full ? heat(gn, 52) : heat(gn, 52, 560);
+  svg.append(s("text", { x: 22, y: 208, "text-anchor": "middle", class: "axt", transform: "rotate(-90 22 208)", text: "days before the forecast" }));
+  const N = full ? heat(gn, 52, 380) : heat(gn, 52, 560);
   const ratio = gf.per_day.reduce((a, b) => a + b) / gn.per_day.reduce((a, b) => a + b);
   const avg = d.pattern_32h.ratio_by_lag_mod_32;
   const patBtn = h("button", { type: "button", class: "toggle", "aria-pressed": "false" }, "Show the 32-hour pattern");
   if (!full) {
     colorBar(svg, 52, 420, 300, INFERNO, [[0, "0"], [1, `${zmax.toFixed(2)} °C or more`]], "");
-    const setPat1 = (on) => { patBtn.setAttribute("aria-pressed", String(on)); N.pat.style.opacity = on ? 1 : 0; };
+    // side chart: zoom on 7-14 days back (5 spikes) as a line; guide lines every 32 hours
+    const per = gn.grid.flat(), L0 = 168, L1 = 336;  // per[lag - 1] = change when that hour is hidden
+    const sb = { l: 730, t: 40, w: 490, h: 336 };
+    const ymax = Math.max(...per.slice(L0 - 1, L1)) * 1.1;
+    const SX = (lag) => sb.l + ((lag - L0) / (L1 - L0)) * sb.w, SY = (v) => sb.t + sb.h - (v / ymax) * sb.h;
+    const side = s("g");
+    side.append(s("text", { x: sb.l + sb.w / 2, y: 26, "text-anchor": "middle", class: "title", text: "7 to 14 days back" }));
+    for (const v of [0, 0.02, 0.04, 0.06, 0.08, 0.1].filter((v) => v < ymax)) side.append(s("line", { class: "gl", x1: sb.l, x2: sb.l + sb.w, y1: SY(v), y2: SY(v) }), s("text", { x: sb.l - 6, y: SY(v) + 4, "text-anchor": "end", text: v.toFixed(2) }));
+    for (let lag = 33; lag <= L1; lag += 32) if (lag >= L0) side.append(s("line", { x1: SX(lag), x2: SX(lag), y1: sb.t, y2: sb.t + sb.h, stroke: "#4ee1ff", "stroke-opacity": 0.3, "stroke-dasharray": "2 3" }));
+    const pts = [];
+    for (let lag = L0; lag <= L1; lag++) pts.push(`${SX(lag).toFixed(1)},${SY(per[lag - 1]).toFixed(1)}`);
+    side.append(s("polyline", { points: pts.join(" "), fill: "none", stroke: "#8b949e", "stroke-width": 1.2, "stroke-linejoin": "round" }));
+    for (let lag = 33; lag < L1; lag += 32) if (lag >= L0) for (const l of [lag, lag + 1]) {
+      const c = s("circle", { cx: SX(l), cy: SY(per[l - 1]), r: 2.6, fill: "#4ee1ff" });
+      c.addEventListener("pointermove", (ev) => tip.show(`<b>${l} hours back</b><br>forecast changes by ${per[l - 1].toFixed(3)} °C`, ev));
+      c.addEventListener("pointerleave", () => tip.hide());
+      side.append(c);
+    }
+    for (const day of [8, 9, 10, 11, 12, 13, 14]) side.append(s("text", { x: SX(24 * day - 12), y: sb.t + sb.h + 14, "text-anchor": "middle", text: day }));
+    side.append(s("text", { x: sb.l + sb.w / 2, y: sb.t + sb.h + 32, "text-anchor": "middle", class: "axt", text: "days before the forecast" }),
+      s("text", { x: sb.l - 44, y: sb.t + sb.h / 2, "text-anchor": "middle", class: "axt", transform: `rotate(-90 ${sb.l - 44} ${sb.t + sb.h / 2})`, text: "forecast change (°C)" }));
+    side.style.transition = "opacity .4s";
+    svg.append(side);
+    const setPat1 = (on) => { patBtn.setAttribute("aria-pressed", String(on)); N.pat.style.opacity = on ? 1 : 0; side.style.opacity = on ? 1 : 0.12; };
     patBtn.onclick = () => setPat1(patBtn.getAttribute("aria-pressed") !== "true");
     const steps1 = [
       { state: false, when: "One hour hidden",
         html: `We hide <b>one hour</b> of the 4-week history and measure how much the forecast changes. Bright = that hour matters. The last day matters most (${Math.round(gn.last_day_share * 100)} %), but <b>all four weeks</b> count.` },
       { state: true, when: "Look closer",
-        html: `Bright pairs line up on a diagonal that repeats every <b>32 hours</b>: hiding the newest hours of each 32-hour block changes the forecast ${avg[1].toFixed(1)}× more than average.`,
-        more: "The 32-hour blocks explain <b>where</b> the bright cells are: the model probably reads its history in 32-hour blocks. <b>Why</b> those hours matter more is an open question for Phase II: do they weigh more, or does the model handle a gap at a block edge badly?",
-        takeaway: "A fingerprint of the model's design, visible from the outside." },
+        html: `Bright pairs repeat every <b>32 hours</b>: one day down and 8 hours to the right. On the right, the same hours as a line: the spikes sit exactly every 32 hours, and there hiding an hour changes the forecast <b>${d.pattern_32h.ratio_normal[1].toFixed(1)}×</b> more than the average hour.`,
+        more: "The 32-hour blocks explain <b>where</b> the bright cells are: the model probably reads its history in 32-hour blocks. <b>Why</b> those hours matter more is an open question for Phase II: do they weigh more, or does the model handle a gap at a block edge badly?" },
     ];
-    const draw1 = (host, ctl) => { host.append(svg); ctl.append(patBtn); return setPat1; };
+    const draw1 = (host) => { host.append(svg); return setPat1; };
     return scrolly({ id: "ch-looks", kicker: "How it reads its history", question: "Which part of its history does the model use?",
-      sub: `${gn.n} normal days; each of the 672 history hours hidden once.`, steps: steps1, draw: draw1,
-      info: "Each cell is one hour of the history (rows = days back, columns = hours of that day). Colour = mean change of the 24-hour forecast when only this hour is hidden." });
+      sub: `${gn.n} random forecasts (random places and dates, not picked around a cold front); each of the 672 history hours hidden once.`, steps: steps1, draw: draw1,
+      info: "Each cell is one hour of the history (rows = days back, columns = hours of that day). Colour = mean change of the 24-hour forecast when only this hour is hidden. Right: the same hours as a line, zoomed on 7 to 14 days back. Dashed lines every 32 hours; cyan dots = the two hours just after each line." });
   }
-  const F = heat(gf, 392);
+  const F = heat(gf, 472, 380);
   // totals per day back (same rows as the heatmaps)
-  const lb = { l: 760, t: 40, w: 210, h: 336 };
+  const lb = { l: 940, t: 40, w: 270, h: 336 };
   const mx = Math.ceil(Math.max(...gn.per_day, ...gf.per_day));
   const X = (v) => lb.l + (v / mx) * lb.w, Y = (day) => lb.t + ((day - 0.5) / 28) * lb.h;
   const lg = s("g");
@@ -277,40 +299,39 @@ function chapterLooks(d, full = false) {
   const line = (vals, col) => s("polyline", { points: vals.map((v, i) => `${X(v)},${Y(i + 1)}`).join(" "), fill: "none", stroke: col, "stroke-width": 2.4, "stroke-linejoin": "round" });
   const ln = line(gn.per_day, C.grey), lf = line(gf.per_day, C.front);
   for (const day of [1, 7, 14, 21, 28]) lg.append(s("text", { x: lb.l - 6, y: Y(day) + 4, "text-anchor": "end", text: day }));
-  lg.append(s("text", { x: lb.l - 30, y: lb.t + lb.h / 2, "text-anchor": "middle", transform: `rotate(-90 ${lb.l - 30} ${lb.t + lb.h / 2})`, text: "days back" }));
+  lg.append(s("text", { x: lb.l - 30, y: lb.t + lb.h / 2, "text-anchor": "middle", transform: `rotate(-90 ${lb.l - 30} ${lb.t + lb.h / 2})`, class: "axt", text: "days back" }));
   lg.append(ln, lf, s("text", { x: lb.l + lb.w / 2, y: 26, "text-anchor": "middle", class: "title", text: "Total per day" }),
-    s("text", { x: lb.l + lb.w / 2, y: lb.t + lb.h + 30, "text-anchor": "middle", text: "summed change (°C)" }));
+    s("text", { x: lb.l + lb.w / 2, y: lb.t + lb.h + 30, "text-anchor": "middle", class: "axt", text: "summed change (°C)" }));
   svg.append(lg);
   colorBar(svg, 52, 420, 300, INFERNO, [[0, "0"], [1, `${zmax.toFixed(2)} °C or more`]], "");
   const setPat = (on) => { patBtn.setAttribute("aria-pressed", String(on)); [N, F].forEach((p) => { p.pat.style.opacity = on ? 1 : 0; }); };
   patBtn.onclick = () => setPat(patBtn.getAttribute("aria-pressed") !== "true");
   const update = ({ front, pat }) => { F.grp.style.opacity = front ? 1 : 0.12; lf.style.opacity = front ? 1 : 0; setPat(pat); };
   const steps = [
-    { state: { front: false, pat: false }, when: "Normal days",
+    { state: { front: false, pat: false }, when: "Random forecasts",
       html: `We hide <b>one hour</b> of the 4-week history and measure how much the forecast changes. Bright = that hour matters. The last day matters most (${Math.round(gn.last_day_share * 100)} %), but <b>all four weeks</b> count.` },
     { state: { front: true, pat: false }, when: "Before a cold front",
       html: `Same shape, but every hour matters <b>${ratio.toFixed(1)}× more</b>, mostly 2–10 days back.` },
     { state: { front: true, pat: true }, when: "Look closer",
       html: `Bright pairs line up on a diagonal that repeats every <b>32 hours</b>: hiding the newest hours of each 32-hour block changes the forecast ${avg[1].toFixed(1)}× more than average.`,
-      more: "The 32-hour blocks explain <b>where</b> the bright cells are: the model probably reads its history in 32-hour blocks. <b>Why</b> those hours matter more is an open question for Phase II: do they weigh more, or does the model handle a gap at a block edge badly?",
-      takeaway: "A fingerprint of the model's design, visible from the outside." },
+      more: "The 32-hour blocks explain <b>where</b> the bright cells are: the model probably reads its history in 32-hour blocks. <b>Why</b> those hours matter more is an open question for Phase II: do they weigh more, or does the model handle a gap at a block edge badly?" },
   ];
-  const draw = (host, ctl) => { host.append(legend([["normal days", C.grey], ["before a cold front", C.front]]), svg); ctl.append(patBtn); return update; };
+  const draw = (host, ctl) => { host.append(legend([["random forecasts", C.grey], ["before a cold front", C.front]]), svg); ctl.append(patBtn); return update; };
   return scrolly({ id: "ch-looks-full", kicker: "Also tested", question: "Which part of its history does the model use, and does that change before a cold front?",
-    sub: `${gn.n} normal and ${gf.n} cold-front cases; each of the 672 history hours hidden once.`, steps, draw,
+    sub: `${gn.n} random forecasts and ${gf.n} cold-front cases; each of the 672 history hours hidden once.`, steps, draw,
     info: "Each cell is one hour of the history (rows = days back, columns = hours of that day). Colour = mean change of the 24-hour forecast when only this hour is hidden." });
 }
 
 // =========================================================================================== 3. repeated patterns (Exp 1)
 function chapterSundays(d) {
-  const W = 1000, H = 400;
+  const W = 1250, H = 400;
   const svgA = frame(W, 330, "Scores: does the forecast follow fixed Sundays");
   const rowsDef = [
     ["rep", "4 repeated Sundays", (g) => g.setup === "4 Sundays" && !g.flag, C.flag],
     ["single", "1 single Sunday", (g) => g.setup.startsWith("1 Sunday"), "#c9a77a"],
     ["flag", "4 Sundays + Sunday flag", (g) => g.setup === "4 Sundays" && g.flag, "#ff7f0e"],
   ];
-  const vals = [10, 20, 50], pw = 244, gap = 40, left = 196, rowH = 70, top = 44;
+  const vals = [10, 20, 50], pw = 320, gap = 40, left = 196, rowH = 70, top = 44;
   const rowEls = {};
   rowsDef.forEach(([key, label], r) => {
     const g = s("g", { class: "srow" });
@@ -334,7 +355,7 @@ function chapterSundays(d) {
         s("text", { x: X(mean) + (mean > 80 ? -6 : 6), y: cy - rowH * 0.36 + 3, "text-anchor": mean > 80 ? "end" : "start", class: "val", text: `${Math.round(mean)} %` }));
     });
   });
-  svgA.append(s("text", { x: left + (3 * pw + 2 * gap) / 2, y: top + rowH * rowsDef.length + 36, "text-anchor": "middle", text: "% of the way the forecast moved towards the fixed value (0 = ignored, 100 = copied) · white line = mean" }));
+  svgA.append(s("text", { x: left + (3 * pw + 2 * gap) / 2, y: top + rowH * rowsDef.length + 36, "text-anchor": "middle", class: "axt", text: "% of the way the forecast moved towards the fixed value (0 = ignored, 100 = copied) · white line = mean" }));
 
   // example pair (drawer, on demand)
   const exPanel = (e, kind) => {
@@ -348,13 +369,14 @@ function chapterSundays(d) {
     svg.append(poly(xs, e.history, x, y, { stroke: C.fc, "stroke-width": 1.2 }), poly(xs, e.history_fixed, x, y, { stroke: "#ff7f0e", "stroke-width": 1.2 }),
       area(fx, e.original.q10, e.original.q90, x, y, { fill: C.band, "fill-opacity": 0.22 }), area(fx, e.fixed.q10, e.fixed.q90, x, y, { fill: "#ff7f0e", "fill-opacity": 0.2 }),
       poly(fx, e.original.q50, x, y, { stroke: C.fc, "stroke-width": 2.2 }), poly(fx, e.fixed.q50, x, y, { stroke: "#ff7f0e", "stroke-width": 2.2 }), poly(fx, e.truth, x, y, { stroke: "#fff", "stroke-width": 2 }));
-    return h("div", { class: "expanel" }, h("p", { class: "exhead" }, h("b", {}, kind === "copies" ? "Copied" : "Ignored"), ` · point ${e.point}, Sunday ${e.sunday}, ${e.score} %`), svg);
+    const season = ["Winter", "Spring", "Summer", "Autumn"][Math.floor((Number(e.sunday.slice(5, 7)) % 12) / 3)];  // Dec-Feb = winter, ...
+    return h("div", { class: "expanel" }, h("p", { class: "exseason" }, season), h("p", { class: "exhead" }, h("b", {}, kind === "copies" ? "Copied" : "Ignored"), ` · point ${e.point}, Sunday ${e.sunday}, ${e.score} %`), svg);
   };
   const same = d.examples.copies.point === d.examples.ignores.point;
   const openEx = drawer("Two cases, Sundays fixed at 10 °C", h("div", {},
     legend([["real history and its forecast", C.fc], ["fixed Sundays and their forecast", "#ff7f0e"], ["what happened", "#fff"]]),
     exPanel(d.examples.copies, "copies"), exPanel(d.examples.ignores, "ignores"),
-    same ? h("p", { class: "note" }, "The same place: copied in winter, ignored in summer, when the normal day-to-day swings are larger.") : null));
+    same ? h("p", { class: "note" }, "The same place: copied in winter, ignored in spring, when the normal day-to-day swings are larger.") : null));
 
   const hostA = h("div", {}, svgA);
   const update = ({ rows }) => {
@@ -366,21 +388,20 @@ function chapterSundays(d) {
       html: `The last <b>4 Sundays</b> of the history are set to a fixed temperature; then we forecast the next Sunday. The model <b>copies</b> them: ${meanOf(10, "4 Sundays", false)} % of the way at 10 °C, ${meanOf(50, "4 Sundays", false)} % at 50 °C.`,
       more: `${d.n} cases: ${d.dates} Sundays over the year × 20 random places.` },
     { state: { view: "rows", rows: ["rep", "single"] }, when: "Once", html: "Only <b>one</b> Sunday fixed (1, 2 or 3 weeks back): <b>ignored</b>." },
-    { state: { view: "rows", rows: ["rep", "single", "flag"] }, when: "With a Sunday flag", html: `Telling the model which hours are Sundays: it copies <b>more</b> (${meanOf(10, "4 Sundays", true)} % at 10 °C).`,
-      takeaway: "Repeated → copied. Once → ignored." },
+    { state: { view: "rows", rows: ["rep", "single", "flag"] }, when: "With a Sunday flag", html: `Telling the model which hours are Sundays: it copies <b>more</b> (${meanOf(10, "4 Sundays", true)} % at 10 °C).` },
   ];
   const draw = (host, ctl) => { host.append(hostA); ctl.append(h("button", { type: "button", class: "toggle", onclick: openEx }, "See an example")); return update; };
   return scrolly({ id: "ch-sundays", kicker: "How it reads its history", question: "Does the model continue a pattern it has seen repeatedly, and ignore one it has seen once?",
     sub: "Forecasts for a Sunday after fixing Sundays in the 4-week history.", steps, draw,
-    info: "Each dot is one case (place and date). Score = how far the forecast moved from its normal value towards the fixed Sunday value, averaged over the 24 hours." });
+    info: "40 forecast Sundays spread over the year, 20 random points each: 800 cases per setup, each with 4 weeks of history (so 4 Sundays). Each dot is one case (place and date). Score = how far the forecast moved from its normal value towards the fixed Sunday value, averaged over the 24 hours. The \"1 single Sunday\" row combines three setups: the Sunday 1, 2 or 3 weeks back (2,400 cases per panel; each alone about 2 %). Control, not shown: the same Sundays fixed, but forecasting the Wednesday of that week: hardly affected (1 to 6 %)." });
 }
 
 // the switch (Exp 1): score against the size of the change ("Also tested" section)
 function chapterSundaySwitch(d) {
   // the switch: score against the size of the change (10 and 20 °C together)
-  const W = 1000, H = 400;
+  const W = 1250, H = 400;
   const svgB = frame(W, H, "Score against the size of the change");
-  const bb = { l: 70, t: 24, w: 880, h: 310 };
+  const bb = { l: 70, t: 24, w: 1130, h: 310 };
   const { X, Y } = axes(svgB, bb, { x0: 0, x1: 24, y0: 0, y1: 100, xticks: [0, 4, 8, 12, 16, 20, 24], yticks: [0, 25, 50, 75, 100], yfmt: (v) => `${v} %`, xlabel: "how different the fixed Sundays are from the real ones (°C)", ylabel: "copied" });
   const cross = [];
   d.score_vs_change.forEach((g) => {
@@ -410,9 +431,9 @@ function chapterSundaySwitch(d) {
 
 // =========================================================================================== 4. a stranger history (Exp 6)
 function chapterWeird(d) {
-  const sl = d.slider, n = sl.sizes.length, W = 1000, H = 440;
+  const sl = d.slider, n = sl.sizes.length, W = 1250, H = 440;
   const svg = frame(W, H, "Inserting artificial cold drops into the history");
-  const top = { l: 56, t: 24, w: 560, h: 110 }, bot = { l: 56, t: 196, w: 560, h: 196 }, side = { l: 690, t: 40, w: 245, h: 330 };
+  const top = { l: 56, t: 24, w: 760, h: 110 }, bot = { l: 56, t: 196, w: 760, h: 196 }, side = { l: 900, t: 40, w: 270, h: 330 };
   const nh = sl.history[0].length, hx = [...Array(nh).keys()];
   const hall = sl.history.flat().filter((v) => v != null);
   const hlo = Math.floor(Math.min(...hall)) - 1, hup = Math.ceil(Math.max(...hall)) + 1;
@@ -507,9 +528,9 @@ function chapterWeird(d) {
 
 // =========================================================================================== 4b. where the strange part sits (Exp 6)
 function chapterPosition(d) {
-  const ex = d.example, n = ex.starts.length, W = 1000, H = 440, C0 = ex.history.length, L = ex.shape.length;
+  const ex = d.example, n = ex.starts.length, W = 1250, H = 440, C0 = ex.history.length, L = ex.shape.length;
   const svg = frame(W, H, "One cold drop moved through the history");
-  const top = { l: 56, t: 24, w: 560, h: 110 }, bot = { l: 56, t: 196, w: 560, h: 196 }, side = { l: 690, t: 40, w: 245, h: 330 };
+  const top = { l: 56, t: 24, w: 760, h: 110 }, bot = { l: 56, t: 196, w: 760, h: 196 }, side = { l: 900, t: 40, w: 270, h: 330 };
   const hx = [...Array(C0).keys()], hist = ex.history;
   const hlo = Math.floor(Math.min(...hist) - d.size) - 1, hup = Math.ceil(Math.max(...hist)) + 1;
   const A1 = axes(svg, top, { x0: 0, x1: C0, y0: hlo, y1: hup, xticks: [0, 336, 672, 1008, 1344, 1680], xfmt: (v) => (v === C0 ? "now" : `−${(C0 - v) / 168} wk`), yticks: [0, 10, 20, 30].filter((v) => v >= hlo && v <= hup), grid: false });
@@ -604,14 +625,14 @@ function chapterCatchingUp(d) {
   const Sx = (off) => d.starts.find((st) => st.start === off);
   const F = (off, x) => at(Sx(off).hours, Sx(off).q50, x);
   const minT = Math.min(...d.truth.mean), minAt = d.truth.hours[d.truth.mean.indexOf(minT)];
-  const W = 1000, H = 330, m = { l: 46, r: 8, t: 30, b: 40 }, gap = 10, nP = d.starts.length;
+  const W = 1250, H = 330, m = { l: 46, r: 8, t: 30, b: 40 }, gap = 10, nP = d.starts.length;
   const pw = (W - m.l - m.r - gap * (nP - 1)) / nP, x0 = -12, x1 = 35;
   const all = [...d.truth.mean, ...d.starts.flatMap((st) => [...st.q10, ...st.q90])];
   const y0 = Math.floor(Math.min(...all)) - 1, y1 = Math.ceil(Math.max(...all)) + 1;
   const Y = (v) => H - m.b - ((v - y0) / (y1 - y0)) * (H - m.t - m.b);
   const svg = frame(W, H, "The average cold front seen from five forecast starts");
   for (let v = Math.ceil(y0 / 2) * 2; v <= y1; v += 2) svg.append(s("line", { class: "gl", x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v) }), s("text", { x: m.l - 8, y: Y(v) + 4, "text-anchor": "end", text: v ? sgn(v, 0) : "0" }));
-  svg.append(s("text", { x: 12, y: (m.t + H - m.b) / 2, "text-anchor": "middle", transform: `rotate(-90 12 ${(m.t + H - m.b) / 2})`, text: "°C since the drop started" }));
+  svg.append(s("text", { x: 12, y: (m.t + H - m.b) / 2, "text-anchor": "middle", transform: `rotate(-90 12 ${(m.t + H - m.b) / 2})`, class: "axt", text: "°C since the drop started" }));
   const panels = d.starts.map((st, i) => {
     const left = m.l + i * (pw + gap), X = (v) => left + ((v - x0) / (x1 - x0)) * pw;
     const line = (xs, ys) => xs.map((x, k) => (x >= x0 && x <= x1 ? `${X(x)},${Y(ys[k])}` : null)).filter(Boolean).join(" ");
@@ -639,7 +660,7 @@ function chapterCatchingUp(d) {
     return { bg, title, band, med, pending, g };
   });
   panels.forEach((p) => svg.append(p.title));
-  svg.append(s("text", { x: (m.l + W - m.r) / 2, y: H - 6, "text-anchor": "middle", text: "hours from the drop start · grey = what the model has already seen" }));
+  svg.append(s("text", { x: (m.l + W - m.r) / 2, y: H - 6, "text-anchor": "middle", class: "axt", text: "hours from the drop start · grey = what the model has already seen" }));
   const update = ({ upto, focus }) => panels.forEach((p, i) => {
     const on = i <= upto;
     p.band.style.opacity = on ? 1 : 0; p.med.style.opacity = on ? 1 : 0; p.pending.style.opacity = on ? 0 : 1;
@@ -663,7 +684,7 @@ function chapterCatchingUp(d) {
 
 // =========================================================================================== 6. does the cold last (Exp 5)
 function chapterLasts(d) {
-  const W = 1000, H = 360, b = { l: 64, t: 16, w: 890, h: 290 };
+  const W = 1250, H = 360, b = { l: 64, t: 16, w: 1140, h: 290 };
   const svg = frame(W, H, "Does the model expect the cold to last");
   const all = [...d.truth.mean, ...d.starts.flatMap((st) => st.forecast)];
   const lo = Math.floor(Math.min(...all)) - 1, up = Math.ceil(Math.max(...all)) + 1;
@@ -690,7 +711,7 @@ function chapterLasts(d) {
 
 // =========================================================================================== 7. is the band honest (Exp 11)
 function chapterHonest(d) {
-  const W = 1000, H = 250, b = { l: 180, t: 34, w: 780, h: 180 };
+  const W = 1250, H = 250, b = { l: 180, t: 34, w: 1030, h: 180 };
   const svg = frame(W, H, "Below, inside or above the band");
   const X = (p) => b.l + (p / 100) * b.w, rh = b.h / 3;
   for (const p of [0, 25, 50, 75, 100]) svg.append(s("text", { x: X(p), y: b.t + b.h + 18, "text-anchor": "middle", text: `${p} %` }));
@@ -736,7 +757,7 @@ function notHelping() {
 
 // =========================================================================================== 8. front explorer (Exp 3)
 function frontExplorer(d) {
-  const W = 1000, H = 480, mapB = { l: 10, t: 70, w: 520, h: 330 }, pb = { l: 610, t: 84, w: 370, h: 290 };
+  const W = 1500, H = 480, mapB = { l: 10, t: 70, w: 760, h: 330 }, pb = { l: 900, t: 84, w: 560, h: 290 };
   const svg = frame(W, H, "Front explorer: drop captured at every point of one cold front");
   const geo = geoBox(d.points.lon, d.points.lat, mapB);
   const pidx = new Map(d.points.id.map((p, i) => [p, i]));
@@ -819,37 +840,116 @@ function frontExplorer(d) {
       svg));
 }
 
+// =========================================================================================== overview
+// sketch of the setup with one real forecast from Sandro's runs (pages.js: loadRuns, runSeries)
+async function overview() {
+  if (!RUNS) await loadRuns();
+  const geo = await getJson("data/meta.json");  // lon/lat of the 378 points (same order as the runs)
+  const m = RUNS.meta, run = m.runs.findIndex((r) => r.label.includes("18 May 2026")), pt = m.places.Linz, v = runSeries(run, pt);
+  const W = 1250, H = 300, mapB = { l: 0, t: 60, w: 190, h: 130 }, inB = { l: 262, t: 44, w: 330, h: 196 }, outB = { l: 880, t: 44, w: 230, h: 196 };
+  const all = [...v.ctx, ...v.truth, ...v.q10, ...v.q90];
+  const y0 = Math.floor(Math.min(...all)) - 1, y1 = Math.ceil(Math.max(...all)) + 1;
+  const yticks = [];
+  for (let t = Math.ceil(y0 / 4) * 4; t <= y1; t += 4) yticks.push(t);
+  const svg = frame(W, H, "Sketch: the hourly temperature history goes into TiRex-2, which forecasts the next 24 hours with a 10 to 90 % band");
+  const ctxX = Array.from({ length: m.ctx }, (_, i) => i - m.ctx + 1), hx = Array.from({ length: m.h }, (_, i) => i + 1);
+  const A = axes(svg, inB, { x0: -m.ctx + 1, x1: 0, y0, y1, xticks: [-35, -24, -12, 0], yticks, xfmt: (x) => (x === -35 ? "−36" : x === 0 ? "0" : `−${-x}`), xlabel: "hours before the start (last 36 of 672)", ylabel: "temperature (°C)" });
+  svg.append(poly(ctxX, v.ctx, A.X, A.Y, { stroke: C.grey, "stroke-width": 2.2 }),
+    s("text", { x: inB.l + inB.w / 2, y: 24, "text-anchor": "middle", class: "title", text: "Input: 4 weeks of hourly temperature" }));
+  const B = axes(svg, outB, { x0: 1, x1: m.h, y0, y1, xticks: [1, 6, 12, 18, 24], yticks, xlabel: "hours after the start" });
+  svg.append(area(hx, v.q10, v.q90, B.X, B.Y, { fill: C.band, "fill-opacity": 0.3 }),
+    poly(hx, v.truth, B.X, B.Y, { stroke: "#e7ebf0", "stroke-width": 1.6, "stroke-dasharray": "5 4" }),
+    poly(hx, v.q50, B.X, B.Y, { stroke: C.fc, "stroke-width": 2.6 }),
+    s("text", { x: outB.l + outB.w / 2, y: 24, "text-anchor": "middle", class: "title", text: "Output: the next 24 hours" }));
+  // labels at the line ends, pushed apart so they don't overlap
+  const L = m.h - 1, labs = [["10–90 % band", v.q90[L], C.band], ["forecast median (q50)", v.q50[L], C.fc], ["measured (truth)", v.truth[L], "#e7ebf0"]]
+    .map(([t, y, c]) => ({ t, y: B.Y(y), c })).sort((a, b) => a.y - b.y);
+  labs.forEach((l, i) => { if (i) l.y = Math.max(l.y, labs[i - 1].y + 17); });
+  for (const l of labs) svg.append(s("text", { x: outB.l + outB.w + 10, y: l.y + 4, style: `fill:${l.c};font-size:13px;font-weight:600`, text: l.t }));
+  // the model in the middle, with arrows
+  const mx = 638, mw = 152, my = inB.t + inB.h / 2;
+  svg.append(s("defs", {}, s("marker", { id: "ovarrow", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto" },
+    s("path", { d: "M0,0 L10,5 L0,10 z", fill: "#9aa6b3" }))));
+  svg.append(s("line", { x1: inB.l + inB.w + 12, x2: mx - 8, y1: my, y2: my, stroke: "#9aa6b3", "stroke-width": 2, "marker-end": "url(#ovarrow)" }),
+    s("line", { x1: mx + mw + 8, x2: outB.l - 42, y1: my, y2: my, stroke: "#9aa6b3", "stroke-width": 2, "marker-end": "url(#ovarrow)" }),
+    s("rect", { x: mx, y: my - 52, width: mw, height: 116, rx: 12, fill: "#1d242c", stroke: C.fc, "stroke-width": 1.5 }),
+    s("image", { href: "tirex.svg", x: mx + 12, y: my - 42, width: 30, height: 36 }),  // TiRex logo (NX-AI, github.com/NX-AI/tirex-2)
+    s("text", { x: mx + mw / 2 + 17, y: my - 14, "text-anchor": "middle", style: "font-size:22px;font-weight:700;fill:#e7ebf0", text: "TiRex-2" }),
+    s("text", { x: mx + mw / 2, y: my + 14, "text-anchor": "middle", class: "axt", text: "zero-shot" }),
+    s("text", { x: mx + mw / 2, y: my + 32, "text-anchor": "middle", text: "(not trained" }),
+    s("text", { x: mx + mw / 2, y: my + 46, "text-anchor": "middle", text: "on this data)" }));
+  // all points of Austria; the example point highlighted and linked to the input chart
+  const G = geoBox(geo.lon, geo.lat, mapB);
+  svg.append(s("text", { x: mapB.l + mapB.w / 2, y: 24, "text-anchor": "middle", class: "title", text: `All ${geo.lon.length} points` }));
+  geo.lon.forEach((_, i) => { if (i !== pt) svg.append(s("circle", { cx: G.x(i), cy: G.y(i), r: 2, fill: "#5b6672" })); });
+  svg.append(s("line", { x1: G.x(pt) + 6, y1: G.y(pt), x2: inB.l - 58, y2: my, stroke: C.grey, "stroke-width": 1.2, "stroke-dasharray": "3 3" }),
+    s("circle", { cx: G.x(pt), cy: G.y(pt), r: 5, fill: "#e7ebf0" }),
+    s("text", { x: G.x(pt), y: G.y(pt) - 9, "text-anchor": "middle", style: "fill:#e7ebf0;font-size:12px", text: "Linz" }),
+    s("text", { x: mapB.l + mapB.w / 2, y: mapB.t + mapB.h + 30, "text-anchor": "middle", text: "one forecast per point," }),
+    s("text", { x: mapB.l + mapB.w / 2, y: mapB.t + mapB.h + 46, "text-anchor": "middle", text: `repeated for all ${geo.lon.length}` }));
+  return h("section", { class: "chapter overview", id: "overview" }, h("div", { class: "qnum" }, "Overview"),
+    h("h1", { class: "q" }, "What does TiRex-2 react to, and when does it fail?"),
+    h("p", { class: "ovdata" }, "Data: hourly weather analysis (INCA, GeoSphere Austria) at 378 points on a 15 km grid across Austria, October 2025 to September 2026."),
+    h("div", { class: "ovfig" }, svg));
+}
+
 // ------------------------------------------------------------------------------------------- page
-async function startStory() {
-  const main = h("main", { id: "main", style: "max-width:none" });
-  document.body.append(main);
-  byId("tostory")?.addEventListener("click", () => byId("story").scrollIntoView({ behavior: "smooth" }));
-  const story = h("section", { id: "story" },
-    h("div", { class: "part-head" }, h("div", { class: "qnum" }, "The story"),
-      h("h1", { class: "q" }, "What does TiRex-2 react to, and when does it fail?"),
-      h("p", {}, "We changed the input of TiRex-2 in controlled ways and watched its 24-hour temperature forecasts for Austria.")));
-  main.append(story);
-  const parts = [["where_it_looks", chapterLooks], ["fixed_sundays", chapterSundays], ["weird_history", chapterWeird],
-    [null, notHelping], ["where_it_looks", chapterLooksFull], ["fixed_sundays", chapterSundaySwitch], ["drop_position", chapterPosition], ["catching_up", chapterCatchingUp], ["cold_lasts", chapterLasts], ["band_honesty", chapterHonest], ["time_curve", chapterWeather], ["front_explorer", frontExplorer]];
-  // ?only=<chapter id> shows just that chapter (for screenshots while building)
-  const only = new URLSearchParams(location.search).get("only");
-  if (only) { byId("explore").style.display = "none"; story.querySelector(".part-head").style.display = "none"; }
+// story.html: overview, the main chapters, then Sandro's limits and errors, then a link to the second page.
+// also-tested.html (data-page="more"): the other experiments, Sandro's other questions, the explorer.
+const MAIN_PARTS = [[null, overview], ["where_it_looks", chapterLooks], ["fixed_sundays", chapterSundays], ["weird_history", chapterWeird]];
+const MORE_PARTS = [[null, notHelping], ["where_it_looks", chapterLooksFull], ["fixed_sundays", chapterSundaySwitch], ["drop_position", chapterPosition],
+  ["catching_up", chapterCatchingUp], ["cold_lasts", chapterLasts], ["band_honesty", chapterHonest], ["time_curve", chapterWeather]];
+const MAIN_QUESTIONS = [4, 5], MORE_QUESTIONS = [1, 2, 3];
+
+const pageLink = (href, label, sub) => h("a", { class: "pagelink", href }, h("span", { class: "pl-label" }, label), sub ? h("span", { class: "pl-sub" }, sub) : null);
+
+async function addParts(host, parts, only) {
   for (const [file, make] of parts) {
     if (only && !make.name.toLowerCase().includes(only)) continue;
     try {
-      story.append(make(file ? await loadJson(file) : null));
+      host.append(await make(file ? await loadJson(file) : null));
     } catch (err) {
-      story.append(h("p", { class: "answer" }, `Could not load ${file || "a section"}: ${err.message}`));
+      host.append(h("p", { class: "answer" }, `Could not load ${file || "a section"}: ${err.message}`));
       console.error(err);
     }
   }
-  if (only) return;
+}
+
+async function addQuestions(main, nums) {
   const questions = h("div", { id: "questions" });
   main.append(questions);
-  try { await renderQuestions(questions); } catch (err) {
+  try { await renderQuestions(questions, nums); } catch (err) {
     questions.append(h("p", { class: "answer" }, `Could not load the question data: ${err.message}`));
     console.error(err);
   }
+}
+
+async function startStory() {
+  const more = document.body.dataset.page === "more";
+  const main = h("main", { id: "main", style: "max-width:none" });
+  document.body.append(main);
+  byId("tostory")?.addEventListener("click", () => byId("story").scrollIntoView({ behavior: "smooth" }));
+  const story = h("section", { id: "story" });
+  if (more) story.append(h("div", { class: "part-head" }, pageLink("story.html#story", "← Back to the story"), h("div", { class: "qnum" }, "Also tested"),
+    h("h1", { class: "q" }, "More experiments"),
+    h("p", {}, "Further tests of how TiRex-2 reads its history and how it handles cold fronts, Sandro's other questions, and an explorer of all cold fronts.")));
+  main.append(story);
+  // ?only=<part of a chapter function name> shows just that chapter (for screenshots while building)
+  const only = new URLSearchParams(location.search).get("only");
+  if (only) {
+    byId("explore")?.style.setProperty("display", "none");
+    return addParts(story, [...MAIN_PARTS, ...MORE_PARTS, ["front_explorer", frontExplorer]], only);
+  }
+  if (more) {
+    await addParts(story, MORE_PARTS);
+    await addQuestions(main, MORE_QUESTIONS);
+    await addParts(main, [["front_explorer", frontExplorer]]);
+    main.append(h("div", { class: "pagelink-row" }, pageLink("story.html#story", "← Back to the story")));
+    return;
+  }
+  await addParts(story, MAIN_PARTS);
+  await addQuestions(main, MAIN_QUESTIONS);
+  main.append(h("div", { class: "pagelink-row" }, pageLink("also-tested.html", "Also tested →", "More experiments and an explorer of all cold fronts")));
 }
 
 startStory();

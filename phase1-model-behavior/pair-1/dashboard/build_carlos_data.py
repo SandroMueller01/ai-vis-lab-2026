@@ -296,9 +296,13 @@ def where_it_looks(res: Path):
                               "per_day": [round(float(v), 2) for v in tot],
                               "last_day_share": round(float(tot[0] / tot.sum()), 3), "last_week_share": round(float(tot[:7].sum() / tot.sum()), 3)})
     lag = np.arange(1, 673)
-    m = eff.mean(0)
-    ratio = [round(float(m[(lag % 32) == k].mean() / m.mean()), 2) for k in range(32)]
-    out["pattern_32h"] = {"ratio_by_lag_mod_32": ratio,
+    keep = lag > 24  # leave out the last day: it matters most anyway and would inflate the hours near the forecast
+
+    def ratio(e):
+        m = e.mean(0)
+        return [round(float(m[keep & ((lag % 32) == k)].mean() / m[keep].mean()), 2) for k in range(32)]
+
+    out["pattern_32h"] = {"ratio_by_lag_mod_32": ratio(eff), "ratio_normal": ratio(eff[z["group"] == "normal day"]),
                           "cells": [[int((lg - 1) // 24), int((lg - 1) % 24)] for lg in lag if lg % 32 in (1, 2) and lg > 24]}
     return out
 
