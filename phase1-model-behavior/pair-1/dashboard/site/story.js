@@ -899,7 +899,9 @@ async function overview() {
 const MAIN_PARTS = [[null, overview], ["where_it_looks", chapterLooks], ["fixed_sundays", chapterSundays], ["weird_history", chapterWeird]];
 const MORE_PARTS = [[null, notHelping], ["where_it_looks", chapterLooksFull], ["fixed_sundays", chapterSundaySwitch], ["drop_position", chapterPosition],
   ["catching_up", chapterCatchingUp], ["cold_lasts", chapterLasts], ["band_honesty", chapterHonest], ["time_curve", chapterWeather]];
-const MAIN_QUESTIONS = [4, 5], MORE_QUESTIONS = [1, 2, 3];
+// the story page shows only what the talk uses of Sandro's sections; every other chart is on the second page
+const MAIN_QUESTIONS = [4, 5], MORE_QUESTIONS = [1, 2, 3, 4, 5];
+const TALK_CARDS = { 4: ["improvement"], 5: ["around-front"] };
 
 const pageLink = (href, label, sub) => h("a", { class: "pagelink", href }, h("span", { class: "pl-label" }, label), sub ? h("span", { class: "pl-sub" }, sub) : null);
 
@@ -915,10 +917,10 @@ async function addParts(host, parts, only) {
   }
 }
 
-async function addQuestions(main, nums) {
+async function addQuestions(main, nums, pick) {
   const questions = h("div", { id: "questions" });
   main.append(questions);
-  try { await renderQuestions(questions, nums); } catch (err) {
+  try { await renderQuestions(questions, nums, pick); } catch (err) {
     questions.append(h("p", { class: "answer" }, `Could not load the question data: ${err.message}`));
     console.error(err);
   }
@@ -942,13 +944,13 @@ async function startStory() {
   }
   if (more) {
     await addParts(story, MORE_PARTS);
-    await addQuestions(main, MORE_QUESTIONS);
+    await addQuestions(main, MORE_QUESTIONS, { drop: TALK_CARDS });
     await addParts(main, [["front_explorer", frontExplorer]]);
     main.append(h("div", { class: "pagelink-row" }, pageLink("story.html#story", "← Back to the story")));
     return;
   }
   await addParts(story, MAIN_PARTS);
-  await addQuestions(main, MAIN_QUESTIONS);
+  await addQuestions(main, MAIN_QUESTIONS, { keep: TALK_CARDS });
   main.append(h("div", { class: "pagelink-row" }, pageLink("also-tested.html", "Also tested →", "More experiments and an explorer of all cold fronts")));
 }
 
