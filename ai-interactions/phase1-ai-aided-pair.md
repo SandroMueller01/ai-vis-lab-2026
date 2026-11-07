@@ -370,12 +370,16 @@ Phase I analysis of Pair 1.
 - **What Sandro did:** *(to fill in: what was checked and changed.)*
 - **Follow-up prompt:** "Create a few notebooks which showcase this collaborative
   approach and how we ended up with our results."
-- **AI output:** `notebooks/00`–`03`, which replay sessions A4, A5/A6 and B1/B2
-  with code. While re-computing, the AI found that on the 15 km grid the cold-wave
+- **AI output:** `notebooks/01` and `notebooks/02` and `phase1-model-behavior/pair-1/experiments/phase1_forecast_results.ipynb`,
+  which replay sessions A4, A5/A6 and B1/B2 with code (an overview notebook was dropped after
+  Carlos's review of PR #19; the notebook on the forecast results moved next to his experiment
+  notebooks). While re-computing, the AI found that on the 15 km grid the cold-wave
   rule gives 27 days with the final definition (29 on 5 km) and 42 with the first
   draft. A simplified wind/rain check gave different numbers than PR #11 (rain
   95 % vs 29 %, northerly wind 54 % vs 43 %), because the definition is simpler.
-  This is noted in notebook 02.
+  This is noted in notebook 02. Carlos's review also pointed out that notebook 01 called
+  "do neighbours help?" an open question although his experiments had tested it (no improvement);
+  the text was changed.
 
 ## Key prompts, what we found, and what each finding led to
 
