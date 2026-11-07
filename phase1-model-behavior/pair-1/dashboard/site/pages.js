@@ -453,7 +453,8 @@ async function startPage() {
   }
 }
 // one-page dashboard (story.html): all five question pages, one section each, under the story
-async function renderQuestions(host, nums = [1, 2, 3, 4, 5]) {
+// pick: { keep: { 4: [card ids] } } shows only those cards of that question; { drop: { 4: [card ids] } } hides them
+async function renderQuestions(host, nums = [1, 2, 3, 4, 5], pick = {}) {
   [R] = await Promise.all([getJson("data/results.json")]);
   await loadRuns();
   const pages = { 1: pageQ1, 2: pageQ2, 3: pageQ3, 4: pageQ4, 5: pageQ5 };
@@ -462,6 +463,8 @@ async function renderQuestions(host, nums = [1, 2, 3, 4, 5]) {
     const sec = h("section", { class: "qsec part", id: `q${n}` });
     host.append(sec);
     fn(sec);
+    const keep = pick.keep && pick.keep[n], drop = pick.drop && pick.drop[n];
+    sec.querySelectorAll("section.viz").forEach((c) => { if ((keep && !keep.includes(c.id)) || (drop && drop.includes(c.id))) c.remove(); });
   }
 }
 

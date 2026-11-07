@@ -9,17 +9,23 @@ hover; the **i** buttons explain how to read a figure.
 
 ## Main story (`story.html`)
 
-| Section | Content | Owner |
+The page has three sections, the ones used in the presentation. Inside a section the page is pinned and scrolling down moves
+the slides **sideways**; after the last slide of a section the page scrolls down to the next one. On screens narrower than
+about 900 px (or with `?flow=vertical`) the sections are shown one below the other instead. Everything else is on the
+second page, *Also tested*.
+
+| Section | Slides | Owner |
 |---|---|---|
-| Map | The 15 km grid with a time slider, seven variables, event rings (cold front, thunderstorm, cold drop) and a point chart | Sandro |
-| **Overview** | The data and the setup: 4 weeks of hourly temperature at one point → TiRex-2 (zero-shot) → the next 24 hours with a 10–90 % band, repeated for all 378 points | Carlos |
-| **Which hours it uses** | Which part of its history the model uses: each of the 672 history hours hidden once; the hours that matter repeat every 32 hours | Carlos |
-| **Copy or ignore a pattern** | Does the model continue a pattern it has seen repeatedly (fixed Sundays), and ignore one it has seen once? | Carlos |
-| **Stranger history, wider band** | Does a stranger history make the model less sure? | Carlos |
-| **Limits** | What the model does not see; how much better than "same as yesterday"; error at weather events; is the band honest? | Sandro |
-| **Errors** | Error around the front arrival; too warm or too cold; where it is wrong; neighbours; start time | Sandro |
+| **1 · The project** | The map (15 km grid, time slider, seven variables, event rings, point chart); the overview (4 weeks of hourly temperature at one point → TiRex-2, zero-shot → the next 24 hours with a 10–90 % band, repeated for all 378 points); *What are we testing, and how?* (the model, the data, our idea) | Sandro (map), Carlos (overview), both (idea) |
+| **2 · Carlos's experiments** | Which hours it uses (each of the 672 history hours hidden once; the hours that matter repeat every 32 hours); copy or ignore a pattern (fixed Sundays); stranger history, wider band | Carlos |
+| **3 · Sandro's experiments** | How much better than "same as yesterday" (Limits); error around the front arrival, with the band chart (Errors); a link to *Also tested* | Sandro |
+
+How it works: `story.js` builds each section (`hsection`) as a tall block with a pinned view; the scroll position sets the
+sideways position. A scrollytelling chapter keeps its figure on the left while its steps move past on the right.
 
 ## Also tested (`also-tested.html`)
+
+Also holds all other charts of Sandro's Limits and Errors sections and of the questions *How often it is wrong*, *When it is right or wrong* and *Finding cold fronts*.
 
 | Section | Content | Owner |
 |---|---|---|
