@@ -1,6 +1,6 @@
 """
 Phase I dataset: the Austria 5 km build thinned out to a coarser lattice (default 15 km,
-374 points). No new download, just every 3rd point in x and y of the 5 km lattice, so
+378 points). No new download, just every 3rd point in x and y of the 5 km lattice, so
 both pairs work with exactly the same locations.
 
   Selection : points whose Austria Lambert coordinates (EPSG:31287) are multiples of
