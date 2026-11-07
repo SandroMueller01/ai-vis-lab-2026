@@ -465,6 +465,7 @@ async function renderQuestions(host, nums = [1, 2, 3, 4, 5], pick = {}) {
     fn(sec);
     const keep = pick.keep && pick.keep[n], drop = pick.drop && pick.drop[n];
     sec.querySelectorAll("section.viz").forEach((c) => { if ((keep && !keep.includes(c.id)) || (drop && drop.includes(c.id))) c.remove(); });
+    sec.querySelectorAll("p.owner, .sources").forEach((e) => e.remove());  // one-page dashboard: no owner lines and no source lists
   }
 }
 
