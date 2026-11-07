@@ -128,7 +128,7 @@ function scrolly({ id, kicker, question, sub, info, steps, draw, tall = false })
   if (q.get("ch") === id) { show(Number(q.get("show") || 0)); return section; }
   const obs = new IntersectionObserver((entries) => {
     for (const e of entries) if (e.isIntersecting) show(stepEls.indexOf(e.target));
-  }, { rootMargin: HS ? "0px -20% 0px -70%" : "-45% 0px -45% 0px" });  // sideways: the strip right of the figure
+  }, { rootMargin: "-45% 0px -45% 0px" });
   stepEls.forEach((el) => obs.observe(el));
   show(0);
   if (update.scrub) {
@@ -136,7 +136,7 @@ function scrolly({ id, kicker, question, sub, info, steps, draw, tall = false })
     let ticking = false;
     const onScroll = () => {
       ticking = false;
-      const mid = HS ? innerWidth * 0.75 : innerHeight / 2, c = stepEls.map((el) => { const r = el.getBoundingClientRect(); return HS ? r.left + r.width / 2 : r.top + r.height / 2; });
+      const mid = innerHeight / 2, c = stepEls.map((el) => { const r = el.getBoundingClientRect(); return r.top + r.height / 2; });
       let f = 0;
       if (mid >= c[c.length - 1]) f = c.length - 1;
       else for (let k = 0; k < c.length - 1; k++) if (mid >= c[k] && mid < c[k + 1]) f = k + (mid - c[k]) / (c[k + 1] - c[k]);
@@ -930,7 +930,103 @@ async function addQuestions(main, nums, pick) {
   }
 }
 
-// ---- the three sideways sections of the story page
+// =========================================================================================== Sandro's experiments (same style as the chapters above)
+const sT = (x, y, text, style, extra = {}) => s("text", { x, y, text, style, ...extra });
+
+function chapterBetter() {
+  const L = R.lead, M = L.mae, pct = (hr) => Math.round(L.improvement[L.leads.indexOf(hr)]);
+  const W = 900, H = 460, b = { l: 66, t: 30, w: 790, h: 340 };
+  const svg = frame(W, H, "Average error of TiRex-2 and of two simple forecasts, by hours ahead");
+  const { X, Y } = axes(svg, b, { x0: 1, x1: 24, y0: 0, y1: 5, xticks: [1, 6, 12, 18, 24], xfmt: (v) => `${v} h`, yticks: [0, 1, 2, 3, 4, 5], yfmt: (v) => `${v} °C`, xlabel: "hours ahead", ylabel: "average error" });
+  const hl = s("g", { class: "fc" }), mark = s("g", { class: "fc" });
+  const hour = poly(L.leads, M.last_hour, X, Y, { stroke: "#7d8a98", "stroke-width": 2.2, "stroke-dasharray": "6 5", class: "fc" });
+  const yest = poly(L.leads, M.yesterday, X, Y, { stroke: C.grey, "stroke-width": 3.4, class: "fc" });
+  const gap = area(L.leads, M.tirex, M.yesterday, X, Y, { fill: C.band, "fill-opacity": 0.3, class: "fc" });
+  const tirex = poly(L.leads, M.tirex, X, Y, { stroke: C.fc, "stroke-width": 4, class: "fc" });
+  const big = s("g", { class: "fc" });
+  svg.append(hl, hour, yest, gap, tirex, mark, big);
+  const op = (el, v) => { el.style.opacity = v; };
+  const update = ({ show, at: hr }) => {
+    op(hour, show === 0 ? 1 : 0.28); op(yest, 1); op(gap, show >= 1 ? 1 : 0); op(tirex, show >= 1 ? 1 : 0);
+    hl.replaceChildren(); mark.replaceChildren(); big.replaceChildren();
+    op(hl, hr ? 1 : 0); op(mark, hr ? 1 : 0); op(big, hr ? 1 : 0);
+    if (!hr) return;
+    const i = L.leads.indexOf(hr), y1 = Y(M.yesterday[i]), y2 = Y(M.tirex[i]), x = X(hr), xe = hr === 24 ? x - 10 : x;
+    hl.append(s("rect", { x: X(hr - 0.6), y: b.t, width: X(hr + 0.6) - X(hr - 0.6), height: b.h, fill: "#6da7ec", "fill-opacity": 0.14, rx: 4 }));
+    mark.append(s("line", { x1: xe, x2: xe, y1: y1, y2: y2, stroke: "#fff", "stroke-width": 2.4 }), s("line", { x1: xe - 7, x2: xe + 7, y1: y1, y2: y1, stroke: "#fff", "stroke-width": 2.4 }),
+      s("line", { x1: xe - 7, x2: xe + 7, y1: y2, y2: y2, stroke: "#fff", "stroke-width": 2.4 }),
+      s("circle", { cx: x, cy: y2, r: 6, fill: C.fc, stroke: "#fff", "stroke-width": 2 }),
+      sT(xe - 14, (y1 + y2) / 2 + 5, `${fmt(M.yesterday[i] - M.tirex[i], 1)} °C less`, "fill:#fff;font-size:14px;font-weight:600", { "text-anchor": "end" }));
+    big.append(sT(b.l + 24, b.t + 70, `${pct(hr)} %`, `font-size:68px;font-weight:800;fill:${hr === 12 ? "#6da7ec" : "#ff9d6b"}`), sT(b.l + 26, b.t + 98, "smaller error than yesterday", "fill:#cfd8e3;font-size:15px"),
+      sT(b.l + 26, b.t + 120, `at ${hr} hours ahead`, "fill:#9aa6b3;font-size:13px"));
+  };
+  const steps = [
+    { state: { show: 0 }, when: "Two simple forecasts", html: "To judge the model we compare it with two very simple forecasts: <b>“same as yesterday”</b> and “same as an hour ago”. The line is the average error in °C." },
+    { state: { show: 1 }, when: "TiRex-2", html: "TiRex-2 starts far better, but its error <b>grows with every hour</b> and creeps up on “same as yesterday”. The shaded area is its lead." },
+    { state: { show: 1, at: 12 }, when: "After 12 hours", html: `After 12 hours its error is <b>about a quarter smaller</b> (${pct(12)} %): <b>${fmt(M.yesterday[11] - M.tirex[11], 1)} °C</b> less than yesterday's temperature.` },
+    { state: { show: 1, at: 24 }, when: "After 24 hours", html: `After 24 hours it is <b>only about ${pct(24)} % better</b>. The lead is nearly gone.`, takeaway: "The model is good for a few hours, weak after a day." },
+  ];
+  return scrolly({ id: "ch-better", kicker: "Limits", question: "How much better is it than “same as yesterday”?",
+    sub: `${R.summary.n_runs} forecasts on all ${R.summary.n_points} points: average error of TiRex-2 against two simple forecasts.`, steps,
+    draw: (host) => { host.append(legend([["same as yesterday", C.grey], ["same as an hour ago", "#7d8a98"], ["TiRex-2", C.fc], ["its lead", C.band, "band"]]), svg); return update; } });
+}
+
+function chapterFront() {
+  const FE = R.front_error, rel = FE.rel, i0 = rel.indexOf(0), i3 = rel.indexOf(3), im1 = rel.indexOf(-1);
+  const before = Math.abs(FE.mean.slice(0, 11).reduce((a, b) => a + b, 0) / 11), covBefore = Math.round(FE.cover[im1]), cov3 = Math.round(FE.cover[i3]);
+  const W = 900, H = 500, bt = { l: 66, t: 28, w: 520, h: 190 }, bb = { l: 66, t: 292, w: 520, h: 120 };
+  const svg = frame(W, H, "Forecast error and band coverage around the arrival of a cold front");
+  const xf = (v) => (v === 0 ? "front" : `${v > 0 ? "+" : "−"}${Math.abs(v)} h`);
+  const T = axes(svg, bt, { x0: -12, x1: 12, y0: -4, y1: 9, xticks: [-12, -6, 0, 6, 12], xfmt: xf, yticks: [-3, 0, 3, 6, 9], yfmt: String, ylabel: "forecast − measured (°C)" });
+  const B = axes(svg, bb, { x0: -12, x1: 12, y0: 0, y1: 100, xticks: [-12, -6, 0, 6, 12], xfmt: xf, yticks: [0, 40, 80], yfmt: (v) => `${v} %`, xlabel: "hours since the front reached the point", ylabel: "true value inside the band" });
+  const shade = s("g", { class: "fc" }, s("rect", { x: T.X(-12), y: bt.t, width: T.X(-1) - T.X(-12), height: bt.h, fill: "#6da7ec", "fill-opacity": 0.1 }),
+    s("rect", { x: B.X(-12), y: bb.t, width: B.X(-1) - B.X(-12), height: bb.h, fill: "#6da7ec", "fill-opacity": 0.1 }));
+  const xsW = rel.slice(i0), warm = area(xsW, xsW.map(() => 0), FE.mean.slice(i0), T.X, T.Y, { fill: "#e0603f", "fill-opacity": 0.45, class: "fc" });
+  const top = s("g", { class: "fc" }, s("line", { class: "zero", x1: bt.l, x2: bt.l + bt.w, y1: T.Y(0), y2: T.Y(0) }),
+    area(rel, FE.q25, FE.q75, T.X, T.Y, { fill: C.band, "fill-opacity": 0.26 }), warm, poly(rel, FE.mean, T.X, T.Y, { stroke: C.fc, "stroke-width": 3.6 }));
+  const bot = s("g", { class: "fc" }, s("line", { class: "zero", x1: bb.l, x2: bb.l + bb.w, y1: B.Y(80), y2: B.Y(80) }), sT(bb.l + bb.w - 4, B.Y(80) - 6, "should be 80 %", "fill:#9aa6b3;font-size:12px", { "text-anchor": "end" }),
+    poly(rel, FE.cover, B.X, B.Y, { stroke: C.fc, "stroke-width": 3.6 }));
+  const front = s("g", { class: "fc" }, s("line", { x1: T.X(0), x2: T.X(0), y1: bt.t, y2: bt.t + bt.h, stroke: C.front, "stroke-width": 2.2 }), s("line", { x1: B.X(0), x2: B.X(0), y1: bb.t, y2: bb.t + bb.h, stroke: C.front, "stroke-width": 2.2 }),
+    sT(T.X(0) + 7, bt.t + 14, "front arrives", `fill:${C.front};font-size:13px;font-weight:700`));
+  const call = s("g");
+  // 100 dots: how many of 100 true values are inside the band
+  const gx = 660, gy = 120, step = 22, dots = [];
+  const pic = s("g", {}, sT(gx - 8, gy - 50, "Of 100 true values,", "fill:#cfd8e3;font-size:14px;font-weight:600"), sT(gx - 8, gy - 30, "how many are inside the band?", "fill:#cfd8e3;font-size:14px;font-weight:600"));
+  for (let k = 0; k < 100; k++) {
+    const d = s("circle", { cx: gx + (k % 10) * step + 7, cy: gy + (9 - Math.floor(k / 10)) * step + 7, r: 7.5, class: "fc", fill: "#2b3540" });
+    dots.push(d); pic.append(d);
+  }
+  const count = sT(gx - 8, gy + 10 * step + 34, "", "font-size:30px;font-weight:800;fill:#6da7ec");
+  const sub = sT(gx - 8, gy + 10 * step + 56, "should be 80", "fill:#9aa6b3;font-size:13px");
+  pic.append(count, sub);
+  svg.append(shade, top, bot, front, call, pic);
+  const op = (el, v) => { el.style.opacity = v; };
+  const update = ({ front: f, warm: w, call: c, n, focus }) => {
+    op(shade, c === "cold" ? 1 : 0); op(front, f ? 1 : 0); op(warm, w ? 1 : 0);
+    op(top, focus === "bottom" ? 0.3 : 1); op(bot, focus === "top" ? 0.3 : 1);
+    dots.forEach((d, k) => { d.setAttribute("fill", k < n ? (n < 50 ? "#ff9d6b" : "#6da7ec") : "#2b3540"); });
+    count.textContent = `${n} of 100`; count.style.fill = n < 50 ? "#ff9d6b" : "#6da7ec";
+    call.replaceChildren();
+    if (c === "cold") call.append(s("circle", { cx: T.X(-3), cy: T.Y(FE.mean[rel.indexOf(-3)]), r: 6, fill: C.fc, stroke: "#fff", "stroke-width": 2 }), sT(T.X(-6), T.Y(2.6), `about ${fmt(before, 1)} °C too cold`, "fill:#fff;font-size:14px;font-weight:600", { "text-anchor": "middle" }), s("line", { x1: T.X(-4.2), x2: T.X(-3.2), y1: T.Y(1.9), y2: T.Y(FE.mean[rel.indexOf(-3)]) - 9, stroke: "#fff", "stroke-width": 1.4 }));
+    if (c === "warm") call.append(s("circle", { cx: T.X(3), cy: T.Y(FE.mean[i3]), r: 7, fill: "#ff9d6b", stroke: "#fff", "stroke-width": 2 }), sT(T.X(3) + 14, T.Y(FE.mean[i3]) - 12, `+${fmt(FE.mean[i3], 1)} °C too warm`, "fill:#fff;font-size:17px;font-weight:700"));
+    if (c === "band") call.append(s("circle", { cx: B.X(3), cy: B.Y(cov3), r: 7, fill: "#ff9d6b", stroke: "#fff", "stroke-width": 2 }), sT(B.X(3), B.Y(cov3) + 32, `${cov3} %`, "fill:#ff9d6b;font-size:26px;font-weight:800", { "text-anchor": "middle" }));
+  };
+  const steps = [
+    { state: { call: "cold", n: covBefore }, when: "Before the front", html: `Before a front reaches a point the forecast is about <b>${fmt(before, 1)} °C too cold</b>, and the band holds the true value about ${covBefore} out of 100 times.` },
+    { state: { front: true, n: covBefore }, when: "The front arrives", html: "Then the front arrives and the temperature drops. The model <b>has not seen it coming</b>." },
+    { state: { front: true, warm: true, call: "warm", n: covBefore }, when: "3 hours later", html: `Three hours after it arrives the forecast is on average <b>${fmt(FE.mean[i3], 0)} °C too warm</b>: the model still expects the old weather.` },
+    { state: { front: true, warm: true, call: "band", n: cov3, focus: "bottom" }, when: "The band", html: `And the true value is <b>inside the band only about ${cov3} %</b> of the time, where it should be 80 %. The band does not warn us.`,
+      takeaway: "The model holds on to the old weather for too long." },
+  ];
+  return scrolly({ id: "ch-front", kicker: "Errors", question: "What happens when a cold front arrives?",
+    sub: `${FE.runs} forecasts started 6 or 12 hours before ${FE.fronts} fronts, 1 to 24 hours ahead, counted from the arrival of the front at each point.`, steps,
+    draw: (host) => { host.append(svg); return update; } });
+}
+
+// ---- the three sections of the story page: 1 sideways on wide screens, 2 and 3 scroll down with steps and a figure that stays
+function vsection(id, number, title, sub, children) {
+  return h("section", { class: "vs", id }, h("div", { class: "vs-bar" }, h("b", {}, `${number} · ${title}`), h("span", { class: "hs-sub" }, sub)), ...children);
+}
 function ideaPanel() {
   const card = (title, ...body) => h("div", { class: "card2" }, h("h3", {}, title), ...body);
   return h("section", { class: "hs-idea", id: "idea" }, h("div", { class: "cols" },
@@ -967,24 +1063,23 @@ function hsection(id, number, title, sub, slides) {
 }
 
 async function startStoryHs(main) {
+  if (HS) main.style.paddingTop = "0";  // no gap above the pinned first section: the first scroll already moves it sideways
   const story = h("div", { id: "story" });
   main.append(story);
   const tmp = h("div");
   await addParts(tmp, [[null, overview], ["where_it_looks", chapterLooks], ["fixed_sundays", chapterSundays], ["weird_history", chapterWeird]]);
   const [ov, looks, sundays, weird] = [...tmp.children];
-  const qhost = h("div");
-  try { await renderQuestions(qhost, MAIN_QUESTIONS, { keep: TALK_CARDS }); } catch (err) { console.error(err); }
-  const cards = [...qhost.querySelectorAll("section.viz")].map((c) => h("div", { class: "hs-slide" }, c));
+  if (!R) [R] = await Promise.all([getJson("data/results.json")]);
   const explore = byId("explore");
-  const end = h("div", { class: "hs-end" }, pageLink("also-tested.html", "Also tested →", "More experiments, our other charts and an explorer of all cold fronts"));
-  const secs = [
-    hsection("s-project", "1", "The project", "the model, the data and our idea", [explore, ov, ideaPanel()].filter(Boolean)),
-    hsection("s-carlos", "2", "Carlos's experiments", "what TiRex-2 reacts to", [looks, sundays, weird].filter(Boolean)),
-    hsection("s-sandro", "3", "Sandro's experiments", "limits and errors of 336 forecasts", [...cards, end]),
-  ];
+  const end = h("div", { class: "pagelink-row" }, pageLink("also-tested.html", "Also tested →", "More experiments, our other charts and an explorer of all cold fronts"));
+  const first = HS ? hsection("s-project", "1", "The project", "the model, the data and our idea", [explore, ov, ideaPanel()].filter(Boolean))
+    : vsection("s-project", "1", "The project", "the model, the data and our idea", [explore, ov, ideaPanel()].filter(Boolean));
+  const secs = [first, vsection("s-carlos", "2", "Carlos's experiments", "what TiRex-2 reacts to", [looks, sundays, weird].filter(Boolean)),
+    vsection("s-sandro", "3", "Sandro's experiments", "limits and errors of 336 forecasts", [chapterBetter(), chapterFront(), end])];
   story.append(...secs);
-  const update = () => secs.forEach((s) => s._update());
-  const layout = () => { secs.forEach((s) => s._layout()); update(); };
+  if (!HS) return;
+  const update = () => first._update();
+  const layout = () => { first._layout(); update(); };
   addEventListener("resize", layout);
   addEventListener("scroll", () => requestAnimationFrame(update), { passive: true });
   new ResizeObserver(layout).observe(story);
@@ -1015,7 +1110,8 @@ async function startStory() {
     main.append(h("div", { class: "pagelink-row" }, pageLink("story.html#story", "← Back to the story")));
     return;
   }
-  if (HS) { main.removeChild(story); return startStoryHs(main); }
+  main.removeChild(story);
+  return startStoryHs(main);
   await addParts(story, MAIN_PARTS);
   await addQuestions(main, MAIN_QUESTIONS, { keep: TALK_CARDS });
   main.append(h("div", { class: "pagelink-row" }, pageLink("also-tested.html", "Also tested →", "More experiments and an explorer of all cold fronts")));
