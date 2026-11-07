@@ -1014,6 +1014,7 @@ function hsection(id, number, title, sub, slides) {
 }
 
 async function startStoryHs(main) {
+  if (HS) main.style.paddingTop = "0";  // no gap above the pinned first section: the first scroll already moves it sideways
   const story = h("div", { id: "story" });
   main.append(story);
   const tmp = h("div");
