@@ -27,3 +27,5 @@ looks at what happens to the **output** (forecast median and 10-90 % band).
 | 11 | [exp11_band_honesty](exp11_band_honesty.ipynb) | Does the model know when it is unsure? |
 
 (Experiment 8 was dropped.)
+
+Sandro's part of Phase I (the 336 forecast runs and the five questions behind the *Limits* and *Errors* sections of the dashboard) is in [phase1_forecast_results.ipynb](phase1_forecast_results.ipynb).
