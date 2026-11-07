@@ -34,6 +34,63 @@ Who had which idea, as far as the chat shows:
 | Carlos's review of the dashboard (see below), his own experiments (C1 to C12) and his plan to build interactive charts in the Martini-glass style | |
 | Not answering Carlos's questions twice: we keep our charts and mark the owner (83) | |
 
+## From questions to experiments
+
+The short version of Phase I: **each question we asked sent us to an experiment, and each result raised the next question.**
+The tables below follow that chain. Prompt numbers refer to Sandro's list further down; "Exp" numbers are the notebooks in
+[`experiments/`](../phase1-model-behavior/pair-1/experiments/). A plot is named where one carries the finding; the interactive
+ones are HTML files (download and open in a browser), the others are chapters of the [dashboard](../phase1-model-behavior/pair-1/dashboard/).
+
+### Step 1 · Can we feed the model neighbouring stations? (Sandro, 27 Oct to 2 Nov)
+
+```
+goal: temperature change at several stations  →  smoke test  →  TiRex-2 ignores past covariates
+   →  "how does the model behave?" (hypotheses B1 to B4)  →  15 km grid  →  cold-front label  →  336 runs
+```
+
+| Question that came up | What we did with the assistant | What we found | Where to see it |
+|---|---|---|---|
+| Can neighbours help predict a cold wave? (27) | Smoke test on 12 points with and without covariates (28) | Only *future* covariates change the forecast; past ones are ignored | Smoke test in the log, A4 |
+| So what should Phase I be? (36) | The assistant proposed four behaviour hypotheses | We switched from "predict with many inputs" to **how the model behaves** | B1 to B4 in the log |
+| Which horizon is good? Where does it fail on a map? (38, 39) | Side-by-side maps, real data against forecast | The forecast follows the front late; 12 h is the best compromise | Dashboard, *Explore* map |
+| Is our "cold drop" a cold front? (62, 63) | Literature search on front definitions | No: a front needs cooling, a pressure rise and a line that moves | Cold-front rule in the dashboard overview |
+
+### Step 2 · Sandro's five questions on 336 forecasts (4 Nov)
+
+| Question (prompt 65, 70) | Experiment | Key plot | Finding | Led to |
+|---|---|---|---|---|
+| How good is it, and is that better than doing nothing? | 336 starts, baselines "same as yesterday" and "same as an hour ago" | Dashboard section 3, chapter *How much better is it than "same as yesterday"?* (lines for the three forecasts, the gap shaded) | 25 % better at 12 h, only 5 % at 24 h | The *Limits* chapter of the dashboard: the gain shrinks with the horizon |
+| Is the band honest? | Coverage of the 10 to 90 % band in normal weather | Band coverage chart (*Also tested*; the same chart around a front is the lower panel of the front chapter) | 81 % against a target of 80 % | The band is fine in calm weather, so the interesting case is fronts |
+| What happens at a cold front? | 30 front runs against 306 normal starts | Same chapter, upper panel (error with the front marked) | About 5.3 °C too warm 3 h after the front arrives; band holds only 32 % | The statement "the model holds on to the old weather" |
+| How often is it wrong, and where? | Error by hours ahead, by region and by weather situation | Pages Q1 to Q5 (*Also tested*) | 22 % of forecasts are wrong by more than 2 K up to 12 h, 41 % at 13 to 24 h | Three statements changed after the run (see "How AI suggestions affected analytical decisions") |
+| Does the text match the run? | The first text had placeholders; each was replaced by a number from the run | n/a | Three statements changed (listed under "How AI suggestions affected analytical decisions") | The rule: write text after the numbers |
+
+### Step 3 · Carlos's experiments (Exp 1 to 11)
+
+Carlos's ideas came from the lectures and his own brainstorming; the assistant shaped them into set-ups (see his section below).
+Only findings that are written down in his section or in the dashboard are given here; for the rest, see the notebook.
+
+| Question that came up | Experiment · key plot | What the record says | What it led to |
+|---|---|---|---|
+| Does the model copy a pattern it has seen repeatedly, and ignore one it has seen once? | Exp 1 · [`exp1_score_by_date`](../phase1-model-behavior/pair-1/experiments/figures/exp1/exp1_score_by_date.html) | Rerun on 40 dates instead of 1, the headline changed | Rule: many dates, not many points |
+| Does a longer history, or telling it the time, help? | Exp 2 · [`exp2_error_vs_history`](../phase1-model-behavior/pair-1/experiments/figures/exp2/exp2_error_vs_history.html) | Time inputs do not help on 2,400 cases (a 6-case test had suggested they do) | Never conclude from a small test |
+| Can it see a cold front coming? Do upwind points or other variables help? | Exp 3 and 4 · [`exp3_average_front`](../phase1-model-behavior/pair-1/experiments/figures/exp3/exp3_average_front.html), [`exp4_upstream_map`](../phase1-model-behavior/pair-1/experiments/figures/exp4/exp4_upstream_map.html) | The model ignores neighbours; fronts react about 1.5 times more than normal days | "Ignores neighbours" counted as a finding, not tuned further |
+| What happens after the front? | Exp 5 · [`exp5_does_cold_last`](../phase1-model-behavior/pair-1/experiments/figures/exp5/exp5_does_cold_last.html) | See notebook | Dashboard: *Catching up, lasting cold* |
+| Does a stranger history make it less sure? | Exp 6 · [`exp6_drops_lines`](../phase1-model-behavior/pair-1/experiments/figures/exp6/exp6_drops_lines.html) | The band is widest at medium drop sizes | Dashboard section 2: stranger history, wider band |
+| How does a front change whole maps over time? | Exp 7 · [`exp7_reality_vs_forecast`](../phase1-model-behavior/pair-1/experiments/figures/exp7/exp7_reality_vs_forecast.html) | See notebook | Dashboard: *Time curve* |
+| How do successive forecasts change as a front approaches? | Exp 9 · [`exp9_successive_runs`](../phase1-model-behavior/pair-1/experiments/figures/exp9/exp9_successive_runs.html) | See notebook | Dashboard: *Explore it yourself* |
+| Which part of its history does it use? | Exp 10 · [`exp10_lag_vs_forecast_hour`](../phase1-model-behavior/pair-1/experiments/figures/exp10/exp10_lag_vs_forecast_hour.html) | The hours that matter repeat every 32 hours (ratio 2.0 times, above 1 in 97 % of cases) | Dashboard section 2: *Which hours it uses* |
+| Does it know when it is unsure? | Exp 11 · [`exp11_pit_histograms`](../phase1-model-behavior/pair-1/experiments/figures/exp11/exp11_pit_histograms.html) | See notebook | Dashboard: *honest band* |
+
+### Where the two lines meet
+
+Carlos's experiments look at *what the model uses* (it ignores neighbours, it uses hours in a 32-hour rhythm). Sandro's runs measure
+*how much that costs* (5.3 °C too warm 3 h after a front arrives, band holds 32 %). The dashboard puts both into one story:
+section 2 for Carlos's experiments, section 3 for the two Sandro picked.
+
+> Findings in this section are copied from the sections below, the experiment notebooks and the dashboard. "See notebook" means
+> we did not restate a number here.
+
 ## Sandro Müller
 
 Student ID K52010874 · GitHub SandroMueller01
