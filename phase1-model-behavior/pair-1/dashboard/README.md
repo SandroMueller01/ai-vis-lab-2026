@@ -1,51 +1,42 @@
 # Austria weather explorer (Phase I dashboard)
 
-An interactive dashboard with several pages for exploring the hourly weather data over Austria and the behaviour of
-TiRex-2 on it. It runs in the browser from static files, so it can be hosted on GitHub Pages. It is dark only.
+An interactive dashboard on the hourly weather over Austria and on how TiRex-2 forecasts it. It runs in the browser
+from static files, so it can be hosted on GitHub Pages. It is dark only.
 
-**Every visualisation names the question(s) it answers** (the blue chips under its title, linking to the page of that
-question). The five questions are the Phase I questions of the team:
+The dashboard has two pages with one shared menu: the main story and a page with further experiments. Each chapter
+shows one figure that stays in place while text steps scroll past it (scrollytelling). Every chart shows values on
+hover; the **i** buttons explain how to read a figure.
 
-1. How often does the system make mistakes?
-2. In what situations is the system likely to be correct or incorrect?
-3. How do we define a cold front?
-4. What are the limitations of the system?
-5. What kind of mistakes does it make? Regions, neighbours and start times.
+## Main story (`story.html`)
 
-## Pages and visualisations
-
-| Page | Visualisation | Answers |
+| Section | Content | Owner |
 |---|---|---|
-| **Explore the data** (`index.html`) | Map of the 15 km grid with a time slider, seven variables, event rings, point chart, jump-to buttons | supports Q3 (cold front, thunderstorm and cold drop rings) |
-| **Q1** `q1.html` | Error by hours ahead: average error, share wrong by more than 2 °C, band coverage, against two simple forecasts | Q1, Q4 |
-| | One forecast in detail: measured, forecast and 10–90 % band for any forecast and place | Q1, Q2 |
-| **Q2** `q2.html` | Right and wrong by weather situation (16 situations), wrong share or band coverage | Q2, Q4 |
-| | A calm day against a front day, side by side | Q2, Q1 |
-| **Q3** `q3.html` | The rule in four steps | Q3 |
-| | All 39 candidate fronts with the reason for each verdict | Q3 |
-| | When the front reaches each point (map for the selected front) | Q3 |
-| | The front as a diagonal (time against longitude) | Q3 |
-| | What a detected front looks like (temperature, pressure, wind, rain) | Q3 |
-| **Q4** `q4.html` | What the model does not see, and what we cannot check | Q4 |
-| | How much better than "same as yesterday" | Q4, Q1 |
-| | Error in normal weather and at weather events, by hours ahead | Q4, Q2 |
-| | Is the uncertainty band honest? | Q4, Q2 |
-| **Q5** `q5.html` | Error around the front arrival (mean error and band coverage) | Q5, Q4 |
-| | Too warm or too cold? | Q5 |
-| | Where is it wrong? (average error and bias map, regions) | Q5 |
-| | Do points with more neighbours get better forecasts? | Q5 |
-| | Does the start time matter? (start hour against hours ahead) | Q5 |
+| Map | The 15 km grid with a time slider, seven variables, event rings (cold front, thunderstorm, cold drop) and a point chart | Sandro |
+| **Overview** | The data and the setup: 4 weeks of hourly temperature at one point → TiRex-2 (zero-shot) → the next 24 hours with a 10–90 % band, repeated for all 378 points | Carlos |
+| **Which hours it uses** | Which part of its history the model uses: each of the 672 history hours hidden once; the hours that matter repeat every 32 hours | Carlos |
+| **Copy or ignore a pattern** | Does the model continue a pattern it has seen repeatedly (fixed Sundays), and ignore one it has seen once? | Carlos |
+| **Stranger history, wider band** | Does a stranger history make the model less sure? | Carlos |
+| **Limits** | What the model does not see; how much better than "same as yesterday"; error at weather events; is the band honest? | Sandro |
+| **Errors** | Error around the front arrival; too warm or too cold; where it is wrong; neighbours; start time | Sandro |
 
-| **Carlos's findings** `carlos.html` | Carlos's 12 questions (C1 to C12) with his findings, as he reported them. Not computed by the dashboard | bears on Q1, Q2, Q4, Q5 |
+## Also tested (`also-tested.html`)
 
-**Who owns what.** Carlos works on his own list of questions (C1 to C12, for example "Can it forecast a cold front 6 h
-ahead?" and "Is the 10–90 % band honest?"). The charts on the Q pages are Sandro's. Every chart shows an **Owner** line. Where a
-chart overlaps with one of Carlos's questions it says so and links to his finding, and his card links back to the chart,
-so that no question is answered twice in two places. The overlaps are: C4, C6, C8 and C9 with the front and band charts,
-C5 with the limits, C7 with the events chart.
+| Section | Content | Owner |
+|---|---|---|
+| Does more information help? | Longer history, time inputs, extra variables (pressure, humidity, wind, upwind points) | Carlos |
+| History before a cold front | The history heatmap for random forecasts and for forecasts before a cold front | Carlos |
+| Sunday switch | How different the repeated Sundays must be before the model copies them | Carlos |
+| Where the strange part sits | Does it matter where in the history the strange part is? | Carlos |
+| Catching up, lasting cold, honest band | Once the model sees the front, does it catch up? Does it expect the cold to last? Does it know when it is unsure? | Carlos |
+| Time curve | How a cold front changes Austria's weather | Carlos |
+| How often it is wrong | Error by hours ahead; one forecast in detail | Sandro |
+| When it is right or wrong | Right and wrong by weather situation; a calm day against a front day | Sandro |
+| Finding cold fronts | The rule in four steps; all candidate fronts; arrival map; the front as a diagonal; what a detected front looks like | Sandro |
+| Explore it yourself | Every cold front: which points the forecast missed and where | Carlos |
 
-Each page starts with a short answer written from the data (the numbers are computed, not typed), and ends with its
-sources. Every chart shows values on hover and has a table view (*Show as table*).
+The code: `story.js` (chapters and page layout), `pages.js` (Sandro's sections), `app.js` (map), `common.js` (menu
+`STORY_TABS`, helpers), `charts.js`. `index.html` only forwards to `story.html`, so the plain site link opens the
+story. `q1.html` to `q5.html` and `carlos.html` are the earlier multi-page version and are no longer linked from the menu.
 
 ## Run it locally
 
@@ -53,23 +44,25 @@ sources. Every chart shows values on hover and has a table view (*Show as table*
 python -m http.server -d phase1-model-behavior/pair-1/dashboard/site
 ```
 
-Then open <http://localhost:8000>. The map libraries and the base map of the explore page come from the internet.
+Then open <http://localhost:8000/story.html>. The map libraries and the base map come from the internet.
 
 ## Rebuild the data
 
-The files in `site/data/` are generated and committed, so the site works from a plain checkout. Three steps, each
-needs the output of the one before:
+The files in `site/data/` are generated and committed, so the site works from a plain checkout. Steps 1 to 3 each
+need the output of the one before; step 4 only needs Carlos's experiment results:
 
 ```bash
 # 1. the TiRex-2 forecasts: about 75 minutes on a normal CPU, writes data/austria_15km/tirex2_forecasts.npz
 docker compose run --rm lab python phase1-model-behavior/pair-1/run_forecasts.py
-# 2. numbers for the question pages (results.json, forecast_runs.json, forecast_runs.bin)
+# 2. numbers for Sandro's sections (results.json, forecast_runs.json, forecast_runs.bin)
 docker compose run --rm lab python phase1-model-behavior/pair-1/dashboard/build_results_data.py
-# 3. observations for the explore page (obs/*.bin, meta.json, events.json)
+# 3. observations for the map (obs/*.bin, meta.json, events.json)
 docker compose run --rm lab python phase1-model-behavior/pair-1/dashboard/build_dashboard_data.py
+# 4. Carlos's charts (site/data/carlos/*.json), from his saved experiment results in data/notebooks/results/
+docker compose run --rm lab python phase1-model-behavior/pair-1/dashboard/build_carlos_data.py
 ```
 
-They need `data/austria_15km` (release `data-austria-15km`, with the event labels). Tests:
+Steps 1 to 3 need `data/austria_15km` (release `data-austria-15km`, with the event labels). Tests:
 
 ```bash
 docker compose run --rm lab python phase1-model-behavior/pair-1/dashboard/test_build_dashboard_data.py
@@ -87,8 +80,8 @@ are stored in tenths of a degree (`build_results_data.py`). Together `site/data/
 ## Publish on GitHub Pages
 
 The workflow [`.github/workflows/pages.yml`](../../../.github/workflows/pages.yml) publishes `site/` whenever it
-changes on `main`. One-time setup: **Settings → Pages → Source: GitHub Actions**. The link then is
-`https://sandromueller01.github.io/ai-vis-lab-2026/`.
+changes on `main`. One-time setup: **Settings → Pages → Source: GitHub Actions**. The dashboard is then at
+`https://sandromueller01.github.io/ai-vis-lab-2026/story.html`.
 
 ## Plan
 
@@ -104,4 +97,5 @@ changes on `main`. One-time setup: **Settings → Pages → Source: GitHub Actio
 
 Data: GeoSphere Austria, <https://data.hub.geosphere.at>, licensed
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Model: [TiRex-2](https://github.com/NX-AI/tirex-2)
-(Apache 2.0). Explore map: [MapLibre GL JS](https://maplibre.org), base map by CARTO, © OpenStreetMap contributors.
+(Apache 2.0); TiRex logo (`site/tirex.svg`) from the same repository, by NX-AI. Map:
+[MapLibre GL JS](https://maplibre.org), base map by CARTO, © OpenStreetMap contributors.

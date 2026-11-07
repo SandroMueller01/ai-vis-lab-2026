@@ -30,7 +30,7 @@ const pointLabel = (i) => {
   return `${near ? `${near[0]} area · ` : ""}${R.points.lat[i].toFixed(2)}°N ${R.points.lon[i].toFixed(2)}°E`;
 };
 
-function head(n) { return [h("div", { class: "qnum" }, `Question ${n}`), h("h1", { class: "q" }, QUESTIONS[n].long)]; }
+function head(n) { return [h("div", { class: "qnum" }, QUESTIONS[n].kicker), h("h1", { class: "q" }, QUESTIONS[n].title)]; }
 const answer = (html) => h("p", { class: "answer", html });
 const named = (label) => R.situations.find((x) => x.label.startsWith(label));
 
@@ -452,5 +452,18 @@ async function startPage() {
     console.error(err);
   }
 }
+// one-page dashboard (story.html): all five question pages, one section each, under the story
+async function renderQuestions(host, nums = [1, 2, 3, 4, 5]) {
+  [R] = await Promise.all([getJson("data/results.json")]);
+  await loadRuns();
+  const pages = { 1: pageQ1, 2: pageQ2, 3: pageQ3, 4: pageQ4, 5: pageQ5 };
+  for (const n of nums) {
+    const fn = pages[n];
+    const sec = h("section", { class: "qsec part", id: `q${n}` });
+    host.append(sec);
+    fn(sec);
+  }
+}
+
 const PAGE = document.body.dataset.page;
-startPage();
+if (PAGE !== "story" && PAGE !== "more") startPage();

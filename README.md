@@ -152,11 +152,11 @@ How it is made and what is in it:
 ## Dashboard
 
 An interactive dashboard for the Phase I analysis: a map of the data with a
-time slider, and page by page our answers to the five Phase I questions. Every
-chart names the questions it answers.
+time slider, then a scrollytelling story of how TiRex-2 reads its history and
+where it fails, and a second page with further experiments.
 
-- Live: <https://sandromueller01.github.io/ai-vis-lab-2026/>
-- Run it locally: `python -m http.server -d phase1-model-behavior/pair-1/dashboard/site`, then open <http://localhost:8000>
+- Live: <https://sandromueller01.github.io/ai-vis-lab-2026/story.html>
+- Run it locally: `python -m http.server -d phase1-model-behavior/pair-1/dashboard/site`, then open <http://localhost:8000/story.html>
 - How it works and how to rebuild the data:
   [`phase1-model-behavior/pair-1/dashboard/README.md`](phase1-model-behavior/pair-1/dashboard/README.md)
 

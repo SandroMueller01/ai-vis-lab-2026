@@ -159,6 +159,7 @@ function initMap() {
   map = new maplibregl.Map({
     container: "map", style: STYLE, center: [13.35, 47.6], zoom: 6.2, minZoom: 4, maxZoom: 13,
     attributionControl: { compact: true },
+    cooperativeGestures: document.body.dataset.page === "story", // one-page dashboard: wheel scrolls the page, Ctrl + wheel zooms
   });
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
   map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-left");
