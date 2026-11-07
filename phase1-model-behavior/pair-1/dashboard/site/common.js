@@ -15,8 +15,7 @@ const QUESTIONS = {
 };
 
 // menu of the one-page dashboard (story.html, also-tested.html): [section id, tab label]
-const STORY_TABS = [["overview", "Overview"], ["ch-looks", "Which hours it uses"], ["ch-sundays", "Copy or ignore a pattern"],
-  ["ch-weird", "Stranger history, wider band"], ["q4", "Limits"], ["q5", "Errors"]];
+const STORY_TABS = [["s-project", "1 · The project"], ["s-carlos", "2 · Carlos's experiments"], ["s-sandro", "3 · Sandro's experiments"]];
 
 // the questions Carlos works on (his findings are on carlos.html)
 const CARLOS = {

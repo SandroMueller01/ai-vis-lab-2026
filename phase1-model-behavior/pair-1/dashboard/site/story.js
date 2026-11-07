@@ -93,6 +93,10 @@ function drawer(title, body) {
   return () => d.classList.toggle("open");  // the same button opens and closes it
 }
 
+// ------------------------------------------------------------------------------------------- sideways sections (wide screens)
+// the story page has three sections; inside a section the page scroll moves the slides sideways (see .hs in story.css), after it down
+const HS = document.body.dataset.page === "story" && matchMedia("(min-width: 900px)").matches && !/[?&]flow=vertical/.test(location.search);
+
 // ------------------------------------------------------------------------------------------- scrollytelling frame
 // steps: [{when, html, more, state, takeaway}]; draw(host, controls) returns update(state)
 function scrolly({ id, kicker, question, sub, info, steps, draw, tall = false }) {
@@ -124,7 +128,7 @@ function scrolly({ id, kicker, question, sub, info, steps, draw, tall = false })
   if (q.get("ch") === id) { show(Number(q.get("show") || 0)); return section; }
   const obs = new IntersectionObserver((entries) => {
     for (const e of entries) if (e.isIntersecting) show(stepEls.indexOf(e.target));
-  }, { rootMargin: "-45% 0px -45% 0px" });
+  }, { rootMargin: HS ? "0px -20% 0px -70%" : "-45% 0px -45% 0px" });  // sideways: the strip right of the figure
   stepEls.forEach((el) => obs.observe(el));
   show(0);
   if (update.scrub) {
@@ -132,7 +136,7 @@ function scrolly({ id, kicker, question, sub, info, steps, draw, tall = false })
     let ticking = false;
     const onScroll = () => {
       ticking = false;
-      const mid = innerHeight / 2, c = stepEls.map((el) => { const r = el.getBoundingClientRect(); return r.top + r.height / 2; });
+      const mid = HS ? innerWidth * 0.75 : innerHeight / 2, c = stepEls.map((el) => { const r = el.getBoundingClientRect(); return HS ? r.left + r.width / 2 : r.top + r.height / 2; });
       let f = 0;
       if (mid >= c[c.length - 1]) f = c.length - 1;
       else for (let k = 0; k < c.length - 1; k++) if (mid >= c[k] && mid < c[k + 1]) f = k + (mid - c[k]) / (c[k + 1] - c[k]);
@@ -926,6 +930,68 @@ async function addQuestions(main, nums, pick) {
   }
 }
 
+// ---- the three sideways sections of the story page
+function ideaPanel() {
+  const card = (title, ...body) => h("div", { class: "card2" }, h("h3", {}, title), ...body);
+  return h("section", { class: "hs-idea", id: "idea" }, h("div", { class: "cols" },
+    h("h1", {}, "What are we testing, and how?"),
+    card("The model", h("p", {}, "TiRex-2 is a time-series forecasting model from JKU. It is used zero-shot: it was never trained on our data."),
+      h("p", {}, "It gets the past temperature of one point and forecasts the next 24 hours, with a band from the 10th to the 90th percentile.")),
+    card("The data", h("p", {}, "Hourly weather analysis (INCA, GeoSphere Austria), October 2025 to September 2026, at 378 points on a 15 km grid."),
+      h("p", {}, "Events are labelled: cold fronts (found with a rule from the literature, 16 fronts), thunderstorms and cold drops.")),
+    card("Our idea", h("p", {}, "Treat the model as a black box and ask where it fails."),
+      h("ul", {}, h("li", {}, "Section 2: change what the model sees (which hours, repeated patterns, strange history) and watch what it does."),
+        h("li", {}, "Section 3: 336 forecasts on all points, compared with a simple baseline, and how they go wrong at cold fronts.")))));
+}
+
+function hsection(id, number, title, sub, slides) {
+  const track = h("div", { class: "hs-track" }, slides);
+  const prog = h("i");
+  const outer = h("section", { class: "hs", id }, h("div", { class: "hs-pin" },
+    h("div", { class: "hs-bar" }, h("b", {}, `${number} · ${title}`), h("span", { class: "hs-sub" }, sub), h("span", { class: "hs-hint" }, "scroll down to move on →"), h("div", { class: "hs-prog" }, prog)),
+    h("div", { class: "hs-view" }, track)));
+  const view = outer.querySelector(".hs-view");
+  outer._layout = () => {
+    outer.style.setProperty("--vw", `${view.clientWidth}px`);
+    const dx = Math.max(0, track.scrollWidth - view.clientWidth);
+    outer.style.height = `${outer.querySelector(".hs-pin").offsetHeight + dx}px`;
+  };
+  outer._update = () => {
+    const dx = Math.max(0, track.scrollWidth - view.clientWidth), navH = document.getElementById("nav")?.offsetHeight || 0;
+    const room = outer.offsetHeight - outer.querySelector(".hs-pin").offsetHeight;
+    const p = room > 0 ? Math.min(1, Math.max(0, (navH - outer.getBoundingClientRect().top) / room)) : 0;
+    view.scrollLeft = p * dx;
+    prog.style.width = `${p * 100}%`;
+  };
+  return outer;
+}
+
+async function startStoryHs(main) {
+  const story = h("div", { id: "story" });
+  main.append(story);
+  const tmp = h("div");
+  await addParts(tmp, [[null, overview], ["where_it_looks", chapterLooks], ["fixed_sundays", chapterSundays], ["weird_history", chapterWeird]]);
+  const [ov, looks, sundays, weird] = [...tmp.children];
+  const qhost = h("div");
+  try { await renderQuestions(qhost, MAIN_QUESTIONS, { keep: TALK_CARDS }); } catch (err) { console.error(err); }
+  const cards = [...qhost.querySelectorAll("section.viz")].map((c) => h("div", { class: "hs-slide" }, c));
+  const explore = byId("explore");
+  const end = h("div", { class: "hs-end" }, pageLink("also-tested.html", "Also tested →", "More experiments, our other charts and an explorer of all cold fronts"));
+  const secs = [
+    hsection("s-project", "1", "The project", "the model, the data and our idea", [explore, ov, ideaPanel()].filter(Boolean)),
+    hsection("s-carlos", "2", "Carlos's experiments", "what TiRex-2 reacts to", [looks, sundays, weird].filter(Boolean)),
+    hsection("s-sandro", "3", "Sandro's experiments", "limits and errors of 336 forecasts", [...cards, end]),
+  ];
+  story.append(...secs);
+  const update = () => secs.forEach((s) => s._update());
+  const layout = () => { secs.forEach((s) => s._layout()); update(); };
+  addEventListener("resize", layout);
+  addEventListener("scroll", () => requestAnimationFrame(update), { passive: true });
+  new ResizeObserver(layout).observe(story);
+  layout();
+  setTimeout(() => { layout(); if (typeof map !== "undefined" && map?.resize) map.resize(); }, 600);
+}
+
 async function startStory() {
   const more = document.body.dataset.page === "more";
   const main = h("main", { id: "main", style: "max-width:none" });
@@ -949,6 +1015,7 @@ async function startStory() {
     main.append(h("div", { class: "pagelink-row" }, pageLink("story.html#story", "← Back to the story")));
     return;
   }
+  if (HS) { main.removeChild(story); return startStoryHs(main); }
   await addParts(story, MAIN_PARTS);
   await addQuestions(main, MAIN_QUESTIONS, { keep: TALK_CARDS });
   main.append(h("div", { class: "pagelink-row" }, pageLink("also-tested.html", "Also tested →", "More experiments and an explorer of all cold fronts")));
