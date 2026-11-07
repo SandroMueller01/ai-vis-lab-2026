@@ -128,7 +128,7 @@ function scrolly({ id, kicker, question, sub, info, steps, draw, tall = false })
   if (q.get("ch") === id) { show(Number(q.get("show") || 0)); return section; }
   const obs = new IntersectionObserver((entries) => {
     for (const e of entries) if (e.isIntersecting) show(stepEls.indexOf(e.target));
-  }, { rootMargin: HS ? "0px -20% 0px -70%" : "-45% 0px -45% 0px" });  // sideways: the strip right of the figure
+  }, { rootMargin: "-45% 0px -45% 0px" });
   stepEls.forEach((el) => obs.observe(el));
   show(0);
   if (update.scrub) {
@@ -136,7 +136,7 @@ function scrolly({ id, kicker, question, sub, info, steps, draw, tall = false })
     let ticking = false;
     const onScroll = () => {
       ticking = false;
-      const mid = HS ? innerWidth * 0.75 : innerHeight / 2, c = stepEls.map((el) => { const r = el.getBoundingClientRect(); return HS ? r.left + r.width / 2 : r.top + r.height / 2; });
+      const mid = innerHeight / 2, c = stepEls.map((el) => { const r = el.getBoundingClientRect(); return r.top + r.height / 2; });
       let f = 0;
       if (mid >= c[c.length - 1]) f = c.length - 1;
       else for (let k = 0; k < c.length - 1; k++) if (mid >= c[k] && mid < c[k + 1]) f = k + (mid - c[k]) / (c[k + 1] - c[k]);
@@ -930,7 +930,54 @@ async function addQuestions(main, nums, pick) {
   }
 }
 
-// ---- the three sideways sections of the story page
+// =========================================================================================== Sandro's experiments (same style as the chapters above)
+const MARK = { x: 0, label: "front arrives" };
+function chapterBetter() {
+  const L = R.lead, at = (h) => L.improvement[L.leads.indexOf(h)];
+  const draw = (host) => (state) => {
+    host.replaceChildren();
+    lineChart(host, {
+      series: [{ name: "Smaller error than \"same as yesterday\"", color: COL.blue, xs: L.leads, ys: L.improvement }], xlim: [1, 24], xticks: [1, 6, 12, 18, 24], ylim: [0, 100],
+      xlabel: "hours ahead", ylabel: "smaller error than yesterday (%)", yfmt: (v) => `${Math.round(v)} %`, xfmt: (x) => `${x} h ahead`, forceLegend: false, height: 340, vmarks: state.marks,
+    });
+  };
+  const steps = [
+    { state: { marks: [] }, when: "The comparison", html: "We compare TiRex-2 with a very simple forecast: <b>“same as yesterday”</b>. The line shows how much smaller its average error is." },
+    { state: { marks: [{ x: 12, label: `12 h: ${Math.round(at(12))} %` }] }, when: "After 12 hours", html: `After 12 hours its error is <b>about a quarter smaller</b> (${Math.round(at(12))} %).` },
+    { state: { marks: [{ x: 24, label: `24 h: ${Math.round(at(24))} %` }] }, when: "After 24 hours", html: `After 24 hours it is <b>only about ${Math.round(at(24))} % better</b>. The lead is nearly gone.`, takeaway: "The model is good for a few hours, weak after a day." },
+  ];
+  return scrolly({ id: "ch-better", kicker: "Limits", question: "How much better is it than “same as yesterday”?",
+    sub: `${R.summary.n_runs} forecasts on all ${R.summary.n_points} points: average error of TiRex-2 compared with repeating yesterday's temperature.`, steps, draw });
+}
+
+function chapterFront() {
+  const FE = R.front_error, i3 = FE.rel.indexOf(3), before = Math.abs(FE.mean.slice(0, 11).reduce((a, b) => a + b, 0) / 11);
+  const draw = (host) => (state) => {
+    host.replaceChildren();
+    const a = h("div"), b = h("div");
+    host.append(a, h("div", { style: "height:8px" }), b);
+    const marks = [MARK, ...state.extra];
+    lineChart(a, { series: [{ name: "Mean error", color: COL.blue, xs: FE.rel, ys: FE.mean }], band: { xs: FE.rel, lo: FE.q25, hi: FE.q75, color: COL.blue, name: "Middle half of the errors" },
+      refs: [{ y: 0, label: "no error" }], vmarks: marks, xlim: [-12, 12], xticks: [-12, -6, 0, 6, 12], xlabel: "hours since the front reached the point",
+      ylabel: "forecast − measured (°C)", yfmt: (v) => `${fmt(v, 2)} °C`, xfmt: (x) => (x === 0 ? "front arrives" : x < 0 ? `${-x} h before` : `${x} h after`), height: 230, forceLegend: true });
+    lineChart(b, { series: [{ name: "True value inside the band", color: COL.blue, xs: FE.rel, ys: FE.cover }], refs: [{ y: 80, label: "should be 80 %" }], vmarks: marks,
+      xlim: [-12, 12], xticks: [-12, -6, 0, 6, 12], ylim: [0, 100], xlabel: "hours since the front reached the point", ylabel: "inside the band (%)",
+      yfmt: (v) => `${Math.round(v)} %`, xfmt: (x) => (x === 0 ? "front arrives" : x < 0 ? `${-x} h before` : `${x} h after`), height: 200 });
+  };
+  const steps = [
+    { state: { extra: [] }, when: "Before the front", html: `Before a front reaches a point the forecast is about <b>${fmt(before, 1)} °C too cold</b>, and the band holds the true value 70 to 80 % of the time.` },
+    { state: { extra: [{ x: 3, label: "+3 h" }] }, when: "3 hours after", html: `Three hours after it arrives the forecast is on average <b>${fmt(FE.mean[i3], 0)} °C too warm</b>: the model still expects the old weather.` },
+    { state: { extra: [{ x: 3, label: "+3 h" }] }, when: "The band", html: `And the true value is <b>inside the band only about ${Math.round(FE.cover[i3])} %</b> of the time, where it should be 80 %. The band does not warn us.`,
+      takeaway: "The model holds on to the old weather for too long." },
+  ];
+  return scrolly({ id: "ch-front", kicker: "Errors", question: "What happens when a cold front arrives?",
+    sub: `${FE.runs} forecasts started 6 or 12 hours before ${FE.fronts} fronts, 1 to 24 hours ahead, counted from the arrival of the front at each point.`, steps, draw });
+}
+
+// ---- the three sections of the story page: 1 sideways on wide screens, 2 and 3 scroll down with steps and a figure that stays
+function vsection(id, number, title, sub, children) {
+  return h("section", { class: "vs", id }, h("div", { class: "vs-bar" }, h("b", {}, `${number} · ${title}`), h("span", { class: "hs-sub" }, sub)), ...children);
+}
 function ideaPanel() {
   const card = (title, ...body) => h("div", { class: "card2" }, h("h3", {}, title), ...body);
   return h("section", { class: "hs-idea", id: "idea" }, h("div", { class: "cols" },
@@ -972,19 +1019,17 @@ async function startStoryHs(main) {
   const tmp = h("div");
   await addParts(tmp, [[null, overview], ["where_it_looks", chapterLooks], ["fixed_sundays", chapterSundays], ["weird_history", chapterWeird]]);
   const [ov, looks, sundays, weird] = [...tmp.children];
-  const qhost = h("div");
-  try { await renderQuestions(qhost, MAIN_QUESTIONS, { keep: TALK_CARDS }); } catch (err) { console.error(err); }
-  const cards = [...qhost.querySelectorAll("section.viz")].map((c) => h("div", { class: "hs-slide" }, c));
+  if (!R) [R] = await Promise.all([getJson("data/results.json")]);
   const explore = byId("explore");
-  const end = h("div", { class: "hs-end" }, pageLink("also-tested.html", "Also tested →", "More experiments, our other charts and an explorer of all cold fronts"));
-  const secs = [
-    hsection("s-project", "1", "The project", "the model, the data and our idea", [explore, ov, ideaPanel()].filter(Boolean)),
-    hsection("s-carlos", "2", "Carlos's experiments", "what TiRex-2 reacts to", [looks, sundays, weird].filter(Boolean)),
-    hsection("s-sandro", "3", "Sandro's experiments", "limits and errors of 336 forecasts", [...cards, end]),
-  ];
+  const end = h("div", { class: "pagelink-row" }, pageLink("also-tested.html", "Also tested →", "More experiments, our other charts and an explorer of all cold fronts"));
+  const first = HS ? hsection("s-project", "1", "The project", "the model, the data and our idea", [explore, ov, ideaPanel()].filter(Boolean))
+    : vsection("s-project", "1", "The project", "the model, the data and our idea", [explore, ov, ideaPanel()].filter(Boolean));
+  const secs = [first, vsection("s-carlos", "2", "Carlos's experiments", "what TiRex-2 reacts to", [looks, sundays, weird].filter(Boolean)),
+    vsection("s-sandro", "3", "Sandro's experiments", "limits and errors of 336 forecasts", [chapterBetter(), chapterFront(), end])];
   story.append(...secs);
-  const update = () => secs.forEach((s) => s._update());
-  const layout = () => { secs.forEach((s) => s._layout()); update(); };
+  if (!HS) return;
+  const update = () => first._update();
+  const layout = () => { first._layout(); update(); };
   addEventListener("resize", layout);
   addEventListener("scroll", () => requestAnimationFrame(update), { passive: true });
   new ResizeObserver(layout).observe(story);
@@ -1015,7 +1060,8 @@ async function startStory() {
     main.append(h("div", { class: "pagelink-row" }, pageLink("story.html#story", "← Back to the story")));
     return;
   }
-  if (HS) { main.removeChild(story); return startStoryHs(main); }
+  main.removeChild(story);
+  return startStoryHs(main);
   await addParts(story, MAIN_PARTS);
   await addQuestions(main, MAIN_QUESTIONS, { keep: TALK_CARDS });
   main.append(h("div", { class: "pagelink-row" }, pageLink("also-tested.html", "Also tested →", "More experiments and an explorer of all cold fronts")));

@@ -9,19 +9,20 @@ hover; the **i** buttons explain how to read a figure.
 
 ## Main story (`story.html`)
 
-The page has three sections, the ones used in the presentation. Inside a section the page is pinned and scrolling down moves
-the slides **sideways**; after the last slide of a section the page scrolls down to the next one. On screens narrower than
-about 900 px (or with `?flow=vertical`) the sections are shown one below the other instead. Everything else is on the
-second page, *Also tested*.
+The page has three sections, the ones used in the presentation. **Section 1** is pinned and scrolling down moves its slides
+**sideways**; after its last slide the page scrolls down. **Sections 2 and 3** are scrollytelling chapters: the text steps scroll
+past on the left and the figure stays on the right. On screens narrower than about 900 px (or with `?flow=vertical`) section 1
+is shown as a normal vertical stack. Everything else is on the second page, *Also tested*.
 
-| Section | Slides | Owner |
+| Section | Content | Owner |
 |---|---|---|
 | **1 · The project** | The map (15 km grid, time slider, seven variables, event rings, point chart); the overview (4 weeks of hourly temperature at one point → TiRex-2, zero-shot → the next 24 hours with a 10–90 % band, repeated for all 378 points); *What are we testing, and how?* (the model, the data, our idea) | Sandro (map), Carlos (overview), both (idea) |
 | **2 · Carlos's experiments** | Which hours it uses (each of the 672 history hours hidden once; the hours that matter repeat every 32 hours); copy or ignore a pattern (fixed Sundays); stranger history, wider band | Carlos |
-| **3 · Sandro's experiments** | How much better than "same as yesterday" (Limits); error around the front arrival, with the band chart (Errors); a link to *Also tested* | Sandro |
+| **3 · Sandro's experiments** | *How much better is it than "same as yesterday"?* (Limits) and *What happens when a cold front arrives?* (Errors: error and band coverage around the front arrival), each in steps; a link to *Also tested* | Sandro |
 
-How it works: `story.js` builds each section (`hsection`) as a tall block with a pinned view; the scroll position sets the
-sideways position. A scrollytelling chapter keeps its figure on the left while its steps move past on the right.
+How it works: `story.js` builds section 1 (`hsection`) as a tall block with a pinned view whose sideways position follows the scroll
+position. Sections 2 and 3 use `scrolly()`; Sandro's two chapters (`chapterBetter`, `chapterFront`) draw the line charts of
+`charts.js` and redraw them with a marker for each step.
 
 ## Also tested (`also-tested.html`)
 

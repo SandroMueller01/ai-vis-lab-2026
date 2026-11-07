@@ -183,3 +183,10 @@ svg.chart .axt { font-size: 14px; fill: var(--fg); }
 .hs-idea .card2 ul { margin: 0; padding-left: 18px; }
 .hs-idea h1 { grid-column: 1 / -1; margin: 0 0 4px; font-size: 26px; color: var(--fg); }
 .hs-end { width: var(--vw); display: flex; align-items: center; justify-content: center; }
+
+/* sections 2 and 3: a title bar, then the scrollytelling chapters as before */
+.vs { padding: 0 0 20px; }
+.vs-bar { display: flex; align-items: center; gap: 14px; padding: 10px 20px; margin-bottom: 36px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--card); font-size: 13px; }
+.vs-bar b { font-size: 15px; color: var(--fg); }
+.vs-bar .hs-sub { color: var(--muted); flex: 1; }
+.vs { scroll-margin-top: var(--nav-h); }
