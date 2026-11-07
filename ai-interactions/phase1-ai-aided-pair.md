@@ -377,33 +377,6 @@ Phase I analysis of Pair 1.
   95 % vs 29 %, northerly wind 54 % vs 43 %), because the definition is simpler.
   This is noted in notebook 02.
 
-## Carlos Elizondo
-
-Student ID K52320897 · GitHub erca-2064 (account created 15 October 2026)
-
-### What GitHub shows (checkable on the PR pages)
-
-| Time (UTC) | Where | What Carlos did |
-|---|---|---|
-| 1 Nov, 14:13–14:15 | PR #7 | Line suggestions in team-info.json and workload.json: his first name, last name, GitHub user |
-| 1 Nov, 15:30–15:37 | PR #4 | Line suggestions for the team table and the pair sentence in the README, and for the pair names in the two AI log headers |
-| 2 Nov, 11:12 | PR #7 | Suggestion: his JKU email address in team-info.json |
-| 2 Nov, 12:14 | PR #11 | Approved the 15 km dataset. Found a typo: the docstring of build_subset.py says 374 points instead of 378 |
-| 2 Nov, 12:28 | PR #12 | Approved (AI folder rename and reflection template) |
-| 2 Nov, 20:03 | PR #13 | Review with changes requested: (1) the light/dark switch breaks the map, keep dark only; (2) a year-long slider is too coarse, pick the day first and then slide over 24 hours; (3) the speed drop-down is unreadable in dark mode. He also asked whether the 3D view will use real elevation |
-
-His own words on the dashboard: "I actually had a very similar idea of doing something like that with the slider, so good that you already got it done."
-His three points are the reason for the day picker and the dark-only page.
-
-### Carlos's prompts to an AI assistant
-
-[Carlos: add your own AI chats here, one row per prompt, in the same format as Sandro's table: date, time (UTC), your prompt exactly as typed, what the
-assistant answered, what you did with it. If you did not use an AI assistant for your part, write that here.]
-
-| # | Date and time (UTC) | Prompt, as typed | What happened |
-|---|---|---|---|
-| | | | |
-
 ## Key prompts, what we found, and what each finding led to
 
 The 91 prompts in the table above, boiled down to the ones that changed the work. The numbers in brackets are the prompt numbers.
@@ -469,6 +442,108 @@ The 91 prompts in the table above, boiled down to the ones that changed the work
 - Small pull requests with an honest AI usage section and a reviewer who has read the code.
 - A second pair of eyes finds what the author misses: Carlos's review of the dashboard and of the 15 km dataset each found a real problem.
 
-## Our own notes
+## Carlos Elizondo
 
-[Sandro and Carlos: what did you decide, change or reject without the assistant? Which results surprised you? Write it in your own words.]
+#### Student ID K52320897 · GitHub erca-2064
+#### Phase I work: experiments in `phase1-model-behavior/pair-1/experiments/` (Exp 1–11) and the story pages of the dashboard.
+
+### How I used AI
+
+I used an AI coding assistant in VS Code, with access to the repo, the data and the Docker container.
+
+1. **Ideas first, without AI.** I watched the Phase I lectures, brainstormed experiments on my own and agreed on
+   them with Sandro, who took the other questions. The ideas started as broad questions, for example: "if one whole
+   day a week ago were a constant 10 °C (or 100 °C), how would today's forecast change?"
+2. **Context for the assistant.** I explained the dataset, the model and the course setting: in Phase I we treat
+   TiRex-2 as a black box, change only its input and watch the output.
+3. **Shaping the experiments.** With the assistant, the broad questions became defined experiments (setups,
+   measures, sample sizes). It ran them and wrote the notebooks and the dashboard code.
+4. **Figures.** I reviewed every result figure by figure, decided what to keep and asked for changes.
+
+To keep the focus on the questions, the assistant was told not to suggest side experiments. It was told to only say "there is a
+possible idea that could test something interesting, want me to describe it?", and I decide whether to do it or not. Other rules: ask before long runs, never push to GitHub; I made every commit and push.
+
+### Important prompts (quoted as typed, shortened with […])
+
+| Date, time (UTC) | Prompt | What it led to |
+|---|---|---|
+| 29 Oct, 16:09 | "Okay, again, you are drifting into the problem of suggesting too many things and we don't get to certain ideas. […]" | One question at a time; the follow-up test plan was cut down. |
+| 29 Oct, 16:19 | "[…] this model is well studied. There is clear documentation about how it's used […] maybe we look into that first before doing a lot of tests." | The assistant read the TiRex-2 docs before designing tests. Became a standing rule. |
+| 1 Nov, 18:12 | "[…] I don't want directly to that you make conclusions from the smoke test. […]" | Rejected "use temperature only, the weather variables didn't help" (based on 12 points). Varying the inputs became a method of Phase I (Exp 3, 4). |
+| 2 Nov, 13:58 | "[…] you proposed to see how this effect changes according to the region, for example, mountains versus lowlands. And I ask you, does this make sense to you? […]" | Region maps dropped: region has no link to the Sunday manipulation. One dot per point in box plots instead. |
+| 2 Nov, 22:34 | "this quick finding that you just did, how did you do it? because I cant just trust that what you said is right." | The assistant showed the code and how to check the number in the figure. I check claims this way since. |
+| 4 Nov, 08:45 | "ok wait, so are you sure that this is a weather pattern (to have warming before cold fronts)? or are you just trying to make sense out of it?" | The claim was checked against the data: warming before the drop in about half of the passages, not "every case". |
+| 4 Nov, 09:20 | "[…] The dataset needs to be large enough that any pattern you report can be shown to be systematic behavior, not a handful of cherry-picked examples. […]" | Exp 1 rerun on 40 dates instead of 1. The headline changed (see below). |
+| 4 Nov, 22:27 | "one question, i marked with green circles in the attached image some bright points that caught my attention, since they since like part of a pattern, what is the cause of them?" | The 32-hour pattern (Exp 10): the model reads its history in 32-hour blocks. Now the first finding of the dashboard and a Phase II question. |
+| 5 Nov, 17:03 | "why 269 cases? did you even consider if averaging over all those cases makes sense?" | The 269 cases were 15 fronts × many points, with very different band widths. Shown as the change per case instead of a plain average. |
+
+### Accepted, modified, rejected
+
+| Suggestion from the AI | Outcome | Why |
+|---|---|---|
+| Treat "the model ignores neighbours" as a finding instead of tuning further | Accepted | All documented ways of passing neighbours were tested; Exp 3 and 4 confirmed it (about 21 % of the drop forecast in every setup) |
+| Reframe "does it notice Sundays" as "does it learn a 7-day pattern", with a copy score | Accepted | Sharper question; became Exp 1 |
+| A yes/no "closer to the Sunday value" score per hour | Modified | 49 vs 51 should not flip the result; now a continuous score from 0 to 100 % |
+| Several new measures and a Martini-glass explorer for Exp 1 at once | Modified | Kept one measure; the Martini glass came later, in the dashboard |
+| Region maps (mountains vs lowlands) for the Sunday effect | Rejected | No link between region and the manipulation |
+| "Use temperature only" after the smoke test | Rejected | Over-generalised from 12 points |
+| Click a dot in a box plot to open that case | Rejected | 800 jittered dots per box: tiny, overlapping, random pick. A fixed pair of examples instead |
+| A daily climate spiral (angle = hour, radius = temperature) | Rejected after seeing it | Added nothing. The time curves were kept |
+| Do not interpolate between slider steps; compute real forecasts every 0.25 °C | Accepted | Interpolated bands would show forecasts the model never made |
+| Keep vertical scrolling (I had asked for horizontal) | Accepted | Horizontal would break the scrollytelling steps and scroll badly on trackpads and phones |
+
+### How AI suggestions affected my decisions
+
+- **Many dates, not many points.** The assistant showed with saved results that splitting by dates changes the
+  result and splitting by points does not. All later runs used many dates.
+- **Exp 1 headline changed.** On one June date the copy score was 13 / 32 / 98 % (10 / 20 / 50 °C); on 40 dates it is
+  52 / 66 / 94 %. Per-date means range from 7 to 99 %: the fixed value is copied more when it stands out from the
+  season.
+- **Negative results are results.** Exp 3 and 4 tested pressure, humidity, wind, upstream points and perfect flags:
+  none helped. That shaped the "Also tested" page.
+- **Phase II questions.** The 32-hour blocks and why the model ignores helpful inputs moved into the Phase II notes.
+
+### Failure patterns
+
+- **Explaining before checking.** Plausible stories stated as facts: "shared past weather" for the bright cells
+  (really the 32-hour blocks), "this warming is in every case" (about half), "earlier runs predict a fall" (it was the
+  normal evening cooling).
+- **Not looking at its own figures.** It said figures were ready after only checking that the code ran: squashed time
+  curves, a reversed axis, a colour bar on top of an axis. Fixed by making it screenshot every figure before
+  reporting.
+- **Summarising from numbers, not the figure.** "Fronts and normal days look alike" from printed shares, while the
+  figure showed fronts react about 1.5× more.
+- **Over-generalising from small tests.** The 12-point smoke test; a 6-case test that suggested time inputs help
+  (they do not on 2,400 cases).
+- **Inflated numbers.** The 32-hour ratio was first 2.5×; it included the last day and the front cases. Without them
+  it is 2.0× (above 1× in 97 % of the cases).
+- **Deciding for me.** Marked a whole experiment as "not used" after I rejected one of its figures; presented its own
+  default (temperature only, 4 weeks) as a team decision.
+- **Ignoring repo rules.** Wrote notebook code without checking the lint rules; CI would have failed with 195 errors.
+- **Wrong runtime estimates.** "15–25 min" became 57 min; "1 h" became 3 h.
+
+### Best practices
+
+- Ask for the sample size and setup behind every claim, and for the code that produced a number.
+- Make the assistant check facts in the data, not from memory.
+- Look at every figure myself and record a decision per figure; make the assistant screenshot its figures before it
+  says they are ready.
+- When a figure confuses me, ask which question it answers; this found real bugs.
+- Run a quick small test before every long run, but never conclude from it.
+- Check the repo's CI and lint rules before writing code.
+
+### Reflection
+
+- **New alternatives.** Yes, mainly in methods: occlusion ("which hours does it use"), calibration by situation and
+  the copy score came from the assistant. The questions and the experiments were mine (fixed Sundays, a single
+  Sunday, forecasts inside the front, how strange the history must be, time curves from the lecture).
+- **Criticism of my choices.** Justified when it rested on data: running all points would add little, dates matter
+  more; the raw upstream input in Exp 4 was dominated by the normal evening cooling (we reran it without that cooling:
+  same result). Not useful when it repeated a default without a reason (temperature only, 10 weeks of history
+  inherited from another experiment).
+- **Confidence.** Higher for results that survived a check I asked for (40 dates, per-case changes, the 2.0× ratio).
+  Lower for anything the assistant only described: I learned to treat its first explanation as a hypothesis.
+- **Interpreting patterns.** It was fast at quantifying a pattern I saw (the 32-hour blocks, the band peaking at
+  medium drop sizes), but the patterns themselves were found by looking at the figures.
+- **Verification.** Every number in the dashboard is computed from saved forecasts by `build_carlos_data.py`, not
+  typed. I reproduced Sandro's 15 km dataset and front list (378 points, 16 of 39 fronts) when reviewing PR #11.
