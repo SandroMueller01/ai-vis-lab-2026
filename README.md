@@ -125,7 +125,7 @@ Everything for the midpoint is in this repository. The checklist and the video l
 | AI reflection | [`ai_reflection_midpoint.md`](ai_reflection_midpoint.md) |
 | Cross-pair comparison | [`phase1-model-behavior/comparison.md`](phase1-model-behavior/comparison.md) |
 | Dashboard (live) | <https://sandromueller01.github.io/ai-vis-lab-2026/> |
-| Progress video (up to 5 minutes) | linked in [`submissions/midpoint/README.md`](submissions/midpoint/README.md); the video file is not in git |
+| Progress video (2:48 min, limit 5) | linked in [`submissions/midpoint/README.md`](submissions/midpoint/README.md); the video file is not in git |
 
 ## Data
 
