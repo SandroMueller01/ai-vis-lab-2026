@@ -93,7 +93,7 @@ Prompts are quoted as typed, with typos; `[…]` marks a shortened prompt.
 
 | Prompt | What it led to |
 |---|---|
-| "Okay the thing is that I do not want that you leave a trace behind that it cannot be seen on the repo that commits and pushes and stuff like this happend with claude plea […]" | `WAYS_OF_DEV_WORKING.md` with branch and commit prefixes; I do the commits and pushes. |
+| "Okay the thing is that I do not want that you leave a trace behind that it cannot be seen on the repo that commits and pushes and stuff like this happend with […]" | `WAYS_OF_DEV_WORKING.md` with branch and commit prefixes; I do the commits and pushes. |
 | "[…] we want to change the goal, to basically guess th temperature change with TiReX2 and checkout how multiple station input wo […]" | A smoke test (12 points). TiRex-2 ignores *past* covariates and only uses *future* ones. The work turned from "predict with many inputs" into **how the model behaves** (hypotheses B1 to B4). |
 | "Okay can we please create some visualisation of austria and show casing how the cold distributes through austria the real data and the predicted from TiRex 2 model side b […]" and "what would be a a good horizon for guessing?" | The forecast follows the front late; 12 h is the best compromise. The idea of the time-slider dashboard. |
 | "Can you take a look at the definition of cold fronts is there any research we can find about that and if yes how they define cold fronts?" | Our `cold_drop` (8 K colder than yesterday) is not a front. A separate `cold_front` label: 3 K in 3 h, 2 hPa, a moving line, at least 50 % of points within 24 h. 16 fronts on 15 km. Every cold-front chart rests on it. |
