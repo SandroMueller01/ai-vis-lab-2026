@@ -23,6 +23,7 @@ pyproj
 
 # Visualization
 matplotlib
+ipympl
 seaborn
 plotly
 umap-learn
