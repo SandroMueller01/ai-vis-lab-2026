@@ -19,12 +19,13 @@ The notebooks in [`notebooks/`](notebooks/) replay the most important steps with
 
 ### How we used GenAI
 
-In short, I used it for almost everything. I worked with Claude (Opus 5.5) in long
-sessions, mostly as a coding agent and not just as a chat. It wrote the dataset
-builders, the event labels, the smoke test, the forecast script, the whole dashboard
-and most of the texts in the READMEs and PR descriptions. My part was to say what I
-wanted, run everything in the Docker container, look at the numbers and the pages,
-and then tell it what was wrong. That loop happened a lot.
+I used it mainly for two things: setting up the repository (Docker, CI, the PR
+workflow, the data release) and working out ideas (the new goal, the cold-front
+definition, the evaluation, the plan for the dashboard). I worked with Claude
+(Opus 5.5) in sessions in the editor, not just as a chat. For the code that followed
+(dataset builders, smoke test, forecast script, dashboard) it did the first version.
+My part was to say what I wanted, run everything in the Docker container, look at the
+numbers and the pages, and then tell it what was wrong. That loop happened a lot.
 
 I used it less for the questions themselves. The five Phase I questions, the 15 km
 grid and the split of work with Carlos came from our team discussions, not from the
