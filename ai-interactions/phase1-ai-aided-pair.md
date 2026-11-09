@@ -16,6 +16,27 @@ We used an AI coding assistant in the editor, with access to the repository, the
 code, searched the literature and drafted texts. We decided what to build, what to keep and what goes into the repository, ran and checked
 the results and made every commit and push ourselves. Each step ended in a pull request that a teammate reviewed.
 
+## What the AI let us do beyond a baseline
+
+Generative AI made it cheap to try more than the minimum. We used that in two directions.
+
+**Broader analysis**
+
+- **Ten experiments instead of one or two.** Carlos's Exp 1 to 11 (Exp 8 was dropped) change the model's input in controlled ways: repeated and one-off patterns, history length, time inputs, extra variables, upwind points, the time after a front, strange history, which hours the model uses, and whether its band is honest.
+- **A full evaluation, not a demo.** 336 forecast start times at 378 points, against two baselines ("same as yesterday", "same as an hour ago"), split into normal weather and 30 cold-front runs.
+- **A cold-front rule from the literature.** Instead of a simple cold-drop label, a front needs a cooling, a pressure rise and a moving line (16 fronts on 15 km).
+- **Checks of our own claims.** Findings were re-run on more dates (Carlos) and cross-checked between the two of us (for example his "21 % of the drop").
+
+**Richer interaction**
+
+- **Map with a time slider.** The 15 km grid (378 points), a day picker with an hourly slider, seven variables, event rings for cold fronts and a chart for every clicked point.
+- **A story page with scrollytelling.** A pinned section that scrolls sideways, then chapters where the text steps scroll past and the figure changes with them.
+- **Hover and explanations.** Every chart shows values on hover; "i" buttons explain how to read it.
+- **Explore it yourself.** Carlos's per-front explorer, where one chooses a front and sees which points the forecast missed and where. His Martini-glass idea (an overview first, details on demand) was the design goal for the story page.
+- **Questions named on every chart**, so each figure says what it is meant to answer.
+
+Section "Record over time" in Sandro's part shows in which order this happened.
+
 ## From questions to experiments
 
 The short version of Phase I: **each question we asked sent us to an experiment, and each result raised the next question.**
@@ -91,18 +112,36 @@ I used an AI coding assistant in the editor, with access to the repo, the data a
 
 Prompts are quoted as typed, with typos; `[…]` marks a shortened prompt.
 
-| Prompt | What it led to |
-|---|---|
-| "Okay the thing is that I do not want that you leave a trace behind that it cannot be seen on the repo that commits and pushes and stuff like this happend with […]" | `WAYS_OF_DEV_WORKING.md` with branch and commit prefixes; I do the commits and pushes. |
-| "[…] we want to change the goal, to basically guess th temperature change with TiReX2 and checkout how multiple station input wo […]" | A smoke test (12 points). TiRex-2 ignores *past* covariates and only uses *future* ones. The work turned from "predict with many inputs" into **how the model behaves** (hypotheses B1 to B4). |
-| "Okay can we please create some visualisation of austria and show casing how the cold distributes through austria the real data and the predicted from TiRex 2 model side b […]" and "what would be a a good horizon for guessing?" | The forecast follows the front late; 12 h is the best compromise. The idea of the time-slider dashboard. |
-| "Can you take a look at the definition of cold fronts is there any research we can find about that and if yes how they define cold fronts?" | Our `cold_drop` (8 K colder than yesterday) is not a front. A separate `cold_front` label: 3 K in 3 h, 2 hPa, a moving line, at least 50 % of points within 24 h. 16 fronts on 15 km. Every cold-front chart rests on it. |
-| "Okay I guess this is phase 1 we settled on that: [pasted] Phase 1 Data a coarser grid over all of Austria […]" | Three grid options with run times; **15 km, 378 points** and a shared release for the whole team. |
-| "Can you help me to answer the following questions, should be backed up with data and science everytime. […]" | The five questions, the 336 forecasts and a source for each answer. After the run, three statements changed (see below). |
-| "No we are AI in the first phase we are pair one please check the github that it is written everywhere correct" | The assistant had followed the older plan (AI-aided in Phase II) and held back on the Phase I questions. Roles corrected in the README, the logs and the PR texts. |
-| "okay there should be no password. Github pages sounds good. This can you do as you want. keep the 3d as a last step […]" | Public page, GitHub Pages, no 3D view. The data is open (CC BY 4.0) and the repo is public. |
-| "Okay please make it in a way that the dashboard has multiple pages an please als name the question which are answered by each viusalation […]" | Six pages with the question named on every chart. |
-| "okay because these were the questions carlos tried to answer so we should not duplicate the questions if you get what I mean […]" | Cross-check of Carlos's "21 % of the drop": about 0 % when the front is 4 or more hours away, 19 to 40 % at 1 to 3 hours. We keep our charts and mark the owner. |
+| When | Prompt | What it led to |
+|---|---|---|
+| 20 Oct | "Okay the thing is that I do not want that you leave a trace behind that it cannot be seen on the repo that commits and pushes and stuff like this happend with […]" | `WAYS_OF_DEV_WORKING.md` with branch and commit prefixes; I do the commits and pushes. |
+| 23 Oct | "[…] we want to change the goal, to basically guess th temperature change with TiReX2 and checkout how multiple station input wo […]" | A smoke test (12 points). TiRex-2 ignores *past* covariates and only uses *future* ones. The work turned from "predict with many inputs" into **how the model behaves** (hypotheses B1 to B4). |
+| 26 Oct | "Okay can we please create some visualisation of austria and show casing how the cold distributes through austria the real data and the predicted from TiRex 2 model side b […]" and "what would be a a good horizon for guessing?" | The forecast follows the front late; 12 h is the best compromise. The idea of the time-slider dashboard. |
+| 1 Nov | "Okay I guess this is phase 1 we settled on that: [pasted] Phase 1 Data a coarser grid over all of Austria […]" | Three grid options with run times; **15 km, 378 points** and a shared release for the whole team. |
+| 1 Nov | "Can you take a look at the definition of cold fronts is there any research we can find about that and if yes how they define cold fronts?" | Our `cold_drop` (8 K colder than yesterday) is not a front. A separate `cold_front` label: 3 K in 3 h, 2 hPa, a moving line, at least 50 % of points within 24 h. 16 fronts on 15 km. Every cold-front chart rests on it. |
+| 2 Nov | "Can you help me to answer the following questions, should be backed up with data and science everytime. […]" | The five questions, the 336 forecasts and a source for each answer. After the run, three statements changed (see below). |
+| 2 Nov | "No we are AI in the first phase we are pair one please check the github that it is written everywhere correct" | The assistant had followed the older plan (AI-aided in Phase II) and held back on the Phase I questions. Roles corrected in the README, the logs and the PR texts. |
+| 2 Nov | "okay there should be no password. Github pages sounds good. This can you do as you want. keep the 3d as a last step […]" | Public page, GitHub Pages, no 3D view. The data is open (CC BY 4.0) and the repo is public. |
+| 4 Nov | "Okay please make it in a way that the dashboard has multiple pages an please als name the question which are answered by each viusalation […]" | Six pages with the question named on every chart. |
+| 4 Nov | "okay because these were the questions carlos tried to answer so we should not duplicate the questions if you get what I mean […]" | Cross-check of Carlos's "21 % of the drop": about 0 % when the front is 4 or more hours away, 19 to 40 % at 1 to 3 hours. We keep our charts and mark the owner. |
+
+### Record over time
+
+What happened when, with the pull request it ended in. Dates are the days the work was done or merged.
+
+| Date | What we did with the assistant | Ended in |
+|---|---|---|
+| 20 Oct | Docker image, dev container, CI, PR template; rule that the repo shows no tool traces; dataset builders; pairs entered in the README | PRs #1 to #3, `WAYS_OF_DEV_WORKING.md` |
+| 23 Oct | New goal (temperature change, several stations); first review of a teammate's PR | model selection (PR #5) |
+| 24 Oct | Smoke test: TiRex-2 ignores past covariates; behaviour hypotheses B1 to B4 written for the team | smoke test (PR #8) |
+| 26 Oct | Maps and time-longitude plots of the 25/26 March front, real data against forecast; 12 h chosen as the main horizon; first time-slider preview | local preview (not in the repo) |
+| 27 to 29 Oct | Data acquisition reviewed for the new goal; shared event labels; release kept and renamed; agenda for the team meeting | PRs #9, #10 |
+| 1 to 2 Nov | Three grid options, 15 km chosen; literature search on cold fronts and the `cold_front` label | 15 km dataset and labels (PR #11) |
+| 2 Nov | The five questions; 336 forecasts started; pair roles corrected; dashboard milestone 1 (map, slider, variables, event rings) | PRs #12, #13 |
+| 4 Nov | Carlos's review of the map fixed; candidate figures; six pages with the question named on every chart; overlap with Carlos's findings checked; GitHub Pages switched on | PRs #13, #14, #4, #7, #10 |
+| 5 Nov | README and model selection updated; first version of this log | PR #15 |
+| 6 to 7 Nov | Carlos's experiment notebooks and the replay notebooks; the one-page story dashboard; three sections with sideways scrolling, then vertical scrolling again after review; richer figures for the two experiments we picked | PRs #17 to #22 |
+| 7 to 9 Nov | Submission README and video information; split of the reflection into sections per person; this log in its final format | PRs #16, #23, #24 |
 
 ### Accepted, modified, rejected
 
