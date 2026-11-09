@@ -130,25 +130,30 @@ at fewer things. Let's see if that is true.
 
 ### What we would do differently in Phase II
 
-Write the log during the session, not afterwards. Next time I copy the prompts that
-matter into the log right away.
+In Phase II our pair works without AI, so this is what I take over from Phase I, and
+what I would tell Pair 2, who is AI-aided in Phase II.
+
+What I take over into Phase II:
 
 Reproduce a known number first. Almost every real bug was found this way (29 days, 306
 start times, 378 points). Before I trust a new pipeline, I check one number I already
 know.
 
-Ask for a synthetic test when a result is flat or surprising. That was the most useful
-single prompt of Phase I for me.
+Test with synthetic data when a result is flat or surprising. The random-walk test was
+the most useful single step of Phase I for me, and it works just as well without AI.
 
 Look at the output myself. Scripted checks are nice, but they missed every layout
 problem.
 
-Smaller steps. Some sessions were very long and produced a lot at once. That is harder
-to review, also for Carlos.
+Smaller steps. Some sessions in Phase I were very long and produced a lot at once.
+That is harder to review, also for Carlos. Small pull requests are easier to check,
+with or without AI.
 
-Advice for Pair 2 (AI-aided in Phase II): use the AI for the heavy lifting (hidden
-states, gate activations, saliency code), but decide the questions yourselves, and keep
-one log entry per PR with prompt, output, what you checked and what you changed.
+Advice for Pair 2 (AI-aided in Phase II): write the log during the session, not
+afterwards, and copy the prompts that matter right away. Use the AI for the heavy
+lifting (hidden states, gate activations, saliency code), but decide the questions
+yourselves, and keep one log entry per PR with prompt, output, what you checked and
+what you changed.
 
 ## Carlos Elizondo
 
