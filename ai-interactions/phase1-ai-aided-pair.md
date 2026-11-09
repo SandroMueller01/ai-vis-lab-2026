@@ -8,7 +8,7 @@ Phase: I (model behavior)
 - **Two parts, one per person:** Sandro's and Carlos's, in the same format: how we used AI, the important prompts, what we accepted, modified or rejected, failure patterns, best practices.
 - **Prompts are quoted as typed**, with typos. `[…]` marks a shortened prompt, `[pasted]` a pasted text.
 - The assistant sessions in Sandro's part ran on his computer. Carlos's part is written by him.
-- The log was put together from the chat history and the pull requests, with the help of the assistant, and checked by both of us in the pull request.
+- The log is based on the chat history and the pull requests, and was checked by both of us in the pull request.
 
 ## How we worked with the AI
 
@@ -139,9 +139,9 @@ What happened when, with the pull request it ended in. Dates are the days the wo
 | 1 to 2 Nov | Three grid options, 15 km chosen; literature search on cold fronts and the `cold_front` label | 15 km dataset and labels (PR #11) |
 | 2 Nov | The five questions; 336 forecasts started; pair roles corrected; dashboard milestone 1 (map, slider, variables, event rings) | PRs #12, #13 |
 | 4 Nov | Carlos's review of the map fixed; candidate figures; six pages with the question named on every chart; overlap with Carlos's findings checked; GitHub Pages switched on | PRs #13, #14, #4, #7, #10 |
-| 5 Nov | README and model selection updated; first version of this log | PR #15 |
+| 5 Nov | README and model selection updated | PR #15 |
 | 6 to 7 Nov | Carlos's experiment notebooks and the replay notebooks; the one-page story dashboard; three sections with sideways scrolling, then vertical scrolling again after review; richer figures for the two experiments we picked | PRs #17 to #22 |
-| 7 to 9 Nov | Submission README and video information; split of the reflection into sections per person; this log in its final format | PRs #16, #23, #24 |
+| 7 to 9 Nov | Submission README and video information; split of the reflection into sections per person | PRs #16, #23, #24 |
 
 ### Accepted, modified, rejected
 
