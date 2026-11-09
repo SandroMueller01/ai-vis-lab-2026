@@ -142,9 +142,6 @@ know.
 Test with synthetic data when a result is flat or surprising. The random-walk test was
 the most useful single step of Phase I for me, and it works just as well without AI.
 
-Look at the output myself. Scripted checks are nice, but they missed every layout
-problem.
-
 Smaller steps. Some sessions in Phase I were very long and produced a lot at once.
 That is harder to review, also for Carlos. Small pull requests are easier to check,
 with or without AI.
