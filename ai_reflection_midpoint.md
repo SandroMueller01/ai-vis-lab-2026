@@ -104,12 +104,12 @@ decision and still open.
 Calibration was not really on my list at the start. The smoke test showed the 10–90 %
 band covers only 58 % at cold waves, and that became one of my main threads. In the
 full runs the band holds the true value 81 % of the time in normal weather and only
-34 % during cold fronts, and almost all mistakes during events are too warm. The model
+32 % during cold fronts, and almost all mistakes during events are too warm. The model
 is about 1 °C too cold before a front and 5.3 °C too warm three hours after it.
 Without the front label I could not have shown that timing.
 
 What did not come from the AI: the questions, the decision to make every chart name
-the question it answers and its owner, and leaving the "agreed" boxes in
+the question it answers, and leaving the "agreed" boxes in
 `model-selection.md` unticked, because those are decisions for the whole team.
 
 ### Compared with the human-only pair
@@ -129,9 +129,8 @@ at fewer things. Let's see if that is true.
 
 ### What we would do differently in Phase II
 
-Write the log during the session, not afterwards. My log is reconstructed from the PR
-descriptions, so the prompts are paraphrased. Next time I copy the prompts that matter
-into the log right away.
+Write the log during the session, not afterwards. Next time I copy the prompts that
+matter into the log right away.
 
 Reproduce a known number first. Almost every real bug was found this way (29 days, 306
 start times, 378 points). Before I trust a new pipeline, I check one number I already
