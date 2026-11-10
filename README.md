@@ -123,7 +123,6 @@ Everything for the midpoint is in this repository. The checklist and the video l
 | Pair 2 (human-only in Phase I) | [`phase1-model-behavior/pair-2/`](phase1-model-behavior/pair-2/) |
 | AI interaction log | [`ai-interactions/phase1-ai-aided-pair.md`](ai-interactions/phase1-ai-aided-pair.md) |
 | AI reflection | [`ai_reflection_midpoint.md`](ai_reflection_midpoint.md) |
-| Cross-pair comparison | [`phase1-model-behavior/comparison.md`](phase1-model-behavior/comparison.md) |
 | Dashboard (live) | <https://sandromueller01.github.io/ai-vis-lab-2026/> |
 | Progress video (2:48 min, limit 5) | linked in [`submissions/midpoint/README.md`](submissions/midpoint/README.md); the video file is not in git |
 

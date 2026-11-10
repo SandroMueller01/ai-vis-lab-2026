@@ -17,7 +17,6 @@ Deadline: **11.11.2026, 23:59**. Team XPL41N, Model: TiRex-2, Task: hourly tempe
 | Shared groundwork: data, event labels, cold-front rule | [`data_acquisition/`](../../data_acquisition/), [`data_acquisition/events/README.md`](../../data_acquisition/events/README.md) |
 | AI interaction log (AI-aided pair) | [`ai-interactions/phase1-ai-aided-pair.md`](../../ai-interactions/phase1-ai-aided-pair.md) |
 | AI reflection | [`ai_reflection_midpoint.md`](../../ai_reflection_midpoint.md) |
-| Cross-pair comparison | [`phase1-model-behavior/comparison.md`](../../phase1-model-behavior/comparison.md) |
 | Dashboard (live) | <https://sandromueller01.github.io/ai-vis-lab-2026/> |
 | Progress video (2:48 min, limit 5) | see below |
 
@@ -38,7 +37,7 @@ history forever). It is linked here instead.
 - [ ] All Phase I pull requests are merged into `main` and the checks are green
 - [ ] AI log of the AI-aided pair is complete, with both members' prompts
 - [ ] `ai_reflection_midpoint.md` is written by the AI-aided pair
-- [ ] `phase1-model-behavior/comparison.md` is filled in by both pairs
+- [ ] The section "Compared with the human-only pair" in `ai_reflection_midpoint.md` is filled in
 - [ ] The live dashboard opens and shows the three sections
 - [ ] The video is uploaded, the link above is filled in and works in a private browser window
 - [ ] Submitted on Moodle before 11.11.2026, 23:59
