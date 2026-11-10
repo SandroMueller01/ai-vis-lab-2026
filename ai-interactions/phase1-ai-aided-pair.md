@@ -71,18 +71,9 @@ The results are in the [experiments README](../phase1-model-behavior/pair-1/expe
 
 ### Step 3 · Carlos's experiments (Exp 1 to 11)
 
-Carlos's ideas came from the lectures and his own brainstorming; the assistant shaped them into set-ups. The results are in the
-[experiments README](../phase1-model-behavior/pair-1/experiments/README.md#results-at-a-glance). Here: what the assistant suggested
-and what he did with it (more in his section below).
-
-| Experiment | What the assistant suggested | What Carlos decided |
-|---|---|---|
-| Exp 1 · fixed Sundays | Reframe "does it notice Sundays" as "does it learn a 7-day pattern", with a copy score | Accepted; the yes/no score was changed to a continuous 0 to 100 %. After his challenge ("shown to be systematic behavior, not a handful of examples") it was rerun on 40 dates instead of 1 |
-| Exp 2 · history and time inputs | A 6-case test that suggested time inputs help | Not trusted; on 2,400 cases they do not help |
-| Exp 3 and 4 · fronts and neighbours | Treat "the model ignores neighbours" as a finding instead of tuning further | Accepted |
-| Exp 10 · which hours it uses | Occlusion: hide each hour of the history once | Accepted |
-| Exp 11 · honest band | Calibration by situation | Accepted |
-| Rejected ideas | Region maps for the Sunday effect; click a dot in a box plot to open a case; a daily climate spiral; "use temperature only" after the 12-point smoke test | Rejected: no link to the manipulation, tiny overlapping dots, added nothing, over-generalised |
+Carlos's ideas came from the lectures and his own brainstorming; the assistant shaped them into set-ups. What he asked for, and what he
+accepted, changed or rejected, is in his own part below. The results of the experiments are in the
+[experiments README](../phase1-model-behavior/pair-1/experiments/README.md#results-at-a-glance).
 
 ## Sandro Müller
 
