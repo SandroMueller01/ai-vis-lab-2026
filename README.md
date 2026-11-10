@@ -111,6 +111,21 @@ notes. The pairs swap AI4Vis roles between phases.
 | Written on-site exam | 17.12.2026 |
 | Written on-site retry exam | 18.02.2027 |
 
+## Midpoint submission (Phase I, 11.11.2026, 23:59)
+
+Everything for the midpoint is in this repository. The checklist and the video link are in
+[`submissions/midpoint/README.md`](submissions/midpoint/README.md).
+
+| Part | Where |
+|---|---|
+| Code of both pairs | this repository, branch `main` |
+| Pair 1 (AI-aided in Phase I) | [`phase1-model-behavior/pair-1/`](phase1-model-behavior/pair-1/): forecast runs, dashboard, experiment notebooks |
+| Pair 2 (human-only in Phase I) | [`phase1-model-behavior/pair-2/`](phase1-model-behavior/pair-2/) |
+| AI interaction log | [`ai-interactions/phase1-ai-aided-pair.md`](ai-interactions/phase1-ai-aided-pair.md) |
+| AI reflection | [`ai_reflection_midpoint.md`](ai_reflection_midpoint.md) |
+| Dashboard (live) | <https://sandromueller01.github.io/ai-vis-lab-2026/> |
+| Progress video (2:48 min, limit 5) | linked in [`submissions/midpoint/README.md`](submissions/midpoint/README.md); the video file is not in git |
+
 ## Data
 
 Hourly multivariate weather time series for Austria, built from GeoSphere
