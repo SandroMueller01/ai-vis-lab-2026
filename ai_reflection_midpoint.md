@@ -154,32 +154,40 @@ what you changed.
 
 ## Carlos Elizondo
 
-### How we used GenAI
+**How I worked with it.** The ideas for my experiments came from the lectures, my own brainstorming and the
+discussions with Sandro. The AI turned them into concrete set-ups, wrote and ran the code and made the figures; I
+reviewed every result and decided what to keep. Over the two weeks I learned that I could not take its conclusions as
+they came. Whenever I asked how many points or dates a result was based on, or whether it still holds if we include
+this or that, the answer was often "sorry, I overlooked that" or "do you want me to run another experiment?". That
+lowered my confidence in its conclusions. So I trusted it differently depending on the task. The dashboard I can
+click through and see that it works, so I did not care much how its code looked. For the experiments the conclusion
+is the result, and the only way to check it is to read the code and the reasoning behind it, so there I looked much
+closer.
 
-<!-- Which tools, for which steps (code, plots, interpreting results, writing), how often. -->
+**Where it helped.** Speed, mostly in designing experiments and building visualizations. Without it, finding out how
+such things are usually done would have taken much more time and research, and a big part of the dashboard code was
+written by the AI. It also brought in methods I would maybe have found myself, but only after a lot of reading that
+the deadline did not allow. The best example is hiding certain hours of the history and measuring how the forecast
+changes, to see how important each hour is (Exp 10). That design came from the AI.
 
-### Where it helped
+**Where it failed.** It drew conclusions from smoke tests. You cannot generalise from 12
+points, even with a very capable model. Many times I had to write in the prompt that it should look at other angles,
+question itself and be analytical. If I had just followed it, it would have built a chain of small errors and
+inconsistencies, and I would have built the story of the project on top of them.
 
-<!-- Concrete examples where AI made the analysis faster, broader or better. -->
+**How it changed my decisions.** Mostly by forcing me to question its suggestions. For the fixed-Sundays experiment
+it proposed maps of the effect by region (mountains vs lowlands). It sounds like a richer analysis, but there is no
+reason why changing the temperature on Sundays should depend on the region. The AI mixed two concepts that do not
+belong together. A person can discard that after a moment of thinking, but only if they stop to think, and I could
+easily have taken it.
 
-### Where it failed or misled us
-
-<!-- Wrong code, wrong claims, plausible but wrong interpretations. How did you notice? -->
-
-### How it changed our analytical decisions
-
-<!-- Which questions, methods or visualisations came from AI suggestions? Which did you reject, and why? -->
-
-### Compared with the human-only pair
-
-<!-- Same questions, different process: what did each pair find, miss, or take longer for? -->
-
-### What we would do differently in Phase II
-
-<!-- Practices to keep, practices to avoid, advice for Pair 2, who is AI-aided in Phase II. -->
-
-## Together
-
-### What we agree on
-
-<!-- The two or three points both of us would sign. Fill in after both parts are written. -->
+**What I take with me.** If I worked with AI again, I would start with a file of rules for the project that it must
+always follow. Mine would be: check its own figures (for example with a screenshot) before saying they are done, so
+my feedback goes to the content and not to overlapping labels; do not agree with me just because I said something,
+but be objective and question my ideas; run a small test before every long run, but never conclude from it; and stay
+on one path at a time, mentioning a side idea only when it really matters, because too many ideas at once distract me
+from the analysis. I would also keep AI-written documents short. Some files in our repo repeat the same information
+in many places. In Phase II, without AI, I will miss how quickly
+it produced a working first version of a visualization or the dashboard, even if it needed a lot of feedback
+afterwards. On the other hand, I expect my analysis to be easier to trust: I will build it on papers I read myself,
+instead of questioning every claim of the AI or not having the time to check all the papers it cites.
