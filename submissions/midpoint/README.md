@@ -22,14 +22,13 @@ Deadline: **11.11.2026, 23:59**. Team XPL41N, Model: TiRex-2, Task: hourly tempe
 
 ## Video
 
-Progress video, **2:48 minutes** (limit: 5 minutes), recorded 07.11.2026 as `Video_2.mp4` (40.7 MB).
+Progress video of both pairs (limit: 5 minutes), `Video_EXP41N_Midpoint_Submission.mp4`.
 
 The video file is **not stored in git** (`*.mp4` and `*.mov` are ignored on purpose: the files are large and stay in the
 history forever). It is linked here instead.
 
-- **Link:** _paste the upload link here_
-- **Hosting:** an unlisted upload (for example JKU cloud storage or an unlisted video link) that opens without a login. Check the link in a
-  private browser window.
+- **Link:** <https://drive.google.com/file/d/1O4ShMX6y2-f9Re1s6mBz9Ub56Oyhi8L0/view?usp=sharing>
+- **Hosting:** Google Drive, shared with everyone who has the link (opens without a login).
 - **What it shows:** the live dashboard (<https://sandromueller01.github.io/ai-vis-lab-2026/>), so the video matches what is deployed.
 
 ## Checklist before submitting
