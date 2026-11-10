@@ -71,19 +71,18 @@ goal: temperature change at several stations  →  smoke test  →  TiRex-2 igno
 ### Step 3 · Carlos's experiments (Exp 1 to 11)
 
 Carlos's ideas came from the lectures and his own brainstorming; the assistant shaped them into set-ups (see his section below).
-Only findings that are written down in his section or in the dashboard are given here; for the rest, see the notebook.
 
 | Question that came up | Experiment · key plot | What the record says | What it led to |
 |---|---|---|---|
-| Does the model copy a pattern it has seen repeatedly, and ignore one it has seen once? | Exp 1 · [`exp1_score_by_date`](../phase1-model-behavior/pair-1/experiments/figures/exp1/exp1_score_by_date.html) | Rerun on 40 dates instead of 1, the headline changed | Rule: many dates, not many points |
-| Does a longer history, or telling it the time, help? | Exp 2 · [`exp2_error_vs_history`](../phase1-model-behavior/pair-1/experiments/figures/exp2/exp2_error_vs_history.html) | Time inputs do not help on 2,400 cases (a 6-case test had suggested they do) | Never conclude from a small test |
-| Can it see a cold front coming? Do upwind points or other variables help? | Exp 3 and 4 · [`exp3_average_front`](../phase1-model-behavior/pair-1/experiments/figures/exp3/exp3_average_front.html), [`exp4_upstream_map`](../phase1-model-behavior/pair-1/experiments/figures/exp4/exp4_upstream_map.html) | The model ignores neighbours; fronts react about 1.5 times more than normal days | "Ignores neighbours" counted as a finding, not tuned further |
-| What happens after the front? | Exp 5 · [`exp5_does_cold_last`](../phase1-model-behavior/pair-1/experiments/figures/exp5/exp5_does_cold_last.html) | See notebook | Dashboard: *Catching up, lasting cold* |
+| Does the model copy a pattern it has seen repeatedly, and ignore one it has seen once? | Exp 1 · [`exp1_score_by_date`](../phase1-model-behavior/pair-1/experiments/figures/exp1/exp1_score_by_date.html) | A repeated pattern is copied (52–94 %), a single one ignored (~2 %); the rerun on 40 dates instead of 1 changed the headline | Rule: many dates, not many points |
+| Does a longer history, or telling it the time, help? | Exp 2 · [`exp2_error_vs_history`](../phase1-model-behavior/pair-1/experiments/figures/exp2/exp2_error_vs_history.html) | History length barely matters; time inputs do not help on 2,400 cases (a 6-case test had suggested they do) | Never conclude from a small test |
+| Can it see a cold front coming? Do upwind points or other variables help? | Exp 3 and 4 · [`exp3_average_front`](../phase1-model-behavior/pair-1/experiments/figures/exp3/exp3_average_front.html), [`exp4_upstream_map`](../phase1-model-behavior/pair-1/experiments/figures/exp4/exp4_upstream_map.html) | It catches only about 21 % of the drop, and no extra input changes that; it ignores neighbours | "Ignores neighbours" counted as a finding, not tuned further |
+| What happens after the front? | Exp 5 · [`exp5_does_cold_last`](../phase1-model-behavior/pair-1/experiments/figures/exp5/exp5_does_cold_last.html) | Once it has seen the drop it keeps the cold; 1–2 days later its error is as small as on normal days | Dashboard: *Catching up, lasting cold* |
 | Does a stranger history make it less sure? | Exp 6 · [`exp6_drops_lines`](../phase1-model-behavior/pair-1/experiments/figures/exp6/exp6_drops_lines.html) | The band is widest at medium drop sizes | Dashboard section 2: stranger history, wider band |
-| How does a front change whole maps over time? | Exp 7 · [`exp7_reality_vs_forecast`](../phase1-model-behavior/pair-1/experiments/figures/exp7/exp7_reality_vs_forecast.html) | See notebook | Dashboard: *Time curve* |
-| How do successive forecasts change as a front approaches? | Exp 9 · [`exp9_successive_runs`](../phase1-model-behavior/pair-1/experiments/figures/exp9/exp9_successive_runs.html) | See notebook | Dashboard: *Explore it yourself* |
+| How does a front change whole maps over time? | Exp 7 · [`exp7_reality_vs_forecast`](../phase1-model-behavior/pair-1/experiments/figures/exp7/exp7_reality_vs_forecast.html) | The whole map changes within hours and stays changed for days; map error peaks at 7.5 °C | Dashboard: *Time curve* |
+| How do successive forecasts change as a front approaches? | Exp 9 · [`exp9_successive_runs`](../phase1-model-behavior/pair-1/experiments/figures/exp9/exp9_successive_runs.html) | The error for the front hour stays at 5–7.6 °C until about 3 h before: it sees the front only once the drop has started | Not in the dashboard (same message as Exp 3) |
 | Which part of its history does it use? | Exp 10 · [`exp10_lag_vs_forecast_hour`](../phase1-model-behavior/pair-1/experiments/figures/exp10/exp10_lag_vs_forecast_hour.html) | The hours that matter repeat every 32 hours (ratio 2.0 times, above 1 in 97 % of cases) | Dashboard section 2: *Which hours it uses* |
-| Does it know when it is unsure? | Exp 11 · [`exp11_pit_histograms`](../phase1-model-behavior/pair-1/experiments/figures/exp11/exp11_pit_histograms.html) | See notebook | Dashboard: *honest band* |
+| Does it know when it is unsure? | Exp 11 · [`exp11_pit_histograms`](../phase1-model-behavior/pair-1/experiments/figures/exp11/exp11_pit_histograms.html) | Honest on normal days (79 % inside the band); with a front coming, half the hours fall below the whole band | Dashboard: *honest band* |
 
 ### Where the two lines meet
 
@@ -91,8 +90,7 @@ Carlos's experiments look at *what the model uses* (it ignores neighbours, it us
 *how much that costs* (5.3 °C too warm 3 h after a front arrives, band holds 32 %). The dashboard puts both into one story:
 section 2 for Carlos's experiments, section 3 for the two Sandro picked.
 
-> Findings in this section are copied from the sections below, the experiment notebooks and the dashboard. "See notebook" means
-> we did not restate a number here.
+> Findings in this section are copied from the sections below, the experiment notebooks and the dashboard.
 
 ## Sandro Müller
 
