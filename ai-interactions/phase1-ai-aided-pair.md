@@ -40,9 +40,8 @@ Section "Record over time" in Sandro's part shows in which order this happened.
 ## From questions to experiments
 
 The short version of Phase I: **each question we asked sent us to an experiment, and each result raised the next question.**
-The tables below follow that chain. "Exp" numbers are the notebooks in
-[`experiments/`](../phase1-model-behavior/pair-1/experiments/). A plot is named where one carries the finding; the interactive
-ones are HTML files (download and open in a browser), the others are chapters of the [dashboard](../phase1-model-behavior/pair-1/dashboard/).
+The steps below follow that chain and show what the assistant contributed at each point. The results themselves (findings and key plots) are in the
+[experiments README](../phase1-model-behavior/pair-1/experiments/README.md#results-at-a-glance).
 
 ### Step 1 · Can we feed the model neighbouring stations? (Sandro, 27 Oct to 2 Nov)
 
@@ -58,39 +57,32 @@ goal: temperature change at several stations  →  smoke test  →  TiRex-2 igno
 | Which horizon is good? Where does it fail on a map? | Side-by-side maps, real data against forecast | The forecast follows the front late; 12 h is the best compromise | Dashboard, *Explore* map |
 | Is our "cold drop" a cold front? | Literature search on front definitions | No: a front needs cooling, a pressure rise and a line that moves | Cold-front rule in the dashboard overview |
 
-### Step 2 · Sandro's five questions on 336 forecasts (4 Nov)
+### Step 2 · Sandro's five questions on 336 forecasts (2 to 4 Nov)
 
-| Question | Experiment | Key plot | Finding | Led to |
-|---|---|---|---|---|
-| How good is it, and is that better than doing nothing? | 336 starts, baselines "same as yesterday" and "same as an hour ago" | Dashboard section 3, chapter *How much better is it than "same as yesterday"?* (lines for the three forecasts, the gap shaded) | 25 % better at 12 h, only 5 % at 24 h | The *Limits* chapter of the dashboard: the gain shrinks with the horizon |
-| Is the band honest? | Coverage of the 10 to 90 % band in normal weather | Band coverage chart (*Also tested*; the same chart around a front is the lower panel of the front chapter) | 81 % against a target of 80 % | The band is fine in calm weather, so the interesting case is fronts |
-| What happens at a cold front? | 30 front runs against 306 normal starts | Same chapter, upper panel (error with the front marked) | About 5.3 °C too warm 3 h after the front arrives; band holds only 32 % | The statement "the model holds on to the old weather" |
-| How often is it wrong, and where? | Error by hours ahead, by region and by weather situation | Pages Q1 to Q5 (*Also tested*) | 22 % of forecasts are wrong by more than 2 K up to 12 h, 41 % at 13 to 24 h | Three statements changed after the run (see "How AI suggestions affected my decisions" in Sandro's part) |
-| Does the text match the run? | The first text had placeholders; each was replaced by a number from the run | n/a | Three statements changed (see "How AI suggestions affected my decisions" in Sandro's part) | The rule: write text after the numbers |
+The results are in the [experiments README](../phase1-model-behavior/pair-1/experiments/README.md#results-at-a-glance). Here: what the assistant contributed and what we decided.
+
+| Step | What the assistant suggested | What we decided |
+|---|---|---|
+| The five questions | At first nothing: it assumed Sandro was in the human-only pair and held back until the roles were corrected | The questions came from us (the Phase I plan and the team meeting); Sandro asked for sources with every answer |
+| The evaluation | Baselines ("same as yesterday", "same as an hour ago"), the 2 °C rule for a mistake, 16 situations, 336 start times | Accepted. Run on the 15 km grid, 378 points |
+| The text of the answers | A first text with placeholders for the numbers | Placeholders kept until the run was done; three statements changed after it |
+| The dashboard | A plan with milestones, then nine candidate figures and a six-page structure | We kept what answers a question and named that question on every chart |
+| Overlap with Carlos's findings | A cross-check of his "21 % of the drop" against our runs | We keep our charts and mark the owner; overlapping charts link to his finding and back |
 
 ### Step 3 · Carlos's experiments (Exp 1 to 11)
 
-Carlos's ideas came from the lectures and his own brainstorming; the assistant shaped them into set-ups (see his section below).
+Carlos's ideas came from the lectures and his own brainstorming; the assistant shaped them into set-ups. The results are in the
+[experiments README](../phase1-model-behavior/pair-1/experiments/README.md#results-at-a-glance). Here: what the assistant suggested
+and what he did with it (more in his section below).
 
-| Question that came up | Experiment · key plot | What the record says | What it led to |
-|---|---|---|---|
-| Does the model copy a pattern it has seen repeatedly, and ignore one it has seen once? | Exp 1 · [`exp1_score_by_date`](../phase1-model-behavior/pair-1/experiments/figures/exp1/exp1_score_by_date.html) | A repeated pattern is copied (52–94 %), a single one ignored (~2 %); the rerun on 40 dates instead of 1 changed the headline | Rule: many dates, not many points |
-| Does a longer history, or telling it the time, help? | Exp 2 · [`exp2_error_vs_history`](../phase1-model-behavior/pair-1/experiments/figures/exp2/exp2_error_vs_history.html) | History length barely matters; time inputs do not help on 2,400 cases (a 6-case test had suggested they do) | Never conclude from a small test |
-| Can it see a cold front coming? Do upwind points or other variables help? | Exp 3 and 4 · [`exp3_average_front`](../phase1-model-behavior/pair-1/experiments/figures/exp3/exp3_average_front.html), [`exp4_upstream_map`](../phase1-model-behavior/pair-1/experiments/figures/exp4/exp4_upstream_map.html) | It catches only about 21 % of the drop, and no extra input changes that; it ignores neighbours | "Ignores neighbours" counted as a finding, not tuned further |
-| What happens after the front? | Exp 5 · [`exp5_does_cold_last`](../phase1-model-behavior/pair-1/experiments/figures/exp5/exp5_does_cold_last.html) | Once it has seen the drop it keeps the cold; 1–2 days later its error is as small as on normal days | Dashboard: *Catching up, lasting cold* |
-| Does a stranger history make it less sure? | Exp 6 · [`exp6_drops_lines`](../phase1-model-behavior/pair-1/experiments/figures/exp6/exp6_drops_lines.html) | The band is widest at medium drop sizes | Dashboard section 2: stranger history, wider band |
-| How does a front change whole maps over time? | Exp 7 · [`exp7_reality_vs_forecast`](../phase1-model-behavior/pair-1/experiments/figures/exp7/exp7_reality_vs_forecast.html) | The whole map changes within hours and stays changed for days; map error peaks at 7.5 °C | Dashboard: *Time curve* |
-| How do successive forecasts change as a front approaches? | Exp 9 · [`exp9_successive_runs`](../phase1-model-behavior/pair-1/experiments/figures/exp9/exp9_successive_runs.html) | The error for the front hour stays at 5–7.6 °C until about 3 h before: it sees the front only once the drop has started | Not in the dashboard (same message as Exp 3) |
-| Which part of its history does it use? | Exp 10 · [`exp10_lag_vs_forecast_hour`](../phase1-model-behavior/pair-1/experiments/figures/exp10/exp10_lag_vs_forecast_hour.html) | The hours that matter repeat every 32 hours (ratio 2.0 times, above 1 in 97 % of cases) | Dashboard section 2: *Which hours it uses* |
-| Does it know when it is unsure? | Exp 11 · [`exp11_pit_histograms`](../phase1-model-behavior/pair-1/experiments/figures/exp11/exp11_pit_histograms.html) | Honest on normal days (79 % inside the band); with a front coming, half the hours fall below the whole band | Dashboard: *honest band* |
-
-### Where the two lines meet
-
-Carlos's experiments look at *what the model uses* (it ignores neighbours, it uses hours in a 32-hour rhythm). Sandro's runs measure
-*how much that costs* (5.3 °C too warm 3 h after a front arrives, band holds 32 %). The dashboard puts both into one story:
-section 2 for Carlos's experiments, section 3 for the two Sandro picked.
-
-> Findings in this section are copied from the sections below, the experiment notebooks and the dashboard.
+| Experiment | What the assistant suggested | What Carlos decided |
+|---|---|---|
+| Exp 1 · fixed Sundays | Reframe "does it notice Sundays" as "does it learn a 7-day pattern", with a copy score | Accepted; the yes/no score was changed to a continuous 0 to 100 %. After his challenge ("shown to be systematic behavior, not a handful of examples") it was rerun on 40 dates instead of 1 |
+| Exp 2 · history and time inputs | A 6-case test that suggested time inputs help | Not trusted; on 2,400 cases they do not help |
+| Exp 3 and 4 · fronts and neighbours | Treat "the model ignores neighbours" as a finding instead of tuning further | Accepted |
+| Exp 10 · which hours it uses | Occlusion: hide each hour of the history once | Accepted |
+| Exp 11 · honest band | Calibration by situation | Accepted |
+| Rejected ideas | Region maps for the Sunday effect; click a dot in a box plot to open a case; a daily climate spiral; "use temperature only" after the 12-point smoke test | Rejected: no link to the manipulation, tiny overlapping dots, added nothing, over-generalised |
 
 ## Sandro Müller
 
