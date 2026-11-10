@@ -182,4 +182,17 @@ what you changed.
 
 ### What we agree on
 
-<!-- The two or three points both of us would sign. Fill in after both parts are written. -->
+<!-- Proposal by Sandro. Carlos: please change, replace or delete anything you do not agree with. -->
+
+The AI was fast at building and slow to be right. It gave us first versions of code,
+experiments and the dashboard quickly. The first number or explanation was often
+plausible and wrong (304 instead of 306 start times, "this warming is in every case"),
+so we treated it as a hypothesis until we had checked it in the data.
+
+Small tests mislead. A 12-point smoke test and a 6-case test each suggested something
+that did not hold on thousands of cases. We run a small test before a long run, but we
+do not conclude from it.
+
+The questions and the decisions stayed ours: what to investigate, which figures to
+keep, and what goes into the repository. The AI proposed options, and we accepted,
+changed or rejected them.
