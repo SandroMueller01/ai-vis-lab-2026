@@ -191,3 +191,21 @@ in many places. In Phase II, without AI, I will miss how quickly
 it produced a working first version of a visualization or the dashboard, even if it needed a lot of feedback
 afterwards. On the other hand, I expect my analysis to be easier to trust: I will build it on papers I read myself,
 instead of questioning every claim of the AI or not having the time to check all the papers it cites.
+## Together
+
+### What we agree on
+
+<!-- Proposal by Sandro. Carlos: please change, replace or delete anything you do not agree with. -->
+
+The AI was fast at building and slow to be right. It gave us first versions of code,
+experiments and the dashboard quickly. The first number or explanation was often
+plausible and wrong (304 instead of 306 start times, "this warming is in every case"),
+so we treated it as a hypothesis until we had checked it in the data.
+
+Small tests mislead. A 12-point smoke test and a 6-case test each suggested something
+that did not hold on thousands of cases. We run a small test before a long run, but we
+do not conclude from it.
+
+The questions and the decisions stayed ours: what to investigate, which figures to
+keep, and what goes into the repository. The AI proposed options, and we accepted,
+changed or rejected them.
