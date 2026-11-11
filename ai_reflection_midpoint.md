@@ -209,3 +209,16 @@ do not conclude from it.
 The questions and the decisions stayed ours: what to investigate, which figures to
 keep, and what goes into the repository. The AI proposed options, and we accepted,
 changed or rejected them.
+
+For the human-only pair we struggled to find fitting visualization techniques
+that we covered in the class which we could have applied to our time-series
+data and model. Here, brainstorming (and implementation help) with an AI could
+have helped, due to our limited experience with advanced AI visualization
+techniques.
+
+We noticed that setting up an initial exploration and visualisations which aid
+in this exploration took up quite a bit of time. However, once we had found
+good visualisations, it was easy for us humans to interpret those which steered
+us in the right directions (e.g. for exploring where the model fails).
+Additionally, it was obvious that creating good, appealing visualisations for
+showcasing and explaining is quite a tedious and lengthy process.
