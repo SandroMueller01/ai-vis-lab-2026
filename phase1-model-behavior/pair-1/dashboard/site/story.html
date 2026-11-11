@@ -6,7 +6,7 @@
 <title>Austria weather explorer</title>
 <meta name="description" content="Hourly weather over Austria and how TiRex-2 forecasts it: the data, the story and the questions on one page.">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
-<link rel="stylesheet" href="style.css?v=67">
+<link rel="stylesheet" href="style.css?v=69">
 <link rel="stylesheet" href="pages.css?v=67">
 <link rel="stylesheet" href="story.css?v=67">
 </head>
@@ -62,9 +62,9 @@
     <div class="ctrl">
       <button id="play">▶ Play</button>
       <select id="speed" aria-label="Playback speed">
-        <option value="1" selected>1 h per step</option>
-        <option value="3">3 h per step</option>
-        <option value="6">6 h per step</option>
+        <option value="0.5">Slow (1 h in 2 s)</option>
+        <option value="1" selected>Normal (1 h per s)</option>
+        <option value="3">Fast (3 h per s)</option>
       </select>
     </div>
   </div>
@@ -76,7 +76,7 @@
       <button id="dnext" aria-label="Next day">▶</button>
     </div>
     <button id="prev" aria-label="One hour back">◀</button>
-    <input type="range" id="slider" min="0" max="23" value="0" step="1" aria-label="Hour of the day (UTC)">
+    <input type="range" id="slider" min="0" max="24" value="0" step="any" aria-label="Hour of the day (UTC)">
     <button id="next" aria-label="One hour forward">▶</button>
     <span id="hourlbl"></span>
   </div>
@@ -88,7 +88,7 @@
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="common.js?v=67"></script>
 <script src="charts.js?v=67"></script>
-<script src="app.js?v=67"></script>
+<script src="app.js?v=76"></script>
 <script src="pages.js?v=67"></script>
 <script src="story.js?v=67"></script>
 </body>

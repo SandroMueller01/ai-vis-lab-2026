@@ -9,7 +9,7 @@ const PALETTES = {
   pressure: ["#762a83", "#af8dc3", "#e7d4e8", "#f7f7f7", "#d9f0d3", "#7fbf7b", "#1b7837"],
   wind: ["#ffffcc", "#c7e9b4", "#7fcdbb", "#41b6c4", "#2c7fb8", "#253494"],
   sun: ["#ffffb2", "#fecc5c", "#fd8d3c", "#f03b20", "#bd0026"],
-  rain: ["#e8f1fa", "#9ecae1", "#4292c6", "#2171b5", "#08306b"],
+  rain: ["#6b6e72", "#9ecae1", "#4292c6", "#2171b5", "#08306b"], // starts grey: no rain
 };
 
 // src: stored variables the layer is computed from; range: colour scale limits (fixed, so colours stay comparable)
@@ -20,7 +20,7 @@ const LAYERS = {
   P0: { label: "Pressure (sea level)", unit: "hPa", src: ["P0"], range: [985, 1035], pal: "pressure", digits: 1 },
   WIND: { label: "Wind speed", unit: "m/s", src: ["UU", "VV"], range: [0, 20], pal: "wind", digits: 1 },
   GL: { label: "Sun (global radiation)", unit: "W/m²", src: ["GL"], range: [0, 1000], pal: "sun", digits: 0 },
-  RR: { label: "Rain (per hour)", unit: "mm", src: ["RR"], range: [0, 10], pal: "rain", digits: 1, sqrt: true },
+  RR: { label: "Rain (previous hour)", unit: "mm", src: ["RR"], range: [0, 10], pal: "rain", digits: 1, sqrt: true },
 };
 
 const EVENT_KINDS = {
@@ -43,7 +43,7 @@ let map, geo, T0;
 const cache = {}; // stored variable -> Uint8Array (time x point)
 const luts = {};
 const S = {
-  t: 0, layer: "T2M", events: new Set(["cold_front"]), sel: null, playing: false,
+  t: 0, day: 0, layer: "T2M", events: new Set(["cold_front"]), sel: null, playing: false,
 };
 
 // ---------------------------------------------------------------- data
@@ -77,10 +77,15 @@ function physical(name, q) {
   return s.sqrt ? x * x : x;
 }
 
+// t may lie between two hours (smooth slider): blend the two hourly values linearly
 function sample(layer, t, i) {
-  const L = LAYERS[layer], k = t * meta.n + i;
-  if (L.src.length === 2) return Math.hypot(physical(L.src[0], cache[L.src[0]][k]), physical(L.src[1], cache[L.src[1]][k]));
-  return physical(L.src[0], cache[L.src[0]][k]);
+  const L = LAYERS[layer], t0 = Math.floor(t), t1 = Math.min(meta.nt - 1, t0 + 1), f = t - t0;
+  const val = (name) => {
+    const a = physical(name, cache[name][t0 * meta.n + i]);
+    return f ? a + (physical(name, cache[name][t1 * meta.n + i]) - a) * f : a;
+  };
+  if (L.src.length === 2) return Math.hypot(val(L.src[0]), val(L.src[1]));
+  return val(L.src[0]);
 }
 
 function buildEvents(ev) {
@@ -141,11 +146,12 @@ function setupLayers() {
   map.addSource("rings", { type: "geojson", data: empty });
   map.addLayer({
     id: "rings-halo", type: "circle", source: "rings",
-    paint: { "circle-color": "rgba(0,0,0,0)", "circle-radius": radius(0.72), "circle-stroke-color": "#0b0f14", "circle-stroke-width": 4.5, "circle-stroke-opacity": 0.85 },
+    paint: { "circle-color": "rgba(0,0,0,0)", "circle-radius": radius(1.02), "circle-stroke-color": "#0b0f14", "circle-stroke-width": 4.6, "circle-stroke-opacity": 0.85 },
   });
   map.addLayer({
+    // the ring sits around the dot, so the dot keeps its colour inside
     id: "rings", type: "circle", source: "rings",
-    paint: { "circle-color": "rgba(0,0,0,0)", "circle-radius": radius(0.72), "circle-stroke-color": ["get", "col"], "circle-stroke-width": 2.2 },
+    paint: { "circle-color": "rgba(0,0,0,0)", "circle-radius": radius(1.02), "circle-stroke-color": ["get", "col"], "circle-stroke-width": 2.6 },
   });
   map.addSource("sel", { type: "geojson", data: empty });
   map.addLayer({
@@ -204,13 +210,13 @@ function draw() {
   for (let i = 0; i < n; i++) {
     const v = sample(S.layer, t, i), p = feats[i].properties;
     p.c = lut[colorIndex(L, v)];
-    p.o = L.sqrt && v < 0.05 ? 0.35 : 0.9;
+    p.o = 0.9;
   }
-  const rings = [];
+  const rings = [], th = Math.round(t); // events are hourly: show those of the nearest hour
   for (const kind of S.events) {
     const f = flags[kind], col = EVENT_KINDS[kind].color;
     for (let i = 0; i < n; i++) {
-      if (f[t * n + i]) rings.push({ type: "Feature", geometry: feats[i].geometry, properties: { col } });
+      if (f[th * n + i]) rings.push({ type: "Feature", geometry: feats[i].geometry, properties: { col } });
     }
   }
   if (map.getSource("pts") && map.getSource("rings") && map.getSource("sel")) {
@@ -222,9 +228,12 @@ function draw() {
   }
   const d = dateOf(t);
   $("when").innerHTML = `${fmtUtc.format(d)} UTC <span>· ${fmtVienna.format(d)}</span>`;
-  $("slider").value = t % 24;
-  $("day").value = isoDay(t);
-  $("hourlbl").textContent = `${String(t % 24).padStart(2, "0")} UTC`;
+  // the slider covers the selected day from 00:00 to 24:00 (= 00:00 of the next day)
+  if (t < S.day * 24 || t > S.day * 24 + 24) S.day = dayOf(t);
+  const hod = t - S.day * 24, mins = Math.floor(hod * 60 + 1e-6);
+  $("slider").value = hod;
+  $("day").value = isoDay(S.day * 24);
+  $("hourlbl").textContent = `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")} UTC`;
   drawTimeline();
   drawChart();
   writeHash();
@@ -276,12 +285,12 @@ function drawTimeline() {
   }
   // the selected day as a band, the selected hour as a line
   g.fillStyle = "rgba(255, 255, 255, .16)";
-  g.fillRect((dayOf(S.t) / DAYS) * w, 0, Math.max(3, w / DAYS), h);
+  g.fillRect((S.day / DAYS) * w, 0, Math.max(3, w / DAYS), h);
   g.fillStyle = css.getPropertyValue("--fg");
   g.fillRect(Math.round((S.t / meta.nt) * w), 0, 1, h);
 }
 
-// click or drag on the year overview selects a day, the hour of the day stays
+// click or drag on the year overview selects a day, starting at 00:00
 function scrub(e) {
   const r = $("tl").getBoundingClientRect();
   setDay(Math.floor(((e.clientX - r.left) / r.width) * DAYS));
@@ -291,8 +300,8 @@ function scrub(e) {
 function drawChart() {
   const box = $("chart");
   if (S.sel == null) { box.hidden = true; return; }
-  const L = LAYERS[S.layer], i = S.sel, n = meta.n;
-  const a = Math.max(0, S.t - 72), b = Math.min(meta.nt - 1, S.t + 72);
+  const L = LAYERS[S.layer], i = S.sel, n = meta.n, tc = Math.round(S.t);
+  const a = Math.max(0, tc - 72), b = Math.min(meta.nt - 1, tc + 72);
   const vals = [];
   for (let t = a; t <= b; t++) vals.push(sample(S.layer, t, i));
   let lo = Math.min(...vals), hi = Math.max(...vals);
@@ -332,8 +341,8 @@ function select(i) {
 // ---------------------------------------------------------------- controls
 function setT(t) { S.t = Math.max(0, Math.min(meta.nt - 1, t)); render(); }
 
-// jump to another day, the hour of the day stays
-function setDay(d) { setT(Math.max(0, Math.min(DAYS - 1, d)) * 24 + (S.t % 24)); }
+// jump to another day, starting at 00:00
+function setDay(d) { setPlaying(false); S.day = Math.max(0, Math.min(DAYS - 1, d)); setT(S.day * 24); }
 
 async function setLayer(key) {
   S.layer = key;
@@ -360,15 +369,27 @@ function toggleEvent(kind, on) {
   render();
 }
 
+// play moves smoothly through the selected day and stops at 24:00 (speed: hours per second)
+function setPlaying(on) {
+  S.playing = on;
+  $("play").textContent = on ? "❚❚ Pause" : "▶ Play";
+}
+
 function togglePlay() {
-  S.playing = !S.playing;
-  $("play").textContent = S.playing ? "❚❚ Pause" : "▶ Play";
-  const step = () => {
+  if (S.playing) { setPlaying(false); return; }
+  const end = Math.min(meta.nt - 1, S.day * 24 + 24);
+  if (S.t >= end) setT(S.day * 24); // at the end of the day: start it again
+  setPlaying(true);
+  let last = performance.now();
+  const step = (now) => {
     if (!S.playing) return;
-    setT((S.t + Number($("speed").value)) % meta.nt);
-    setTimeout(step, 140);
+    const t = S.t + (Math.min(100, now - last) / 1000) * Number($("speed").value); // max 0.1 s per frame: no jump after a hidden tab
+    last = now;
+    if (t >= end) { setT(end); setPlaying(false); return; }
+    setT(t);
+    requestAnimationFrame(step);
   };
-  if (S.playing) step();
+  requestAnimationFrame(step);
 }
 
 function buildUi() {
@@ -412,11 +433,11 @@ function buildUi() {
     const ms = Date.parse(`${day.value}T00:00:00Z`);
     if (Number.isNaN(ms)) render(); else setDay(Math.round((ms - T0) / 86400e3));
   };
-  $("dprev").onclick = () => setDay(dayOf(S.t) - 1);
-  $("dnext").onclick = () => setDay(dayOf(S.t) + 1);
-  $("slider").oninput = () => setT(dayOf(S.t) * 24 + Number($("slider").value));
-  $("prev").onclick = () => setT(S.t - 1);
-  $("next").onclick = () => setT(S.t + 1);
+  $("dprev").onclick = () => setDay(S.day - 1);
+  $("dnext").onclick = () => setDay(S.day + 1);
+  $("slider").oninput = () => setT(S.day * 24 + Number($("slider").value));
+  $("prev").onclick = () => setT(Math.ceil(S.t) - 1);
+  $("next").onclick = () => setT(Math.floor(S.t) + 1);
   $("play").onclick = togglePlay;
   $("cclose").onclick = () => select(null);
   let drag = false;
@@ -424,12 +445,22 @@ function buildUi() {
   $("tl").addEventListener("pointermove", (e) => { if (drag) scrub(e); });
   $("tl").addEventListener("pointerup", () => { drag = false; });
   window.addEventListener("resize", () => { TL.cols = null; render(); });
+  // space = play / pause, only while the map fills the middle of the screen (elsewhere space keeps scrolling the page)
+  window.addEventListener("keydown", (e) => {
+    if (e.code !== "Space" || e.ctrlKey || e.altKey || e.metaKey) return;
+    const el = e.target, tag = el.tagName;
+    if (tag === "BUTTON" || tag === "SELECT" || tag === "TEXTAREA" || el.isContentEditable || (tag === "INPUT" && el.type !== "range" && el.type !== "checkbox")) return;
+    const r = $("map").getBoundingClientRect(), mid = window.innerHeight / 2;
+    if (r.top > mid || r.bottom < mid) return;
+    e.preventDefault();
+    togglePlay();
+  });
 }
 
 // ---------------------------------------------------------------- shareable link: #v=T2M&t=4000&ev=cold_front&sel=12
 function writeHash() {
-  const h = `v=${S.layer}&t=${S.t}&ev=${[...S.events].join(",")}${S.sel == null ? "" : `&sel=${S.sel}`}`;
-  history.replaceState(null, "", `#${h}`);
+  const h = `v=${S.layer}&t=${Math.round(S.t)}&ev=${[...S.events].join(",")}${S.sel == null ? "" : `&sel=${S.sel}`}`;
+  if (location.hash !== `#${h}`) history.replaceState(null, "", `#${h}`); // not on every frame while playing
 }
 
 function readHash() {
@@ -456,6 +487,7 @@ async function main() {
     if (f) S.t = indexOf(f.time);
   }
   readHash();
+  S.day = dayOf(S.t);
   buildUi();
   syncEvents();
   initMap();

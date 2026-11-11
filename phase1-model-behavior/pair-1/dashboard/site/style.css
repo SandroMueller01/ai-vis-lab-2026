@@ -54,7 +54,7 @@ button:hover, select:hover, input[type="date"]:hover { border-color: var(--accen
 .chip[aria-checked="true"] { background: var(--accent); }
 .daypick button { padding: 3px 8px; }
 #slider { flex: 1; min-width: 80px; margin: 0; accent-color: var(--accent); }
-#hourlbl { width: 58px; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+#hourlbl { width: 78px; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
 #tl { width: 100%; height: 46px; display: block; cursor: pointer; touch-action: none; }
 
 .chead { display: flex; justify-content: space-between; align-items: center; }
