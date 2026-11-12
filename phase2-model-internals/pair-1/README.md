@@ -14,7 +14,7 @@ the questions are worded. Every notebook has the same twelve sections:
 | `01_question_a.ipynb` | to be worded |
 | `02_question_b.ipynb` | to be worded |
 | `03_question_c.ipynb` | to be worded |
-| `04_question_d.ipynb` | to be worded |
+| `04_question_d.ipynb` | What differs inside the model between a normal day and a front day, and can the state predict that the forecast will fail? |
 | `05_question_e.ipynb` | to be worded |
 | `06_question_f.ipynb` | to be worded |
 
