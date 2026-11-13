@@ -1,6 +1,6 @@
 # Open questions for Phase II (why does the model behave like this?)
 
-## 1. Why does hiding the newest hours of each 32-hour block change the forecast ~2x more? (Exp 10)
+## 1. Why do the last 1–2 hours of each 32-hour block (counted back from the forecast start) change the forecast ~2x more than an average hour? (Exp 10)
 - Bright cells in the occlusion heatmap repeat every 32 h (diagonal, shifting 8 h per day), in normal days and before
   fronts. Hiding the newest 1-2 h of each 32-h block (counted back from the forecast start) changes the forecast ~2x the
   average (2.0x for random forecasts without the last day, above 1x in 97 % of cases); the oldest hour of a block
@@ -8,7 +8,7 @@
 - The 32-h blocks explain WHERE (input split into 32-hour blocks). WHY they are brighter is open: do those hours weigh
   more, or does the model handle a gap at a block edge badly? (We measured the effect of hiding, not weight.)
 
-## 2. Why does the model not use extra inputs (pressure, a warning flag, neighbours) to see a front coming? (Exp 3, 4, 5)
+## 2. Why do extra inputs (pressure, a warning flag, neighbours) not help the model see a front coming? (Exp 3, 4, 5)
 - **Pressure:** it falls ~7 hPa over the day before the drop (Exp 5, average front in all variables). Given as levels
   (Exp 3 setup D) and as 3-hour changes (Exp 4 setup G): no improvement in the drop captured. Hypotheses: the model
   must learn the pressure -> temperature link from the 10-week history alone (few fronts in it); pressure also falls
