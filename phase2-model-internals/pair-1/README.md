@@ -12,6 +12,6 @@ One notebook per question:
 | `03_question_c.ipynb` | to be worded |
 | `04_question_d.ipynb` | to be worded |
 | `05_question_e.ipynb` | to be worded |
-| `06_question_f.ipynb` | to be worded |
+| `06_question_f.ipynb` | Can information from neighbouring points change the forecast, in which form must it be given, and what does the model do with it? |
 
 Run them in the project container (see the main README). Large results go to `data/notebooks/results/`, not into git.
